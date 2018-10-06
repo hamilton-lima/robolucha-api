@@ -1,0 +1,102 @@
+basePath: /
+definitions:
+  main.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  main.LoginResponse:
+    properties:
+      error:
+        type: boolean
+      uuid:
+        type: string
+    type: object
+  main.UserSetting:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        type: integer
+      lastOption:
+        type: string
+      updatedAt:
+        type: string
+      userID:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  license: {}
+  title: Robolucha API
+  version: "1.0"
+paths:
+  /private/user/setting:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.UserSetting'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: find current user userSetting
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: UserSetting
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.UserSetting'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.UserSetting'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Updates user userSetting
+  /public/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: LoginRequest
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.LoginRequest'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.LoginResponse'
+            type: object
+      summary: Logs the user
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
