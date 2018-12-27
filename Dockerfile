@@ -1,10 +1,12 @@
 # prepare builder
 FROM golang as builder
-COPY . $GOPATH/src/github.com/hamilton-lima/robolucha-api/
-WORKDIR $GOPATH/src/github.com/hamilton-lima/robolucha-api/
+COPY . $GOPATH/src/gitlab.com/robolucha/robolucha-api/
+WORKDIR $GOPATH/src/gitlab.com/robolucha/robolucha-api/
 
-# get dependancies
-RUN go get -d -v
+# get dependencies
+RUN go get -v
+# RUN go install 
+# -d -v
 
 # build the binary static linked
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /go/bin/api

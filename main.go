@@ -14,7 +14,7 @@ import (
 	"github.com/gin-contrib/cors"
 	log "github.com/sirupsen/logrus"
 
-	_ "./docs"
+	_ "gitlab.com/robolucha/robolucha-api/docs"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
