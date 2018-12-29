@@ -9,11 +9,12 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/matryer/try.v1"
+	try "gopkg.in/matryer/try.v1"
 )
 
+// DBconfig defines database configuration
 type DBconfig struct {
 	dialect  string
 	args     string
@@ -22,6 +23,7 @@ type DBconfig struct {
 	user     string
 }
 
+// DataSource keep the connnection instance and the configuration
 type DataSource struct {
 	config *DBconfig
 	db     *gorm.DB
@@ -142,4 +144,22 @@ func (ds *DataSource) createSession(user *User) *Session {
 	}).Error("Session created")
 
 	return &session
+}
+
+func (ds *DataSource) createMatch(m *Match) *Match {
+	match := Match{
+		TimeStart:     m.TimeStart,
+		TimeEnd:       m.TimeEnd,
+		LastTimeAlive: m.LastTimeAlive,
+		Duration:      m.Duration,
+	}
+
+	ds.db.Create(&match)
+
+	log.WithFields(log.Fields{
+		"match.id": match.ID,
+		"duration": match.Duration,
+	}).Error("Match created")
+
+	return &match
 }

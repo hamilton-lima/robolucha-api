@@ -14,10 +14,10 @@ import (
 	"github.com/gin-contrib/cors"
 	log "github.com/sirupsen/logrus"
 
-	_ "gitlab.com/robolucha/robolucha-api/docs"
 	"github.com/gin-gonic/gin"
-	"github.com/swaggo/gin-swagger"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
+	_ "gitlab.com/robolucha/robolucha-api/docs"
 )
 
 // LoginRequest data structure
@@ -53,6 +53,11 @@ func main() {
 	publicAPI := router.Group("/public")
 	{
 		publicAPI.POST("/login", handleLogin)
+	}
+
+	internalAPI := router.Group("/internal")
+	{
+		internalAPI.POST("/match", createMatch)
 	}
 
 	privateAPI := router.Group("/private")
@@ -180,4 +185,40 @@ func updateUserSetting(c *gin.Context) {
 	}).Info("Updated userSetting")
 
 	c.JSON(http.StatusOK, userSetting)
+}
+
+// createMatch godoc
+// @Summary create Match
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} main.Match
+// @Security ApiKeyAuth
+// @Router /internal/match [post]
+func createMatch(c *gin.Context) {
+
+	var match *Match
+	err := c.BindJSON(&match)
+	if err != nil {
+		log.Info("Invalid body content on createMatch")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"createMatch": match,
+	}).Info("creating match")
+
+	match = dataSource.createMatch(match)
+
+	if match == nil {
+		log.Info("Invalid Match when saving")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"createMatch": match,
+	}).Info("created match")
+
+	c.JSON(http.StatusOK, match)
 }

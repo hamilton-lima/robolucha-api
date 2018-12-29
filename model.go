@@ -31,3 +31,15 @@ type UserSetting struct {
 	UserID     uint       `json:"userID"`
 	LastOption string     `json:"lastOption"`
 }
+
+// Match definition
+type Match struct {
+	ID            uint       `gorm:"primary_key" json:"id"`
+	CreatedAt     time.Time  `json:"createdAt"`
+	UpdatedAt     time.Time  `json:"updatedAt"`
+	DeletedAt     *time.Time `json:"deletedAt"`
+	TimeStart     uint       `json:"timeStart"`
+	TimeEnd       uint       `json:"timeEnd"`
+	LastTimeAlive uint       `json:"lastTimeAlive"`
+	Duration      uint       `json:"duration"`
+}
