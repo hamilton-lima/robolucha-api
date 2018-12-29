@@ -38,8 +38,8 @@ type Match struct {
 	CreatedAt     time.Time  `json:"createdAt"`
 	UpdatedAt     time.Time  `json:"updatedAt"`
 	DeletedAt     *time.Time `json:"deletedAt"`
-	TimeStart     uint       `json:"timeStart"`
-	TimeEnd       uint       `json:"timeEnd"`
-	LastTimeAlive uint       `json:"lastTimeAlive"`
-	Duration      uint       `json:"duration"`
+	TimeStart     uint64     `json:"timeStart"`
+	TimeEnd       uint64     `json:"timeEnd"`
+	LastTimeAlive uint64     `json:"lastTimeAlive"`
+	Duration      uint64     `json:"duration"`
 }

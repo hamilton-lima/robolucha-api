@@ -1,5 +1,6 @@
 // @title Robolucha API
 // @version 1.0
+// @description Robolucha API
 // @host localhost:8080
 // @BasePath /
 // @securityDefinitions.apikey ApiKeyAuth
@@ -39,8 +40,8 @@ func main() {
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.DebugLevel)
 
-	dataSource = NewDataSource(BuildMysqlConfig())
-	defer dataSource.db.Close()
+	// dataSource = NewDataSource(BuildMysqlConfig())
+	// defer dataSource.db.Close()
 
 	router := gin.Default()
 
@@ -53,6 +54,7 @@ func main() {
 	publicAPI := router.Group("/public")
 	{
 		publicAPI.POST("/login", handleLogin)
+		publicAPI.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 
 	internalAPI := router.Group("/internal")
@@ -67,8 +69,8 @@ func main() {
 		privateAPI.GET("/user/setting", findUserSetting)
 	}
 
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.Run()
+
 }
 
 // SessionIsValid check if Authoraization header is valid
@@ -189,8 +191,9 @@ func updateUserSetting(c *gin.Context) {
 
 // createMatch godoc
 // @Summary create Match
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
+// @Param request body main.Match true "Match"
 // @Success 200 {object} main.Match
 // @Security ApiKeyAuth
 // @Router /internal/match [post]

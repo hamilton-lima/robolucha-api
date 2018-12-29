@@ -1,6 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
+        "description": "Robolucha API",
         "title": "Robolucha API",
         "contact": {},
         "license": {},
@@ -9,6 +10,43 @@
     "host": "localhost:8080",
     "basePath": "/",
     "paths": {
+        "/internal/match": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "create Match",
+                "parameters": [
+                    {
+                        "description": "Match",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.Match"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.Match"
+                        }
+                    }
+                }
+            }
+        },
         "/private/user/setting": {
             "get": {
                 "security": [
@@ -121,6 +159,35 @@
                     "type": "boolean"
                 },
                 "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "main.Match": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastTimeAlive": {
+                    "type": "integer"
+                },
+                "timeEnd": {
+                    "type": "integer"
+                },
+                "timeStart": {
+                    "type": "integer"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }

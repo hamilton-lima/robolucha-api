@@ -14,6 +14,25 @@ definitions:
       uuid:
         type: string
     type: object
+  main.Match:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      duration:
+        type: integer
+      id:
+        type: integer
+      lastTimeAlive:
+        type: integer
+      timeEnd:
+        type: integer
+      timeStart:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
   main.UserSetting:
     properties:
       createdAt:
@@ -32,10 +51,34 @@ definitions:
 host: localhost:8080
 info:
   contact: {}
+  description: Robolucha API
   license: {}
   title: Robolucha API
   version: "1.0"
 paths:
+  /internal/match:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Match
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.Match'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Match'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: create Match
   /private/user/setting:
     get:
       consumes:
