@@ -25,11 +25,11 @@ definitions:
       id:
         type: integer
       lastTimeAlive:
-        type: integer
+        type: string
       timeEnd:
-        type: integer
+        type: string
       timeStart:
-        type: integer
+        type: string
       updatedAt:
         type: string
     type: object
@@ -48,7 +48,7 @@ definitions:
       userID:
         type: integer
     type: object
-host: localhost:8080
+host: http://localhost:8080
 info:
   contact: {}
   description: Robolucha API

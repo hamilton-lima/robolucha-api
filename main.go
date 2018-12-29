@@ -40,8 +40,8 @@ func main() {
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.DebugLevel)
 
-	// dataSource = NewDataSource(BuildMysqlConfig())
-	// defer dataSource.db.Close()
+	dataSource = NewDataSource(BuildMysqlConfig())
+	defer dataSource.db.Close()
 
 	router := gin.Default()
 
@@ -202,7 +202,10 @@ func createMatch(c *gin.Context) {
 	var match *Match
 	err := c.BindJSON(&match)
 	if err != nil {
-		log.Info("Invalid body content on createMatch")
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Error("Invalid body content on createMatch")
+
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
@@ -214,7 +217,7 @@ func createMatch(c *gin.Context) {
 	match = dataSource.createMatch(match)
 
 	if match == nil {
-		log.Info("Invalid Match when saving")
+		log.Error("Invalid Match when saving")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}

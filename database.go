@@ -77,6 +77,7 @@ func NewDataSource(config *DBconfig) *DataSource {
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Session{})
 	db.AutoMigrate(&UserSetting{})
+	db.AutoMigrate(&Match{})
 
 	return &DataSource{db: db, config: config}
 }
@@ -159,7 +160,7 @@ func (ds *DataSource) createMatch(m *Match) *Match {
 	log.WithFields(log.Fields{
 		"match.id": match.ID,
 		"duration": match.Duration,
-	}).Error("Match created")
+	}).Info("Match created")
 
 	return &match
 }

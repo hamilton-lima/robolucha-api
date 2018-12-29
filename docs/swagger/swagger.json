@@ -7,7 +7,7 @@
         "license": {},
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "http://localhost:8080",
     "basePath": "/",
     "paths": {
         "/internal/match": {
@@ -179,13 +179,13 @@
                     "type": "integer"
                 },
                 "lastTimeAlive": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "timeEnd": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "timeStart": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "updatedAt": {
                     "type": "string"
