@@ -20,3 +20,10 @@ open http://localhost:8080/public/swagger/index.html
 ```
 - run swag init in the api folder
 - use the generated file in api/docs/swagger/swagger.json to generate API clients
+
+## Create users
+
+Run script at database 
+```
+insert into users(email) values('foo@bar.com');
+```
