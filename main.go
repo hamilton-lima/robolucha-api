@@ -67,6 +67,7 @@ func main() {
 	privateAPI.Use(SessionIsValid())
 	{
 		privateAPI.GET("/luchador", getLuchador)
+		privateAPI.PUT("/luchador", updateLuchador)
 		privateAPI.PUT("/user/setting", updateUserSetting)
 		privateAPI.GET("/user/setting", findUserSetting)
 	}
@@ -275,6 +276,49 @@ func getLuchador(c *gin.Context) {
 	log.WithFields(log.Fields{
 		"getLuchador": luchador,
 	}).Info("result")
+
+	c.JSON(http.StatusOK, luchador)
+}
+
+// updateLuchador godoc
+// @Summary Updates Luchador
+// @Accept  json
+// @Produce  json
+// @Param request body main.Luchador true "Luchador"
+// @Success 200 {object} main.Luchador
+// @Security ApiKeyAuth
+// @Router /private/luchador [put]
+func updateLuchador(c *gin.Context) {
+	val, _ := c.Get("user")
+	user := val.(*User)
+
+	var luchador *Luchador
+	err := c.BindJSON(&luchador)
+	if err != nil {
+		log.Info("Invalid body content on updateLuchador")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+		"action":   "before save",
+	}).Info("updateLuchador")
+
+	// validate if the luchador is the same from the user
+
+	luchador = dataSource.updateLuchador(user, luchador)
+
+	if luchador == nil {
+		log.Info("Invalid Luchador when saving, missing ID?")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+		"action":   "after save",
+	}).Info("updateLuchador")
 
 	c.JSON(http.StatusOK, luchador)
 }

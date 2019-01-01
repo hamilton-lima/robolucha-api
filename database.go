@@ -205,3 +205,18 @@ func (ds *DataSource) findLuchador(user *User) *Luchador {
 
 	return &luchador
 }
+
+func (ds *DataSource) updateLuchador(user *User, luchador *Luchador) *Luchador {
+	var current Luchador
+	if ds.db.First(&current, luchador.ID).RecordNotFound() {
+		return nil
+	}
+
+	ds.db.Save(&luchador)
+
+	log.WithFields(log.Fields{
+		"luchador": current,
+	}).Info("updateLuchador")
+
+	return luchador
+}

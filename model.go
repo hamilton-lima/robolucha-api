@@ -57,11 +57,11 @@ type Luchador struct {
 
 // Code definition
 type Code struct {
-	ID         uint       `gorm:"primary_key" json:"id"`
-	CreatedAt  time.Time  `json:"createdAt"`
-	UpdatedAt  time.Time  `json:"updatedAt"`
-	DeletedAt  *time.Time `json:"deletedAt"`
-	LuchadorID uint       `json:"luchadorID"`
+	ID         uint       `gorm:"primary_key" json:"id,omitempty"`
+	CreatedAt  time.Time  `json:"createdAt,omitempty"`
+	UpdatedAt  time.Time  `json:"updatedAt,omitempty"`
+	DeletedAt  *time.Time `json:"deletedAt,omitempty"`
+	LuchadorID uint       `json:"luchadorID,omitempty"`
 	Event      string     `json:"event"`
 	Script     string     `json:"script"`
 	Exception  string     `json:"exception"`
