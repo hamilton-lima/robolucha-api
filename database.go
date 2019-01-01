@@ -175,6 +175,7 @@ func (ds *DataSource) createLuchador(l *Luchador) *Luchador {
 	luchador := Luchador{
 		UserID: l.UserID,
 		Name:   l.Name,
+		Codes:  l.Codes,
 	}
 
 	ds.db.Create(&luchador)
