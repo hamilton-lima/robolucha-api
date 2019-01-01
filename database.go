@@ -85,6 +85,12 @@ func NewDataSource(config *DBconfig) *DataSource {
 	db.AutoMigrate(&Luchador{})
 	db.AutoMigrate(&Code{})
 
+	// Enable debug mode
+	debug := os.Getenv("GORM_DEBUG")
+	if debug == "true" {
+		db.LogMode(true)
+	}
+
 	return &DataSource{db: db, config: config}
 }
 
@@ -183,6 +189,19 @@ func (ds *DataSource) createLuchador(l *Luchador) *Luchador {
 	log.WithFields(log.Fields{
 		"luchador": luchador,
 	}).Info("Luchador created")
+
+	return &luchador
+}
+
+func (ds *DataSource) findLuchador(user *User) *Luchador {
+	var luchador Luchador
+	if ds.db.Preload("Codes").Where(&Luchador{UserID: user.ID}).First(&luchador).RecordNotFound() {
+		return nil
+	}
+
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+	}).Info("findLuchador")
 
 	return &luchador
 }

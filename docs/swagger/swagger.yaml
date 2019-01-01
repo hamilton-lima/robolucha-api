@@ -118,7 +118,7 @@ paths:
       - ApiKeyAuth: []
       summary: create Match
   /private/luchador:
-    post:
+    get:
       consumes:
       - application/json
       produces:
@@ -131,7 +131,7 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: create Luchador for the current user
+      summary: find or create Luchador for the current user
   /private/user/setting:
     get:
       consumes:

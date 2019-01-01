@@ -27,3 +27,9 @@ Run script at database
 ```
 insert into users(email) values('foo@bar.com');
 ```
+
+## Enable SQL log mode 
+
+```
+GORM_DEBUG=true
+```

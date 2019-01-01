@@ -66,7 +66,7 @@ func main() {
 	privateAPI := router.Group("/private")
 	privateAPI.Use(SessionIsValid())
 	{
-		privateAPI.POST("/luchador", createLuchador)
+		privateAPI.GET("/luchador", getLuchador)
 		privateAPI.PUT("/user/setting", updateUserSetting)
 		privateAPI.GET("/user/setting", findUserSetting)
 	}
@@ -232,42 +232,49 @@ func createMatch(c *gin.Context) {
 }
 
 // createLuchador godoc
-// @Summary create Luchador for the current user
+// @Summary find or create Luchador for the current user
 // @Accept json
 // @Produce json
 // @Success 200 {object} main.Luchador
 // @Security ApiKeyAuth
-// @Router /private/luchador [post]
-func createLuchador(c *gin.Context) {
+// @Router /private/luchador [get]
+func getLuchador(c *gin.Context) {
 
 	val, _ := c.Get("user")
 	user := val.(*User)
-
 	var luchador *Luchador
-	luchador = &Luchador{
-		UserID: user.ID,
-		Name:   fmt.Sprintf("Luchador%d", user.ID),
-	}
 
-	repeat := Code{Event: "repeat", Script: "move(20)\nfire(1)"}
-	onHitWall := Code{Event: "onHitWall", Script: "turn(45)"}
-	luchador.Codes = []Code{repeat, onHitWall}
-
-	log.WithFields(log.Fields{
-		"createLuchador": luchador,
-	}).Info("creating luchador")
-
-	luchador = dataSource.createLuchador(luchador)
-
+	luchador = dataSource.findLuchador(user)
 	if luchador == nil {
-		log.Error("Invalid Luchador when saving")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
+		luchador = &Luchador{
+			UserID: user.ID,
+			Name:   fmt.Sprintf("Luchador%d", user.ID),
+		}
+
+		repeat := Code{Event: "repeat", Script: "move(20)\nfire(1)"}
+		onHitWall := Code{Event: "onHitWall", Script: "turn(45)"}
+		luchador.Codes = []Code{repeat, onHitWall}
+
+		log.WithFields(log.Fields{
+			"getLuchador": luchador,
+		}).Info("creating luchador")
+
+		luchador = dataSource.createLuchador(luchador)
+
+		if luchador == nil {
+			log.Error("Invalid Luchador when saving")
+			c.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
+
+		log.WithFields(log.Fields{
+			"luchador": luchador,
+		}).Info("created luchador")
 	}
 
 	log.WithFields(log.Fields{
-		"createLuchador": luchador,
-	}).Info("created luchador")
+		"getLuchador": luchador,
+	}).Info("result")
 
 	c.JSON(http.StatusOK, luchador)
 }
