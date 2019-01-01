@@ -43,3 +43,26 @@ type Match struct {
 	LastTimeAlive time.Time  `json:"lastTimeAlive"`
 	Duration      uint64     `json:"duration"`
 }
+
+// Luchador definition
+type Luchador struct {
+	ID        uint       `gorm:"primary_key" json:"id"`
+	CreatedAt time.Time  `json:"createdAt"`
+	UpdatedAt time.Time  `json:"updatedAt"`
+	DeletedAt *time.Time `json:"deletedAt"`
+	UserID    uint       `json:"userID"`
+	Name      string     `json:"name"`
+	Codes     []Code     `json:"codes"`
+}
+
+// Code definition
+type Code struct {
+	ID         uint       `gorm:"primary_key" json:"id"`
+	CreatedAt  time.Time  `json:"createdAt"`
+	UpdatedAt  time.Time  `json:"updatedAt"`
+	DeletedAt  *time.Time `json:"deletedAt"`
+	LuchadorID uint       `json:"luchadorID"`
+	Event      string     `json:"event"`
+	Script     string     `json:"script"`
+	Exception  string     `json:"exception"`
+}

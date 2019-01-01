@@ -1,5 +1,24 @@
 basePath: /
 definitions:
+  main.Code:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      event:
+        type: string
+      exception:
+        type: string
+      id:
+        type: integer
+      luchadorID:
+        type: integer
+      script:
+        type: string
+      updatedAt:
+        type: string
+    type: object
   main.LoginRequest:
     properties:
       email:
@@ -13,6 +32,25 @@ definitions:
         type: boolean
       uuid:
         type: string
+    type: object
+  main.Luchador:
+    properties:
+      codes:
+        items:
+          $ref: '#/definitions/main.Code'
+        type: array
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+      userID:
+        type: integer
     type: object
   main.Match:
     properties:
@@ -48,7 +86,7 @@ definitions:
       userID:
         type: integer
     type: object
-host: http://localhost:8080
+host: localhost:8080
 info:
   contact: {}
   description: Robolucha API
@@ -79,6 +117,21 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: create Match
+  /private/luchador:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Luchador'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: create Luchador for the current user
   /private/user/setting:
     get:
       consumes:

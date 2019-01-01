@@ -9,6 +9,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 
@@ -65,6 +66,7 @@ func main() {
 	privateAPI := router.Group("/private")
 	privateAPI.Use(SessionIsValid())
 	{
+		privateAPI.POST("/luchador", createLuchador)
 		privateAPI.PUT("/user/setting", updateUserSetting)
 		privateAPI.GET("/user/setting", findUserSetting)
 	}
@@ -227,4 +229,45 @@ func createMatch(c *gin.Context) {
 	}).Info("created match")
 
 	c.JSON(http.StatusOK, match)
+}
+
+// createLuchador godoc
+// @Summary create Luchador for the current user
+// @Accept json
+// @Produce json
+// @Success 200 {object} main.Luchador
+// @Security ApiKeyAuth
+// @Router /private/luchador [post]
+func createLuchador(c *gin.Context) {
+
+	val, _ := c.Get("user")
+	user := val.(*User)
+
+	var luchador *Luchador
+	luchador = &Luchador{
+		UserID: user.ID,
+		Name:   fmt.Sprintf("Luchador%d", user.ID),
+	}
+
+	repeat := Code{Event: "repeat", Script: "move(20)\nfire(1)"}
+	onHitWall := Code{Event: "onHitWall", Script: "turn(45)"}
+	luchador.Codes = []Code{repeat, onHitWall}
+
+	log.WithFields(log.Fields{
+		"createLuchador": luchador,
+	}).Info("creating luchador")
+
+	luchador = dataSource.createLuchador(luchador)
+
+	if luchador == nil {
+		log.Error("Invalid Luchador when saving")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"createLuchador": luchador,
+	}).Info("created luchador")
+
+	c.JSON(http.StatusOK, luchador)
 }

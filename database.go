@@ -58,9 +58,13 @@ func NewDataSource(config *DBconfig) *DataSource {
 			"host":     config.host,
 			"database": config.database,
 			"user":     config.user,
-		}).Debug("Failed to connect database, will retry")
+		}).Debug("Database connection status")
 
 		if err != nil {
+			log.WithFields(log.Fields{
+				"waitTime": waitTime,
+			}).Warn("Error connecting to the database, will retry.")
+
 			time.Sleep(waitTime)
 		}
 		return attempt < 5, err
@@ -78,6 +82,8 @@ func NewDataSource(config *DBconfig) *DataSource {
 	db.AutoMigrate(&Session{})
 	db.AutoMigrate(&UserSetting{})
 	db.AutoMigrate(&Match{})
+	db.AutoMigrate(&Luchador{})
+	db.AutoMigrate(&Code{})
 
 	return &DataSource{db: db, config: config}
 }
@@ -163,4 +169,19 @@ func (ds *DataSource) createMatch(m *Match) *Match {
 	}).Info("Match created")
 
 	return &match
+}
+
+func (ds *DataSource) createLuchador(l *Luchador) *Luchador {
+	luchador := Luchador{
+		UserID: l.UserID,
+		Name:   l.Name,
+	}
+
+	ds.db.Create(&luchador)
+
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+	}).Info("Luchador created")
+
+	return &luchador
 }

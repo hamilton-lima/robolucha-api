@@ -7,7 +7,7 @@
         "license": {},
         "version": "1.0"
     },
-    "host": "http://localhost:8080",
+    "host": "localhost:8080",
     "basePath": "/",
     "paths": {
         "/internal/match": {
@@ -42,6 +42,31 @@
                         "schema": {
                             "type": "object",
                             "$ref": "#/definitions/main.Match"
+                        }
+                    }
+                }
+            }
+        },
+        "/private/luchador": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "create Luchador for the current user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.Luchador"
                         }
                     }
                 }
@@ -141,6 +166,35 @@
         }
     },
     "definitions": {
+        "main.Code": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "event": {
+                    "type": "string"
+                },
+                "exception": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "luchadorID": {
+                    "type": "integer"
+                },
+                "script": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
         "main.LoginRequest": {
             "type": "object",
             "properties": {
@@ -160,6 +214,35 @@
                 },
                 "uuid": {
                     "type": "string"
+                }
+            }
+        },
+        "main.Luchador": {
+            "type": "object",
+            "properties": {
+                "codes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/main.Code"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "integer"
                 }
             }
         },
