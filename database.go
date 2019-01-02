@@ -84,6 +84,7 @@ func NewDataSource(config *DBconfig) *DataSource {
 	db.AutoMigrate(&Match{})
 	db.AutoMigrate(&Luchador{})
 	db.AutoMigrate(&Code{})
+	db.AutoMigrate(&MatchParticipant{})
 
 	// Enable debug mode
 	debug := os.Getenv("GORM_DEBUG")
@@ -224,7 +225,7 @@ func (ds *DataSource) updateLuchador(user *User, luchador *Luchador) *Luchador {
 func (ds *DataSource) findActiveMatches() *[]Match {
 
 	var matches []Match
-	ds.db.Where("time_end < time_start").Find(&matches)
+	ds.db.Where("time_end < time_start").Order("time_start desc").Find(&matches)
 
 	log.WithFields(log.Fields{
 		"matches": matches,
@@ -244,4 +245,43 @@ func (ds *DataSource) findMatch(id uint) *Match {
 	}).Info("findMatch")
 
 	return &match
+}
+
+func (ds *DataSource) findLuchadorByID(luchadorID uint) *Luchador {
+	var luchador Luchador
+	if ds.db.Preload("Codes").Where(&Luchador{ID: luchadorID}).First(&luchador).RecordNotFound() {
+		return nil
+	}
+
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+	}).Info("findLuchadorByID")
+
+	return &luchador
+}
+
+func (ds *DataSource) createMatchParticipant(mp *MatchParticipant) *MatchParticipant {
+	matchPartipant := MatchParticipant{
+		LuchadorID: mp.LuchadorID,
+		MatchID:    mp.MatchID,
+	}
+
+	ds.db.Create(&matchPartipant)
+
+	log.WithFields(log.Fields{
+		"matchPartipant": matchPartipant,
+	}).Info("MatchPartipant created")
+
+	return &matchPartipant
+}
+
+func (ds *DataSource) endMatch(match *Match) *Match {
+
+	ds.db.Model(&match).Update("time_end", match.TimeEnd)
+
+	log.WithFields(log.Fields{
+		"match": match,
+	}).Info("Match time_end updated")
+
+	return match
 }

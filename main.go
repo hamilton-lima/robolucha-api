@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/gin-contrib/cors"
 	log "github.com/sirupsen/logrus"
@@ -45,6 +46,8 @@ func main() {
 	dataSource = NewDataSource(BuildMysqlConfig())
 	defer dataSource.db.Close()
 
+	internalAPIKey := os.Getenv("INTERNAL_API_KEY")
+
 	router := gin.Default()
 
 	config := cors.DefaultConfig()
@@ -60,8 +63,12 @@ func main() {
 	}
 
 	internalAPI := router.Group("/internal")
+	internalAPI.Use(KeyIsValid(internalAPIKey))
 	{
 		internalAPI.POST("/match", createMatch)
+		internalAPI.GET("/luchador", getLuchadorByID)
+		internalAPI.POST("/match-participant", addMatchPartipant)
+		internalAPI.PUT("/end-match", endMatch)
 	}
 
 	privateAPI := router.Group("/private")
@@ -97,6 +104,28 @@ func SessionIsValid() gin.HandlerFunc {
 		}
 
 		c.Set("user", user)
+	}
+}
+
+// KeyIsValid check if Authoraization header is valid
+func KeyIsValid(key string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authorization := c.Request.Header.Get("Authorization")
+		if authorization == "" {
+			log.Debug("No Authorization header")
+			c.AbortWithStatus(http.StatusForbidden)
+		}
+
+		if authorization != key {
+			log.WithFields(log.Fields{
+				"Authorization": authorization,
+			}).Info("Invalid Authorization key")
+			c.AbortWithStatus(http.StatusForbidden)
+		}
+
+		log.WithFields(log.Fields{
+			"Authorization": authorization,
+		}).Info(">> Authorization key")
 	}
 }
 
@@ -399,6 +428,117 @@ func joinMatch(c *gin.Context) {
 	message := string(joinMatchJSON)
 
 	Publish(channel, message)
+
+	c.JSON(http.StatusOK, match)
+}
+
+// getLuchadorByID godoc
+// @Summary find Luchador by ID
+// @Accept json
+// @Produce json
+// @Param luchadorID query int false "int valid"
+// @Success 200 {object} main.Luchador
+// @Security ApiKeyAuth
+// @Router /internal/luchador [get]
+func getLuchadorByID(c *gin.Context) {
+
+	parameter := c.Query("luchadorID")
+	i32, err := strconv.ParseInt(parameter, 10, 32)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"luchadorID": parameter,
+		}).Error("Invalid luchadorID")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	var luchadorID uint
+	luchadorID = uint(i32)
+
+	var luchador *Luchador
+
+	luchador = dataSource.findLuchadorByID(luchadorID)
+	if luchador == nil {
+		log.WithFields(log.Fields{
+			"luchadorID": luchadorID,
+		}).Error("Luchador not found")
+
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"getLuchador": luchador,
+	}).Info("result")
+
+	c.JSON(http.StatusOK, luchador)
+}
+
+// addMatchPartipant godoc
+// @Summary adds match participant
+// @Accept json
+// @Produce json
+// @Param request body main.MatchParticipant true "MatchParticipant"
+// @Success 200 {object} main.MatchParticipant
+// @Security ApiKeyAuth
+// @Router /internal/match-participant [post]
+func addMatchPartipant(c *gin.Context) {
+
+	var matchParticipantRequest *MatchParticipant
+	err := c.BindJSON(&matchParticipantRequest)
+	if err != nil {
+		log.Info("Invalid body content on addMatchPartipant")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	matchParticipant := dataSource.createMatchParticipant(matchParticipantRequest)
+	if matchParticipant == nil {
+		log.WithFields(log.Fields{
+			"matchParticipant": matchParticipantRequest,
+		}).Error("Error saving matchParticipant")
+
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"matchParticipant": matchParticipant,
+	}).Info("result")
+
+	c.JSON(http.StatusOK, matchParticipant)
+}
+
+// endMatch godoc
+// @Summary ends existing match
+// @Accept json
+// @Produce json
+// @Param request body main.Match true "Match"
+// @Success 200 {object} main.Match
+// @Security ApiKeyAuth
+// @Router /internal/end-match [put]
+func endMatch(c *gin.Context) {
+
+	var matchRequest *Match
+	err := c.BindJSON(&matchRequest)
+	if err != nil {
+		log.Info("Invalid body content on endMatch")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	match := dataSource.endMatch(matchRequest)
+	if match == nil {
+		log.WithFields(log.Fields{
+			"match": matchRequest,
+		}).Error("Error calling endMatch")
+
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"match": match,
+	}).Info("result")
 
 	c.JSON(http.StatusOK, match)
 }

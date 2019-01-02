@@ -72,3 +72,13 @@ type JoinMatch struct {
 	MatchID    uint `json:"matchID"`
 	LuchadorID uint `json:"luchadorID"`
 }
+
+// Code definition
+type MatchParticipant struct {
+	ID         uint       `gorm:"primary_key" json:"id,omitempty"`
+	CreatedAt  time.Time  `json:"createdAt,omitempty"`
+	UpdatedAt  time.Time  `json:"updatedAt,omitempty"`
+	DeletedAt  *time.Time `json:"deletedAt,omitempty"`
+	LuchadorID uint       `json:"luchadorID"`
+	MatchID    uint       `json:"matchID"`
+}

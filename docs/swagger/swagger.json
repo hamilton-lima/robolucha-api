@@ -10,6 +10,76 @@
     "host": "localhost:8080",
     "basePath": "/",
     "paths": {
+        "/internal/end-match": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "ends existing match",
+                "parameters": [
+                    {
+                        "description": "Match",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.Match"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.Match"
+                        }
+                    }
+                }
+            }
+        },
+        "/internal/luchador": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find Luchador by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "int valid",
+                        "name": "luchadorID",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.Luchador"
+                        }
+                    }
+                }
+            }
+        },
         "/internal/match": {
             "post": {
                 "security": [
@@ -42,6 +112,43 @@
                         "schema": {
                             "type": "object",
                             "$ref": "#/definitions/main.Match"
+                        }
+                    }
+                }
+            }
+        },
+        "/internal/match-participant": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "adds match participant",
+                "parameters": [
+                    {
+                        "description": "MatchParticipant",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.MatchParticipant"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.MatchParticipant"
                         }
                     }
                 }
@@ -297,6 +404,9 @@
         "main.JoinMatch": {
             "type": "object",
             "properties": {
+                "luchadorID": {
+                    "type": "integer"
+                },
                 "matchID": {
                     "type": "integer"
                 }
@@ -376,6 +486,29 @@
                 },
                 "timeStart": {
                     "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "main.MatchParticipant": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "luchadorID": {
+                    "type": "integer"
+                },
+                "matchID": {
+                    "type": "integer"
                 },
                 "updatedAt": {
                     "type": "string"
