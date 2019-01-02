@@ -50,4 +50,6 @@ func Publish(channel string, message string) {
 			"message": message,
 		}).Error("Error publishing message to REDIS")
 	}
+
+	conn.Close()
 }
