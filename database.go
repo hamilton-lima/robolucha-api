@@ -232,3 +232,16 @@ func (ds *DataSource) findActiveMatches() *[]Match {
 
 	return &matches
 }
+
+func (ds *DataSource) findMatch(id uint) *Match {
+
+	var match Match
+	ds.db.Where(&Match{ID: id}).Find(&match)
+
+	log.WithFields(log.Fields{
+		"id":    id,
+		"match": match,
+	}).Info("findMatch")
+
+	return &match
+}

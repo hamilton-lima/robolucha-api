@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/gin-contrib/cors"
 	log "github.com/sirupsen/logrus"
@@ -71,6 +72,7 @@ func main() {
 		privateAPI.PUT("/user/setting", updateUserSetting)
 		privateAPI.GET("/user/setting", findUserSetting)
 		privateAPI.GET("/match", getActiveMatches)
+		privateAPI.POST("/join-match", joinMatch)
 	}
 
 	router.Run()
@@ -341,4 +343,61 @@ func getActiveMatches(c *gin.Context) {
 	}).Info("getActiveMatches")
 
 	c.JSON(http.StatusOK, matches)
+}
+
+// joinMatch godoc
+// @Summary join match
+// @Accept json
+// @Produce json
+// @Param matchID query int false "int valid"
+// @Success 200 {object} main.Match
+// @Security ApiKeyAuth
+// @Router /private/join-match [post]
+func joinMatch(c *gin.Context) {
+
+	parameter := c.Query("matchID")
+	var matchID uint
+	i32, err := strconv.ParseInt(parameter, 10, 32)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"matchID": parameter,
+		}).Error("Invalid MatchID")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	matchID = uint(i32)
+
+	val, _ := c.Get("user")
+	user := val.(*User)
+
+	var luchador *Luchador
+	luchador = dataSource.findLuchador(user)
+	if luchador == nil {
+		log.WithFields(log.Fields{
+			"user": user,
+		}).Error("Error getting luchador for the current uses")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	var match *Match
+	match = dataSource.findMatch(matchID)
+	if match == nil {
+		log.WithFields(log.Fields{
+			"user": user,
+		}).Error("Match not found when trying to join match")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+		"match":    match,
+	}).Info("Joining match")
+
+	channel := fmt.Sprintf("match.%v.join", matchID)
+	message := fmt.Sprintf("%v", luchador.ID)
+	Publish(channel, message)
+
+	c.JSON(http.StatusOK, match)
 }

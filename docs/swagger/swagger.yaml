@@ -117,6 +117,26 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: create Match
+  /private/join-match:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: int valid
+        in: query
+        name: matchID
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Match'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: join match
   /private/luchador:
     get:
       consumes:
