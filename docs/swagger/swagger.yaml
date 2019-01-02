@@ -19,6 +19,11 @@ definitions:
       updatedAt:
         type: string
     type: object
+  main.JoinMatch:
+    properties:
+      matchID:
+        type: integer
+    type: object
   main.LoginRequest:
     properties:
       email:
@@ -122,10 +127,13 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: int valid
-        in: query
-        name: matchID
-        type: integer
+      - description: JoinMatch
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.JoinMatch'
+          type: object
       produces:
       - application/json
       responses:

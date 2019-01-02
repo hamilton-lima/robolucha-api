@@ -66,3 +66,9 @@ type Code struct {
 	Script     string     `json:"script"`
 	Exception  string     `json:"exception"`
 }
+
+// JoinMatch definition
+type JoinMatch struct {
+	MatchID    uint `json:"matchID"`
+	LuchadorID uint `json:"luchadorID"`
+}

@@ -9,10 +9,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/gin-contrib/cors"
 	log "github.com/sirupsen/logrus"
@@ -349,23 +349,19 @@ func getActiveMatches(c *gin.Context) {
 // @Summary join match
 // @Accept json
 // @Produce json
-// @Param matchID query int false "int valid"
+// @Param request body main.JoinMatch true "JoinMatch"
 // @Success 200 {object} main.Match
 // @Security ApiKeyAuth
 // @Router /private/join-match [post]
 func joinMatch(c *gin.Context) {
 
-	parameter := c.Query("matchID")
-	var matchID uint
-	i32, err := strconv.ParseInt(parameter, 10, 32)
+	var joinMatch *JoinMatch
+	err := c.BindJSON(&joinMatch)
 	if err != nil {
-		log.WithFields(log.Fields{
-			"matchID": parameter,
-		}).Error("Invalid MatchID")
+		log.Info("Invalid body content on joinMatch")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
-	matchID = uint(i32)
 
 	val, _ := c.Get("user")
 	user := val.(*User)
@@ -380,8 +376,11 @@ func joinMatch(c *gin.Context) {
 		return
 	}
 
+	// make sure it will join with the luchador associated with the user
+	joinMatch.LuchadorID = luchador.ID
+
 	var match *Match
-	match = dataSource.findMatch(matchID)
+	match = dataSource.findMatch(joinMatch.MatchID)
 	if match == nil {
 		log.WithFields(log.Fields{
 			"user": user,
@@ -395,8 +394,10 @@ func joinMatch(c *gin.Context) {
 		"match":    match,
 	}).Info("Joining match")
 
-	channel := fmt.Sprintf("match.%v.join", matchID)
-	message := fmt.Sprintf("%v", luchador.ID)
+	channel := fmt.Sprintf("match.%v.join", joinMatch.MatchID)
+	joinMatchJSON, _ := json.Marshal(joinMatch)
+	message := string(joinMatchJSON)
+
 	Publish(channel, message)
 
 	c.JSON(http.StatusOK, match)

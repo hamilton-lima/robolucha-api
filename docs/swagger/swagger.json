@@ -63,10 +63,14 @@
                 "summary": "join match",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "int valid",
-                        "name": "matchID",
-                        "in": "query"
+                        "description": "JoinMatch",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.JoinMatch"
+                        }
                     }
                 ],
                 "responses": {
@@ -287,6 +291,14 @@
                 },
                 "updatedAt": {
                     "type": "string"
+                }
+            }
+        },
+        "main.JoinMatch": {
+            "type": "object",
+            "properties": {
+                "matchID": {
+                    "type": "integer"
                 }
             }
         },
