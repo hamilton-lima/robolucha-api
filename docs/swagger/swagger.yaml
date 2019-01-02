@@ -154,6 +154,22 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Updates Luchador
+  /private/match:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.Match'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: find active matches
   /private/user/setting:
     get:
       consumes:

@@ -70,6 +70,7 @@ func main() {
 		privateAPI.PUT("/luchador", updateLuchador)
 		privateAPI.PUT("/user/setting", updateUserSetting)
 		privateAPI.GET("/user/setting", findUserSetting)
+		privateAPI.GET("/match", getActiveMatches)
 	}
 
 	router.Run()
@@ -232,7 +233,7 @@ func createMatch(c *gin.Context) {
 	c.JSON(http.StatusOK, match)
 }
 
-// createLuchador godoc
+// getLuchador godoc
 // @Summary find or create Luchador for the current user
 // @Accept json
 // @Produce json
@@ -321,4 +322,23 @@ func updateLuchador(c *gin.Context) {
 	}).Info("updateLuchador")
 
 	c.JSON(http.StatusOK, luchador)
+}
+
+// getActiveMatches godoc
+// @Summary find active matches
+// @Accept json
+// @Produce json
+// @Success 200 {array} main.Match
+// @Security ApiKeyAuth
+// @Router /private/match [get]
+func getActiveMatches(c *gin.Context) {
+
+	var matches *[]Match
+
+	matches = dataSource.findActiveMatches()
+	log.WithFields(log.Fields{
+		"matches": matches,
+	}).Info("getActiveMatches")
+
+	c.JSON(http.StatusOK, matches)
 }

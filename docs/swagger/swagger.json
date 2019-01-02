@@ -107,6 +107,33 @@
                 }
             }
         },
+        "/private/match": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find active matches",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.Match"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/private/user/setting": {
             "get": {
                 "security": [

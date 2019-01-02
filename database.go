@@ -220,3 +220,15 @@ func (ds *DataSource) updateLuchador(user *User, luchador *Luchador) *Luchador {
 
 	return luchador
 }
+
+func (ds *DataSource) findActiveMatches() *[]Match {
+
+	var matches []Match
+	ds.db.Where("time_end < time_start").Find(&matches)
+
+	log.WithFields(log.Fields{
+		"matches": matches,
+	}).Info("findActiveMatches")
+
+	return &matches
+}
