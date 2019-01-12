@@ -352,6 +352,12 @@ func updateLuchador(c *gin.Context) {
 		"action":   "after save",
 	}).Info("updateLuchador")
 
+	channel := fmt.Sprintf("luchador.%v.update", luchador.ID)
+	luchadorUpdateJSON, _ := json.Marshal(luchador)
+	message := string(luchadorUpdateJSON)
+
+	Publish(channel, message)
+
 	c.JSON(http.StatusOK, luchador)
 }
 

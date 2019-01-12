@@ -216,7 +216,7 @@ func (ds *DataSource) updateLuchador(user *User, luchador *Luchador) *Luchador {
 	ds.db.Save(&luchador)
 
 	log.WithFields(log.Fields{
-		"luchador": current,
+		"luchador": luchador,
 	}).Info("updateLuchador")
 
 	return luchador
