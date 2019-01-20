@@ -8,5 +8,7 @@ export MYSQL_DATABASE=robolucha_db
 export MYSQL_USER=robolucha_uzr
 export MYSQL_PASSWORD=foo123123
 
+export API_PORT=8080
+
 go build -o $HOME/go/bin/robolucha-api
 $HOME/go/bin/robolucha-api

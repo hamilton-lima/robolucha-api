@@ -48,6 +48,11 @@ func main() {
 
 	internalAPIKey := os.Getenv("INTERNAL_API_KEY")
 
+	port := os.Getenv("API_PORT")
+	if len(port) == 0 {
+		port = "5000"
+	}
+
 	router := gin.Default()
 
 	config := cors.DefaultConfig()
@@ -82,7 +87,7 @@ func main() {
 		privateAPI.POST("/join-match", joinMatch)
 	}
 
-	router.Run(":5000")
+	router.Run(":" + port)
 }
 
 // SessionIsValid check if Authoraization header is valid
