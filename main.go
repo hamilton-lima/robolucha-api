@@ -82,8 +82,7 @@ func main() {
 		privateAPI.POST("/join-match", joinMatch)
 	}
 
-	router.Run()
-
+	router.Run(":5000")
 }
 
 // SessionIsValid check if Authoraization header is valid

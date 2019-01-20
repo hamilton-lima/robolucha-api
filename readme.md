@@ -32,7 +32,7 @@ Create symbolic link from workspace to gopath
 
 Run script at database 
 ```
-insert into users(email) values('foo@bar.com');
+insert into users(email) values('hamilton.lima@gmail.com');
 ```
 
 ## Enable SQL log mode 
