@@ -53,6 +53,7 @@ type Luchador struct {
 	UserID    uint       `json:"userID"`
 	Name      string     `json:"name"`
 	Codes     []Code     `json:"codes"`
+	Configs   []Config   `json:"configs"`
 }
 
 // Code definition
@@ -65,6 +66,17 @@ type Code struct {
 	Event      string     `json:"event"`
 	Script     string     `json:"script"`
 	Exception  string     `json:"exception"`
+}
+
+// Config definition
+type Config struct {
+	ID         uint       `gorm:"primary_key" json:"id,omitempty"`
+	CreatedAt  time.Time  `json:"createdAt,omitempty"`
+	UpdatedAt  time.Time  `json:"updatedAt,omitempty"`
+	DeletedAt  *time.Time `json:"deletedAt,omitempty"`
+	LuchadorID uint       `json:"luchadorID,omitempty"`
+	Key        string     `json:"key"`
+	Value      string     `json:"value"`
 }
 
 // JoinMatch definition

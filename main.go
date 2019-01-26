@@ -288,9 +288,8 @@ func getLuchador(c *gin.Context) {
 			Name:   fmt.Sprintf("Luchador%d", user.ID),
 		}
 
-		repeat := Code{Event: "onRepeat", Script: "move(20)\nfire(1)"}
-		onHitWall := Code{Event: "onHitWall", Script: "turn(45)"}
-		luchador.Codes = []Code{repeat, onHitWall}
+		luchador.Codes = defaultCode()
+		luchador.Configs = randomConfig()
 
 		log.WithFields(log.Fields{
 			"getLuchador": luchador,

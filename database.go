@@ -84,6 +84,7 @@ func NewDataSource(config *DBconfig) *DataSource {
 	db.AutoMigrate(&Match{})
 	db.AutoMigrate(&Luchador{})
 	db.AutoMigrate(&Code{})
+	db.AutoMigrate(&Config{})
 	db.AutoMigrate(&MatchParticipant{})
 
 	// Enable debug mode
