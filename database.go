@@ -181,9 +181,10 @@ func (ds *DataSource) createMatch(m *Match) *Match {
 
 func (ds *DataSource) createLuchador(l *Luchador) *Luchador {
 	luchador := Luchador{
-		UserID: l.UserID,
-		Name:   l.Name,
-		Codes:  l.Codes,
+		UserID:  l.UserID,
+		Name:    l.Name,
+		Codes:   l.Codes,
+		Configs: l.Configs,
 	}
 
 	ds.db.Create(&luchador)
@@ -197,7 +198,7 @@ func (ds *DataSource) createLuchador(l *Luchador) *Luchador {
 
 func (ds *DataSource) findLuchador(user *User) *Luchador {
 	var luchador Luchador
-	if ds.db.Preload("Codes").Where(&Luchador{UserID: user.ID}).First(&luchador).RecordNotFound() {
+	if ds.db.Preload("Codes").Preload("Configs").Where(&Luchador{UserID: user.ID}).First(&luchador).RecordNotFound() {
 		return nil
 	}
 
@@ -250,7 +251,7 @@ func (ds *DataSource) findMatch(id uint) *Match {
 
 func (ds *DataSource) findLuchadorByID(luchadorID uint) *Luchador {
 	var luchador Luchador
-	if ds.db.Preload("Codes").Where(&Luchador{ID: luchadorID}).First(&luchador).RecordNotFound() {
+	if ds.db.Preload("Codes").Preload("Configs").Where(&Luchador{ID: luchadorID}).First(&luchador).RecordNotFound() {
 		return nil
 	}
 

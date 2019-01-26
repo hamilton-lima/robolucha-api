@@ -3,6 +3,8 @@ package main
 import (
 	"math/rand"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func defaultCode() []Code {
@@ -57,6 +59,10 @@ func randomConfig() []Config {
 
 	list = add2ConfigList(list, "eye", "eye.png")
 	list = add2ConfigList(list, "eye.color", randomColor())
+
+	log.WithFields(log.Fields{
+		"config": list,
+	}).Info("generated config")
 
 	return list
 }
