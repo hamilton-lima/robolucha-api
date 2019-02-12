@@ -5,11 +5,11 @@
 Follow the instalation procedures in https://github.com/swaggo/swag
 
 ```
-code $HOME/.profile
+code ~/.profile
 export PATH=$PATH:$HOME/go/bin
 
 go get -u github.com/swaggo/swag/cmd/swag
-cd ~/Code/robolucha/robolucha-api
+cd ~/code/robolucha/robolucha-api
 swag init
 
 cd ~/go/src/gitlab.com/robolucha/robolucha-api
@@ -25,7 +25,20 @@ open http://localhost:8080/public/swagger/index.html
 
 Create symbolic link from workspace to gopath
 ```
-	ln -s /home/hamilton/Code/robolucha/robolucha-api /home/hamilton/go/src/gitlab.com/robolucha
+	export WIN=/mnt/c/Users/hamil/code
+	mkdir -p $WIN/go/src/gitlab.com/robolucha
+	ln -s $WIN/robolucha-api $WIN/go/src/gitlab.com/robolucha
+	export PATH=$PATH:$WIN/go/bin
+```
+
+Edit .profile
+```
+	nano $HOME/.profile
+	export WIN=/mnt/c/Users/hamil/code
+	export PATH=$PATH:$WIN/go/bin
+	export WIN=/mnt/c/Users/hamil/code
+	export GOPATH=$WIN/go
+	export DOCKER_HOST=tcp://0.0.0.0:2375
 ```
 
 ## Create users
