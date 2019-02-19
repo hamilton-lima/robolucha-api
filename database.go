@@ -209,6 +209,7 @@ func (ds *DataSource) findLuchador(user *User) *Luchador {
 	return &luchador
 }
 
+
 func (ds *DataSource) updateLuchador(user *User, luchador *Luchador) *Luchador {
 	var current Luchador
 	if ds.db.First(&current, luchador.ID).RecordNotFound() {
@@ -225,7 +226,7 @@ func (ds *DataSource) updateLuchador(user *User, luchador *Luchador) *Luchador {
 }
 
 func (ds *DataSource) findActiveMatches() *[]Match {
-
+	
 	var matches []Match
 	ds.db.Where("time_end < time_start").Order("time_start desc").Find(&matches)
 
@@ -286,4 +287,21 @@ func (ds *DataSource) endMatch(match *Match) *Match {
 	}).Info("Match time_end updated")
 
 	return match
+}
+
+func (ds *DataSource) findLuchadorConfigsByMatchID(id uint) *[]Luchador {
+
+	match := Match{}
+	ds.db.First(&match, "id = ?", id)
+
+	var participants []Luchador
+	ds.db.Model(&match).Related(&participants, "Participants").Preload("Configs")
+
+	log.WithFields(log.Fields{
+		"id":    id,
+		"match": match,
+		"result": participants,
+	}).Debug("findLuchadorConfigsByMatchID")
+
+	return &participants
 }

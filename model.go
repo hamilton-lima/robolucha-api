@@ -42,6 +42,7 @@ type Match struct {
 	TimeEnd       time.Time  `json:"timeEnd"`
 	LastTimeAlive time.Time  `json:"lastTimeAlive"`
 	Duration      uint64     `json:"duration"`
+	Participants  []Luchador `gorm:"many2many:match_participants;" json:"participants"`
 }
 
 // Luchador definition

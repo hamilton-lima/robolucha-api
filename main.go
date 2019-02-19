@@ -84,6 +84,7 @@ func main() {
 		privateAPI.PUT("/user/setting", updateUserSetting)
 		privateAPI.GET("/user/setting", findUserSetting)
 		privateAPI.GET("/match", getActiveMatches)
+		privateAPI.GET("/match-config", getLuchadorConfigsForCurrentMatch)
 		privateAPI.POST("/join-match", joinMatch)
 	}
 
@@ -382,6 +383,39 @@ func getActiveMatches(c *gin.Context) {
 
 	c.JSON(http.StatusOK, matches)
 }
+
+// getLuchadorConfigsForCurrentMatch godoc
+// @Summary return luchador configs for current match
+// @Accept json
+// @Produce json
+// @Param matchID query int false "int valid"
+// @Success 200 {array} main.Luchador
+// @Security ApiKeyAuth
+// @Router /private/match-config [get]
+func getLuchadorConfigsForCurrentMatch(c *gin.Context) {
+
+	parameter := c.Query("matchID")
+	i32, err := strconv.ParseInt(parameter, 10, 32)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"matchID": parameter,
+		}).Error("Invalid matchID")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	var matchID uint
+	matchID = uint(i32)
+
+	var result *[]Luchador
+
+	result = dataSource.findLuchadorConfigsByMatchID(matchID)
+	log.WithFields(log.Fields{
+		"result": result,
+	}).Debug("getLuchadorConfigsForCurrentMatch")
+
+	c.JSON(http.StatusOK, result)
+}
+
 
 // joinMatch godoc
 // @Summary join match
