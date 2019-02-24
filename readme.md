@@ -29,6 +29,8 @@ Create symbolic link from workspace to gopath
 	mkdir -p $WIN/go/src/gitlab.com/robolucha
 	ln -s $WIN/robolucha-api $WIN/go/src/gitlab.com/robolucha
 	export PATH=$PATH:$WIN/go/bin
+	cd $WIN/go/src/gitlab.com/robolucha/robolucha-api
+	go get -v	
 ```
 
 Edit .profile
