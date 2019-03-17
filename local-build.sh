@@ -10,5 +10,11 @@ export MYSQL_PASSWORD=foo123123
 
 export API_PORT=8080
 
-go build -o $HOME/go/bin/robolucha-api
+export GIN_MODE=debug
+export GORM_DEBUG=true
+
+echo "--- BUILD api"
+go build -v -o $HOME/go/bin/robolucha-api
+
+echo "--- START api"
 $HOME/go/bin/robolucha-api
