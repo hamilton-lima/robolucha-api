@@ -42,7 +42,7 @@ type Match struct {
 	TimeEnd       time.Time  `json:"timeEnd"`
 	LastTimeAlive time.Time  `json:"lastTimeAlive"`
 	Duration      uint64     `json:"duration"`
-	Participants  []Luchador `gorm:"many2many:match_participants;" json:"participants"`
+	Participants  []Luchador `gorm:"many2many:match_participants" json:"participants"`
 }
 
 // Luchador definition
@@ -88,10 +88,6 @@ type JoinMatch struct {
 
 // Code definition
 type MatchParticipant struct {
-	ID         uint       `gorm:"primary_key" json:"id,omitempty"`
-	CreatedAt  time.Time  `json:"createdAt,omitempty"`
-	UpdatedAt  time.Time  `json:"updatedAt,omitempty"`
-	DeletedAt  *time.Time `json:"deletedAt,omitempty"`
-	LuchadorID uint       `json:"luchadorID"`
-	MatchID    uint       `json:"matchID"`
+	LuchadorID uint `json:"luchadorID"`
+	MatchID    uint `json:"matchID"`
 }

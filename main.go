@@ -53,6 +53,10 @@ func main() {
 		port = "5000"
 	}
 
+	log.WithFields(log.Fields{
+		"port": port,
+	}).Debug("Port configuration")
+
 	router := gin.Default()
 
 	config := cors.DefaultConfig()
@@ -89,6 +93,10 @@ func main() {
 	}
 
 	router.Run(":" + port)
+	
+	log.WithFields(log.Fields{
+		"port": port,
+	}).Debug("Server is ready")
 }
 
 // SessionIsValid check if Authoraization header is valid
@@ -418,7 +426,7 @@ func getLuchadorConfigsForCurrentMatch(c *gin.Context) {
 
 
 // joinMatch godoc
-// @Summary join match
+// @Summary Sends message with the request to join the match 
 // @Accept json
 // @Produce json
 // @Param request body main.JoinMatch true "JoinMatch"
@@ -517,7 +525,7 @@ func getLuchadorByID(c *gin.Context) {
 }
 
 // addMatchPartipant godoc
-// @Summary adds match participant
+// @Summary Adds luchador to a match
 // @Accept json
 // @Produce json
 // @Param request body main.MatchParticipant true "MatchParticipant"
@@ -534,7 +542,7 @@ func addMatchPartipant(c *gin.Context) {
 		return
 	}
 
-	matchParticipant := dataSource.createMatchParticipant(matchParticipantRequest)
+	matchParticipant := dataSource.addMatchParticipant(matchParticipantRequest)
 	if matchParticipant == nil {
 		log.WithFields(log.Fields{
 			"matchParticipant": matchParticipantRequest,

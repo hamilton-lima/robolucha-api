@@ -53,6 +53,13 @@ func NewDataSource(config *DBconfig) *DataSource {
 	err := try.Do(func(attempt int) (bool, error) {
 		var err error
 		db, err = gorm.Open(config.dialect, config.args)
+
+		// Enable debug mode
+		debug := os.Getenv("GORM_DEBUG")
+		if debug == "true" {
+			db.LogMode(true)
+		}
+
 		log.WithFields(log.Fields{
 			"error":    err,
 			"host":     config.host,
@@ -85,13 +92,6 @@ func NewDataSource(config *DBconfig) *DataSource {
 	db.AutoMigrate(&Luchador{})
 	db.AutoMigrate(&Code{})
 	db.AutoMigrate(&Config{})
-	db.AutoMigrate(&MatchParticipant{})
-
-	// Enable debug mode
-	debug := os.Getenv("GORM_DEBUG")
-	if debug == "true" {
-		db.LogMode(true)
-	}
 
 	return &DataSource{db: db, config: config}
 }
@@ -209,6 +209,18 @@ func (ds *DataSource) findLuchador(user *User) *Luchador {
 	return &luchador
 }
 
+func (ds *DataSource) findLuchadorByIDNoPreload(id uint) *Luchador {
+	var luchador Luchador
+	if ds.db.First(&luchador, id).RecordNotFound() {
+		return nil
+	}
+
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+	}).Info("findLuchadorByID")
+
+	return &luchador
+}
 
 func (ds *DataSource) updateLuchador(user *User, luchador *Luchador) *Luchador {
 	var current Luchador
@@ -226,7 +238,7 @@ func (ds *DataSource) updateLuchador(user *User, luchador *Luchador) *Luchador {
 }
 
 func (ds *DataSource) findActiveMatches() *[]Match {
-	
+
 	var matches []Match
 	ds.db.Where("time_end < time_start").Order("time_start desc").Find(&matches)
 
@@ -263,13 +275,43 @@ func (ds *DataSource) findLuchadorByID(luchadorID uint) *Luchador {
 	return &luchador
 }
 
-func (ds *DataSource) createMatchParticipant(mp *MatchParticipant) *MatchParticipant {
-	matchPartipant := MatchParticipant{
-		LuchadorID: mp.LuchadorID,
-		MatchID:    mp.MatchID,
+func (ds *DataSource) addMatchParticipant(mp *MatchParticipant) *MatchParticipant {
+
+	var match *Match
+	match = ds.findMatch(mp.MatchID)
+	if match == nil {
+		log.WithFields(log.Fields{
+			"matchID": mp.MatchID,
+		}).Error("Match not found")
+		return nil
 	}
 
-	ds.db.Create(&matchPartipant)
+	var luchador *Luchador
+	luchador = ds.findLuchadorByIDNoPreload(mp.LuchadorID)
+	if luchador == nil {
+		log.WithFields(log.Fields{
+			"luchadorID": mp.MatchID,
+		}).Error("Luchador not found")
+		return nil
+	}
+
+	for _, participant := range match.Participants {
+		if participant.ID == mp.LuchadorID {
+			log.WithFields(log.Fields{
+				"matchID":    mp.MatchID,
+				"luchadorID": mp.MatchID,
+			}).Error("Luchador is already in the match")
+			return nil
+		}
+	}
+
+	match.Participants = append(match.Participants, *luchador)
+	ds.db.Save(&match)
+
+	matchPartipant := MatchParticipant{
+		LuchadorID: luchador.ID,
+		MatchID:    match.ID,
+	}
 
 	log.WithFields(log.Fields{
 		"matchPartipant": matchPartipant,
@@ -298,8 +340,8 @@ func (ds *DataSource) findLuchadorConfigsByMatchID(id uint) *[]Luchador {
 	ds.db.Model(&match).Related(&participants, "Participants").Preload("Configs")
 
 	log.WithFields(log.Fields{
-		"id":    id,
-		"match": match,
+		"id":     id,
+		"match":  match,
 		"result": participants,
 	}).Debug("findLuchadorConfigsByMatchID")
 
