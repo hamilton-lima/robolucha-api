@@ -102,6 +102,14 @@ func NewDataSource(config *DBconfig) *DataSource {
 	return &DataSource{db: db, config: config}
 }
 
+func (ds *DataSource) KeepAlive() {
+	log.Debug("Keep connection alive")
+	for range time.Tick(time.Minute) {
+		ds.db.DB().Ping()
+		log.Debug("Keep connection alive")
+	}
+}
+
 func (ds *DataSource) findUserByEmail(email string) *User {
 	var user User
 

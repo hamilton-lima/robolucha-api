@@ -48,6 +48,8 @@ func main() {
 	dataSource = NewDataSource(BuildMysqlConfig())
 	defer dataSource.db.Close()
 
+	go dataSource.KeepAlive()
+
 	internalAPIKey := os.Getenv("INTERNAL_API_KEY")
 
 	port := os.Getenv("API_PORT")
