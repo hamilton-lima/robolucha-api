@@ -47,8 +47,14 @@ func BuildMysqlConfig() *DBconfig {
 
 // NewDataSource creates a DataSource instance
 func NewDataSource(config *DBconfig) *DataSource {
-	waitTime := 20 * time.Second
+	waitTime := 10 * time.Second
 	var db *gorm.DB
+
+	log.WithFields(log.Fields{
+		"host":     config.host,
+		"database": config.database,
+		"user":     config.user,
+	}).Debug("Connecting to the database")
 
 	err := try.Do(func(attempt int) (bool, error) {
 		var err error
@@ -94,6 +100,14 @@ func NewDataSource(config *DBconfig) *DataSource {
 	db.AutoMigrate(&Config{})
 
 	return &DataSource{db: db, config: config}
+}
+
+func (ds *DataSource) KeepAlive() {
+	log.Debug("Keep connection alive")
+	for range time.Tick(time.Minute) {
+		ds.db.DB().Ping()
+		log.Debug("Keep connection alive")
+	}
 }
 
 func (ds *DataSource) findUserByEmail(email string) *User {
