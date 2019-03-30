@@ -43,6 +43,8 @@ func main() {
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.DebugLevel)
 
+	log.Info("Robolucha API, start.")
+
 	dataSource = NewDataSource(BuildMysqlConfig())
 	defer dataSource.db.Close()
 
@@ -93,7 +95,7 @@ func main() {
 	}
 
 	router.Run(":" + port)
-	
+
 	log.WithFields(log.Fields{
 		"port": port,
 	}).Debug("Server is ready")
@@ -424,9 +426,8 @@ func getLuchadorConfigsForCurrentMatch(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-
 // joinMatch godoc
-// @Summary Sends message with the request to join the match 
+// @Summary Sends message with the request to join the match
 // @Accept json
 // @Produce json
 // @Param request body main.JoinMatch true "JoinMatch"

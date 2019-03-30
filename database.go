@@ -47,8 +47,14 @@ func BuildMysqlConfig() *DBconfig {
 
 // NewDataSource creates a DataSource instance
 func NewDataSource(config *DBconfig) *DataSource {
-	waitTime := 20 * time.Second
+	waitTime := 10 * time.Second
 	var db *gorm.DB
+
+	log.WithFields(log.Fields{
+		"host":     config.host,
+		"database": config.database,
+		"user":     config.user,
+	}).Debug("Connecting to the database")
 
 	err := try.Do(func(attempt int) (bool, error) {
 		var err error
