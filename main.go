@@ -48,6 +48,7 @@ func main() {
 	dataSource = NewDataSource(BuildMysqlConfig())
 	defer dataSource.db.Close()
 
+	addTestUsers(dataSource)
 	go dataSource.KeepAlive()
 
 	internalAPIKey := os.Getenv("INTERNAL_API_KEY")
@@ -82,6 +83,7 @@ func main() {
 		internalAPI.GET("/luchador", getLuchadorByID)
 		internalAPI.POST("/match-participant", addMatchPartipant)
 		internalAPI.PUT("/end-match", endMatch)
+		internalAPI.GET("/ready", getReady)
 	}
 
 	privateAPI := router.Group("/private")
@@ -525,6 +527,15 @@ func getLuchadorByID(c *gin.Context) {
 	}).Info("result")
 
 	c.JSON(http.StatusOK, luchador)
+}
+
+// getHealth godoc
+// @Summary returns application health check information
+// @Success 200
+// @Security ApiKeyAuth
+// @Router /internal/ready [get]
+func getReady(c *gin.Context) {
+	c.JSON(http.StatusOK, "ok")
 }
 
 // addMatchPartipant godoc
