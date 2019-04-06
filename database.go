@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"time"
@@ -27,6 +29,7 @@ type DBconfig struct {
 type DataSource struct {
 	config *DBconfig
 	db     *gorm.DB
+	secret string
 }
 
 // BuildMysqlConfig creates a DBconfig for Mysql based on environment variables
@@ -47,7 +50,7 @@ func BuildMysqlConfig() *DBconfig {
 
 // NewDataSource creates a DataSource instance
 func NewDataSource(config *DBconfig) *DataSource {
-	waitTime := 10 * time.Second
+	waitTime := 2 * time.Second
 	var db *gorm.DB
 
 	log.WithFields(log.Fields{
@@ -80,7 +83,7 @@ func NewDataSource(config *DBconfig) *DataSource {
 
 			time.Sleep(waitTime)
 		}
-		return attempt < 5, err
+		return attempt < 30, err
 	})
 	if err != nil {
 		log.WithFields(log.Fields{
@@ -99,7 +102,9 @@ func NewDataSource(config *DBconfig) *DataSource {
 	db.AutoMigrate(&Code{})
 	db.AutoMigrate(&Config{})
 
-	return &DataSource{db: db, config: config}
+	secret := os.Getenv("API_SECRET")
+
+	return &DataSource{db: db, config: config, secret: secret}
 }
 
 func (ds *DataSource) KeepAlive() {
@@ -155,6 +160,25 @@ func (ds *DataSource) updateUserSetting(settings *UserSetting) *UserSetting {
 	}).Error("User Setting updated")
 
 	return &current
+}
+
+func (ds *DataSource) createUser(u *User) *User {
+	user := User{Email: u.Email, Password: ds.createHash(u.Password)}
+	ds.db.Where(&User{Email: u.Email}).FirstOrCreate(&user)
+
+	log.WithFields(log.Fields{
+		"id":       user.ID,
+		"email":    user.Email,
+		"password": user.Password,
+	}).Debug("createUser")
+
+	return &user
+}
+
+func (ds *DataSource) createHash(key string) string {
+	hasher := md5.New()
+	hasher.Write([]byte(key + ds.secret))
+	return hex.EncodeToString(hasher.Sum(nil))
 }
 
 func (ds *DataSource) createSession(user *User) *Session {
