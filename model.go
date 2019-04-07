@@ -60,7 +60,7 @@ type Luchador struct {
 	UpdatedAt time.Time  `json:"updatedAt"`
 	DeletedAt *time.Time `json:"deletedAt"`
 	UserID    uint       `json:"userID"`
-	Name      string     `json:"name"`
+	Name      string     `gorm:"not null;unique" json:"name"`
 	Codes     []Code     `json:"codes"`
 	Configs   []Config   `json:"configs"`
 }
