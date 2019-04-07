@@ -51,8 +51,6 @@ func main() {
 	addTestUsers(dataSource)
 	go dataSource.KeepAlive()
 
-	internalAPIKey := os.Getenv("INTERNAL_API_KEY")
-
 	port := os.Getenv("API_PORT")
 	if len(port) == 0 {
 		port = "5000"
@@ -62,6 +60,16 @@ func main() {
 		"port": port,
 	}).Debug("Port configuration")
 
+	internalAPIKey := os.Getenv("INTERNAL_API_KEY")
+	router := createRouter(internalAPIKey)
+	router.Run(":" + port)
+
+	log.WithFields(log.Fields{
+		"port": port,
+	}).Debug("Server is ready")
+}
+
+func createRouter(internalAPIKey string) *gin.Engine {
 	router := gin.Default()
 
 	config := cors.DefaultConfig()
@@ -98,11 +106,7 @@ func main() {
 		privateAPI.POST("/join-match", joinMatch)
 	}
 
-	router.Run(":" + port)
-
-	log.WithFields(log.Fields{
-		"port": port,
-	}).Debug("Server is ready")
+	return router
 }
 
 // SessionIsValid check if Authoraization header is valid
