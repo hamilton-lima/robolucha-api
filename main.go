@@ -415,14 +415,19 @@ func createGameComponent(c *gin.Context) {
 
 	// validate if the luchador is the same from the user
 
-	luchador = dataSource.findLuchadorByName(luchador.Name)
+	found := dataSource.findLuchadorByName(luchador.Name)
 
-	if luchador == nil {
+	if found == nil {
 		log.Info("Luchador not found, will create")
 		luchador.Configs = randomConfig()
+		log.WithFields(log.Fields{
+			"configs": luchador.Configs,
+		}).Info(">>> Random config assigned to luchador")
 
 		luchador = dataSource.createLuchador(luchador)
 		luchador = dataSource.findLuchadorByID(luchador.ID)
+	} else {
+		luchador = found
 	}
 
 	log.WithFields(log.Fields{

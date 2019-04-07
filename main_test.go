@@ -16,6 +16,7 @@ import (
 )
 
 const API_KEY = "123456"
+const DB_NAME = "./tests/robolucha-api-test.db"
 
 func performRequest(r http.Handler, method, path string, body string) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest(method, path, bytes.NewBufferString(body))
@@ -28,8 +29,8 @@ func performRequest(r http.Handler, method, path string, body string) *httptest.
 
 func TestCreateMatch(t *testing.T) {
 	os.Setenv("GORM_DEBUG", "false")
-
-	dataSource = NewDataSource(BuildSQLLiteConfig("./tests/robolucha-api-test.db"))
+	os.Remove(DB_NAME)
+	dataSource = NewDataSource(BuildSQLLiteConfig(DB_NAME))
 	defer dataSource.db.Close()
 
 	plan, _ := ioutil.ReadFile("tests/create-match.json")
@@ -43,8 +44,8 @@ func TestCreateMatch(t *testing.T) {
 
 func TestCreateGameComponent(t *testing.T) {
 	os.Setenv("GORM_DEBUG", "false")
-
-	dataSource = NewDataSource(BuildSQLLiteConfig("./tests/robolucha-api-test.db"))
+	os.Remove(DB_NAME)
+	dataSource = NewDataSource(BuildSQLLiteConfig(DB_NAME))
 	defer dataSource.db.Close()
 
 	plan, _ := ioutil.ReadFile("tests/create-gamecomponent1.json")
@@ -72,5 +73,11 @@ func TestCreateGameComponent(t *testing.T) {
 	log.WithFields(log.Fields{
 		"luchador.ID": luchador2.ID,
 	}).Info("Second call to create game component")
+
+	luchadorFromDB := dataSource.findLuchadorByID(luchador2.ID)
+	log.WithFields(log.Fields{
+		"luchador.configs": luchadorFromDB.Configs,
+	}).Info("configs from luchador")
+	assert.True(t, len(luchadorFromDB.Configs) > 0)
 
 }

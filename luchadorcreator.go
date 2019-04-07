@@ -36,6 +36,14 @@ var mouth = []string{"boca0001.png", "boca0002.png", "boca0003.png", "boca0004.p
 	"boca0011.png", "boca0012.png", "boca0013.png", "boca0014.png", "boca0015.png", "boca0016.png",
 	"boca0017.png", "boca0018.png", "boca0019.png", "boca0020.png"}
 
+var MASK_CONFIG_KEYS = []string{"background", "background.color",
+	"background2", "background2.color",
+	"ornamentTop", "ornamentTop.color",
+	"ornamentBottom", "ornamentBottom.color",
+	"face", "face.color",
+	"mouth", "mouth.color",
+	"eye", "eye.color"}
+
 func randomConfig() []Config {
 
 	list := []Config{}
