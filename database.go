@@ -11,6 +11,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	try "gopkg.in/matryer/try.v1"
@@ -48,6 +49,13 @@ func BuildMysqlConfig() *DBconfig {
 		args:     connection}
 }
 
+// BuildMysqlConfig creates a DBconfig for Mysql based on environment variables
+func BuildSQLLiteConfig(fileName string) *DBconfig {
+	return &DBconfig{
+		dialect: "sqlite3",
+		args:    fileName}
+}
+
 // NewDataSource creates a DataSource instance
 func NewDataSource(config *DBconfig) *DataSource {
 	waitTime := 2 * time.Second
@@ -79,6 +87,7 @@ func NewDataSource(config *DBconfig) *DataSource {
 		if err != nil {
 			log.WithFields(log.Fields{
 				"waitTime": waitTime,
+				"err":      err,
 			}).Warn("Error connecting to the database, will retry.")
 
 			time.Sleep(waitTime)
@@ -205,6 +214,7 @@ func (ds *DataSource) createMatch(m *Match) *Match {
 		TimeEnd:       m.TimeEnd,
 		LastTimeAlive: m.LastTimeAlive,
 		Duration:      m.Duration,
+		Participants:  m.Participants,
 	}
 
 	ds.db.Create(&match)
