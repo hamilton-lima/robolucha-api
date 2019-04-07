@@ -1,0 +1,408 @@
+basePath: /
+definitions:
+  main.Code:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      event:
+        type: string
+      exception:
+        type: string
+      id:
+        type: integer
+      luchadorID:
+        type: integer
+      script:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  main.Config:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        type: integer
+      key:
+        type: string
+      luchadorID:
+        type: integer
+      updatedAt:
+        type: string
+      value:
+        type: string
+    type: object
+  main.JoinMatch:
+    properties:
+      luchadorID:
+        type: integer
+      matchID:
+        type: integer
+    type: object
+  main.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  main.LoginResponse:
+    properties:
+      error:
+        type: boolean
+      uuid:
+        type: string
+    type: object
+  main.Luchador:
+    properties:
+      codes:
+        items:
+          $ref: '#/definitions/main.Code'
+        type: array
+      configs:
+        items:
+          $ref: '#/definitions/main.Config'
+        type: array
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+      userID:
+        type: integer
+    type: object
+  main.Match:
+    properties:
+      arenaHeight:
+        type: integer
+      arenaWidth:
+        type: integer
+      buletSpeed:
+        type: integer
+      bulletSize:
+        type: integer
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      duration:
+        type: integer
+      fps:
+        type: integer
+      id:
+        type: integer
+      lastTimeAlive:
+        type: string
+      luchadorSize:
+        type: integer
+      maxParticipants:
+        type: integer
+      minParticipants:
+        type: integer
+      participants:
+        items:
+          $ref: '#/definitions/main.Luchador'
+        type: array
+      timeEnd:
+        type: string
+      timeStart:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  main.MatchParticipant:
+    properties:
+      luchadorID:
+        type: integer
+      matchID:
+        type: integer
+    type: object
+  main.UserSetting:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        type: integer
+      lastOption:
+        type: string
+      updatedAt:
+        type: string
+      userID:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Robolucha API
+  license: {}
+  title: Robolucha API
+  version: "1.0"
+paths:
+  /internal/end-match:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Match
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.Match'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Match'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: ends existing match
+  /internal/luchador:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: int valid
+        in: query
+        name: luchadorID
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Luchador'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: find Luchador by ID
+  /internal/match:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Match
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.Match'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Match'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: create Match
+  /internal/match-participant:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: MatchParticipant
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.MatchParticipant'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.MatchParticipant'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Adds luchador to a match
+  /internal/ready:
+    get:
+      responses:
+        "200": {}
+      security:
+      - ApiKeyAuth: []
+      summary: returns application health check information
+  /private/join-match:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: JoinMatch
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.JoinMatch'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Match'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Sends message with the request to join the match
+  /private/luchador:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Luchador'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: find or create Luchador for the current user
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Luchador
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.Luchador'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Luchador'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Updates Luchador
+  /private/match:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.Match'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: find active matches
+  /private/match-config:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: int valid
+        in: query
+        name: matchID
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.Luchador'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: return luchador configs for current match
+  /private/user/setting:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.UserSetting'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: find current user userSetting
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: UserSetting
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.UserSetting'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.UserSetting'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Updates user userSetting
+  /public/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: LoginRequest
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.LoginRequest'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.LoginResponse'
+            type: object
+      summary: Logs the user
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
