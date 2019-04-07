@@ -297,6 +297,18 @@ func (ds *DataSource) findActiveMatches() *[]Match {
 	return &matches
 }
 
+func (ds *DataSource) findMaskConfig(id uint) *[]Config {
+
+	var configs []Config
+	ds.db.Where(&Config{LuchadorID: id}).Find(&configs)
+
+	log.WithFields(log.Fields{
+		"configs": configs,
+	}).Info("findMaskConfig")
+
+	return &configs
+}
+
 func (ds *DataSource) findMatch(id uint) *Match {
 
 	var match Match

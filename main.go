@@ -104,6 +104,7 @@ func createRouter(internalAPIKey string, logRequestBody string) *gin.Engine {
 	{
 		privateAPI.GET("/luchador", getLuchador)
 		privateAPI.PUT("/luchador", updateLuchador)
+		privateAPI.GET("/mask-config/:id", getMaskConfig)
 		privateAPI.PUT("/user/setting", updateUserSetting)
 		privateAPI.GET("/user/setting", findUserSetting)
 		privateAPI.GET("/match", getActiveMatches)
@@ -390,6 +391,37 @@ func updateLuchador(c *gin.Context) {
 	c.JSON(http.StatusOK, luchador)
 }
 
+// getMaskConfig godoc
+// @Summary find maskConfig for a luchador
+// @Accept json
+// @Produce json
+// @Param id path int true "Luchador ID"
+// @Success 200 200 {array} main.Config
+// @Security ApiKeyAuth
+// @Router /private/mask-config/{id} [get]
+func getMaskConfig(c *gin.Context) {
+
+	id := c.Param("id")
+	aid, err := strconv.Atoi(id)
+	if err != nil {
+		log.Info("Invalid ID")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"id": aid,
+	}).Info("getMaskConfig")
+
+	configs := dataSource.findMaskConfig(uint(aid))
+
+	log.WithFields(log.Fields{
+		"configs": configs,
+	}).Info("getMaskConfig")
+
+	c.JSON(http.StatusOK, configs)
+}
+
 // createGameComponent godoc
 // @Summary Create Gamecomponent as Luchador
 // @Accept  json
@@ -422,7 +454,7 @@ func createGameComponent(c *gin.Context) {
 		luchador.Configs = randomConfig()
 		log.WithFields(log.Fields{
 			"configs": luchador.Configs,
-		}).Info(">>> Random config assigned to luchador")
+		}).Info("Random config assigned to luchador")
 
 		luchador = dataSource.createLuchador(luchador)
 		luchador = dataSource.findLuchadorByID(luchador.ID)

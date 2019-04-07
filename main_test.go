@@ -10,6 +10,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/stretchr/testify/assert"
@@ -18,9 +19,9 @@ import (
 const API_KEY = "123456"
 const DB_NAME = "./tests/robolucha-api-test.db"
 
-func performRequest(r http.Handler, method, path string, body string) *httptest.ResponseRecorder {
+func performRequest(r http.Handler, method, path string, body string, authorization string) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest(method, path, bytes.NewBufferString(body))
-	req.Header.Set("Authorization", API_KEY)
+	req.Header.Set("Authorization", authorization)
 
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
@@ -28,7 +29,7 @@ func performRequest(r http.Handler, method, path string, body string) *httptest.
 }
 
 func TestCreateMatch(t *testing.T) {
-	os.Setenv("GORM_DEBUG", "false")
+	os.Setenv("GORM_DEBUG", "true")
 	os.Remove(DB_NAME)
 	dataSource = NewDataSource(BuildSQLLiteConfig(DB_NAME))
 	defer dataSource.db.Close()
@@ -38,22 +39,25 @@ func TestCreateMatch(t *testing.T) {
 	fmt.Println(body)
 
 	router := createRouter(API_KEY, "true")
-	w := performRequest(router, "POST", "/internal/match", body)
+	w := performRequest(router, "POST", "/internal/match", body, API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestCreateGameComponent(t *testing.T) {
-	os.Setenv("GORM_DEBUG", "false")
+	os.Setenv("GORM_DEBUG", "true")
+	os.Setenv("API_ADD_TEST_USERS", "true")
+
 	os.Remove(DB_NAME)
 	dataSource = NewDataSource(BuildSQLLiteConfig(DB_NAME))
 	defer dataSource.db.Close()
+	addTestUsers(dataSource)
 
 	plan, _ := ioutil.ReadFile("tests/create-gamecomponent1.json")
 	body := string(plan)
 	fmt.Println(body)
 
 	router := createRouter(API_KEY, "true")
-	w := performRequest(router, "POST", "/internal/game-component", body)
+	w := performRequest(router, "POST", "/internal/game-component", body, API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var luchador Luchador
@@ -64,7 +68,7 @@ func TestCreateGameComponent(t *testing.T) {
 	}).Info("First call to create game component")
 
 	// retry to check for duplicate
-	w = performRequest(router, "POST", "/internal/game-component", body)
+	w = performRequest(router, "POST", "/internal/game-component", body, API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var luchador2 Luchador
@@ -93,7 +97,49 @@ func TestCreateGameComponent(t *testing.T) {
 		log.WithFields(log.Fields{
 			"key": key,
 		}).Info("Key found in luchador config")
-
 	}
 
+	getConfigs(t, router, luchador2.ID)
+	configsFromDB := getConfigs(t, router, luchador2.ID)
+	elementsMatch(t, luchadorFromDB.Configs, configsFromDB)
+}
+
+func elementsMatch(t *testing.T, a []Config, b []Config) {
+	for _, configA := range a {
+		found := false
+		for _, configB := range b {
+
+			if configA.Key == configB.Key && configA.Value == configB.Value {
+				found = true
+				break
+			}
+		}
+		assert.True(t, found)
+		log.WithFields(log.Fields{
+			"config": configA,
+		}).Info("match found for config")
+	}
+}
+
+func getConfigs(t *testing.T, router *gin.Engine, id uint) []Config {
+
+	w := performRequest(router, "POST", "/public/login", `{"email": "foo@bar"}`, "")
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response LoginResponse
+	json.Unmarshal(w.Body.Bytes(), &response)
+	assert.False(t, response.Error)
+	assert.Greater(t, len(response.UUID), 0)
+
+	log.WithFields(log.Fields{
+		"session": response.UUID,
+	}).Info("logged in")
+
+	w = performRequest(router, "GET", fmt.Sprintf("/private/mask-config/%v", id), "", response.UUID)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var configs []Config
+	json.Unmarshal(w.Body.Bytes(), &configs)
+
+	return configs
 }
