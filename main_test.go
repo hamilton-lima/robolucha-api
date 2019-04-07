@@ -82,21 +82,34 @@ func TestCreateGameComponent(t *testing.T) {
 	log.WithFields(log.Fields{
 		"luchador.configs": luchadorFromDB.Configs,
 	}).Info("configs from luchador")
-	assert.True(t, len(luchadorFromDB.Configs) == len(MASK_CONFIG_KEYS), "Same amount of keys in the config")
 
 	// all the Mask config items should be present
-	for _, key := range MASK_CONFIG_KEYS {
+	for _, color := range maskColors {
 		found := false
 		for _, config := range luchadorFromDB.Configs {
-			if config.Key == key {
+			if config.Key == color {
 				found = true
 				break
 			}
 		}
 		assert.True(t, found)
 		log.WithFields(log.Fields{
-			"key": key,
-		}).Info("Key found in luchador config")
+			"color": color,
+		}).Info("Color found in luchador config")
+	}
+
+	for shape, _ := range maskShapes {
+		found := false
+		for _, config := range luchadorFromDB.Configs {
+			if config.Key == shape {
+				found = true
+				break
+			}
+		}
+		assert.True(t, found)
+		log.WithFields(log.Fields{
+			"shape": shape,
+		}).Info("Shape found in luchador config")
 	}
 
 	getConfigs(t, router, luchador2.ID)
