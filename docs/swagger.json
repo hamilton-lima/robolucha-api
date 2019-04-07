@@ -301,6 +301,42 @@
                 }
             }
         },
+        "/private/mask-config/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find maskConfig for a luchador",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Luchador ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.Config"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/private/match": {
             "get": {
                 "security": [
