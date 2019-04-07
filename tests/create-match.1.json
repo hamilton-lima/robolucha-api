@@ -1,0 +1,28 @@
+{
+  "arenaHeight": 600,
+  "arenaWidth": 1200,
+  "buletSpeed": 120,
+  "bulletSize": 16,
+  "duration": 1200000,
+  "fps": 30,
+  "luchadorSize": 60,
+  "maxParticipants": 14,
+  "minParticipants": 2,
+  "participants": [
+    {
+      "codes": [
+        { "event": "onStart", "script": "turnGun(90)" },
+        { "event": "onRepeat", "script": "move(20)\nfire(3)" },
+        { "event": "onHitWall", "script": "turn(90)\nturnGun(90)" }
+      ],
+      "name": "otto"
+    },
+    {
+      "codes": [
+        { "event": "onRepeat", "script": "turn(10)\nturnGun(-10)\nfire(1)" }
+      ],
+      "name": "farol"
+    }
+  ],
+  "timeStart": "2019-04-07T18:11:04.634Z"
+}

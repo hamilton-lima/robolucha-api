@@ -61,7 +61,8 @@ func main() {
 	}).Debug("Port configuration")
 
 	internalAPIKey := os.Getenv("INTERNAL_API_KEY")
-	router := createRouter(internalAPIKey)
+	logRequestBody := os.Getenv("GIM_LOG_REQUEST_BODY")
+	router := createRouter(internalAPIKey, logRequestBody)
 	router.Run(":" + port)
 
 	log.WithFields(log.Fields{
@@ -69,7 +70,7 @@ func main() {
 	}).Debug("Server is ready")
 }
 
-func createRouter(internalAPIKey string) *gin.Engine {
+func createRouter(internalAPIKey string, logRequestBody string) *gin.Engine {
 	router := gin.Default()
 
 	config := cors.DefaultConfig()
@@ -77,6 +78,9 @@ func createRouter(internalAPIKey string) *gin.Engine {
 	config.AllowCredentials = true
 	config.AddAllowHeaders("Authorization")
 	router.Use(cors.New(config))
+	if logRequestBody == "true" {
+		router.Use(RequestLogger())
+	}
 
 	publicAPI := router.Group("/public")
 	{
@@ -88,6 +92,7 @@ func createRouter(internalAPIKey string) *gin.Engine {
 	internalAPI.Use(KeyIsValid(internalAPIKey))
 	{
 		internalAPI.POST("/match", createMatch)
+		internalAPI.POST("/game-component", createGameComponent)
 		internalAPI.GET("/luchador", getLuchadorByID)
 		internalAPI.POST("/match-participant", addMatchPartipant)
 		internalAPI.PUT("/end-match", endMatch)
@@ -273,12 +278,14 @@ func createMatch(c *gin.Context) {
 	}).Info("creating match")
 
 	match = dataSource.createMatch(match)
-
 	if match == nil {
 		log.Error("Invalid Match when saving")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
+
+	// load all the fields
+	match = dataSource.findMatch(match.ID)
 
 	log.WithFields(log.Fields{
 		"createMatch": match,
@@ -379,6 +386,49 @@ func updateLuchador(c *gin.Context) {
 	message := string(luchadorUpdateJSON)
 
 	Publish(channel, message)
+
+	c.JSON(http.StatusOK, luchador)
+}
+
+// createGameComponent godoc
+// @Summary Create Gamecomponent as Luchador
+// @Accept  json
+// @Produce  json
+// @Param request body main.Luchador true "Luchador"
+// @Success 200 {object} main.Luchador
+// @Security ApiKeyAuth
+// @Router /internal/game-component [post]
+func createGameComponent(c *gin.Context) {
+
+	var luchador *Luchador
+	err := c.BindJSON(&luchador)
+	if err != nil {
+		log.Info("Invalid body content on createGameComponent")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+		"action":   "before save",
+	}).Info("createGameComponent")
+
+	// validate if the luchador is the same from the user
+
+	luchador = dataSource.findLuchadorByName(luchador.Name)
+
+	if luchador == nil {
+		log.Info("Luchador not found, will create")
+		luchador.Configs = randomConfig()
+
+		luchador = dataSource.createLuchador(luchador)
+		luchador = dataSource.findLuchadorByID(luchador.ID)
+	}
+
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+		"action":   "after save",
+	}).Info("createGameComponent")
 
 	c.JSON(http.StatusOK, luchador)
 }

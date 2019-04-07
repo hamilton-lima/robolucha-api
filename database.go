@@ -300,7 +300,7 @@ func (ds *DataSource) findActiveMatches() *[]Match {
 func (ds *DataSource) findMatch(id uint) *Match {
 
 	var match Match
-	ds.db.Where(&Match{ID: id}).Find(&match)
+	ds.db.Preload("Participants").Where(&Match{ID: id}).First(&match)
 
 	log.WithFields(log.Fields{
 		"id":    id,
@@ -319,6 +319,19 @@ func (ds *DataSource) findLuchadorByID(luchadorID uint) *Luchador {
 	log.WithFields(log.Fields{
 		"luchador": luchador,
 	}).Info("findLuchadorByID")
+
+	return &luchador
+}
+
+func (ds *DataSource) findLuchadorByName(name string) *Luchador {
+	var luchador Luchador
+	if ds.db.Where(&Luchador{Name: name}).First(&luchador).RecordNotFound() {
+		return nil
+	}
+
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+	}).Info("findLuchadorByName")
 
 	return &luchador
 }

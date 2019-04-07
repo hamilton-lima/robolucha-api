@@ -172,6 +172,29 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: ends existing match
+  /internal/game-component:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Luchador
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.Luchador'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Luchador'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create Gamecomponent as Luchador
   /internal/luchador:
     get:
       consumes:
