@@ -34,15 +34,23 @@ type UserSetting struct {
 
 // Match definition
 type Match struct {
-	ID            uint       `gorm:"primary_key" json:"id"`
-	CreatedAt     time.Time  `json:"createdAt"`
-	UpdatedAt     time.Time  `json:"updatedAt"`
-	DeletedAt     *time.Time `json:"deletedAt"`
-	TimeStart     time.Time  `json:"timeStart"`
-	TimeEnd       time.Time  `json:"timeEnd"`
-	LastTimeAlive time.Time  `json:"lastTimeAlive"`
-	Duration      uint64     `json:"duration"`
-	Participants  []Luchador `gorm:"many2many:match_participants" json:"participants"`
+	ID              uint       `gorm:"primary_key" json:"id"`
+	CreatedAt       time.Time  `json:"createdAt"`
+	UpdatedAt       time.Time  `json:"updatedAt"`
+	DeletedAt       *time.Time `json:"deletedAt"`
+	TimeStart       time.Time  `json:"timeStart"`
+	TimeEnd         time.Time  `json:"timeEnd"`
+	LastTimeAlive   time.Time  `json:"lastTimeAlive"`
+	Duration        uint64     `json:"duration"`
+	Participants    []Luchador `gorm:"many2many:match_participants" json:"participants"`
+	MinParticipants uint       `json:"minParticipants"`
+	MaxParticipants uint       `json:"maxParticipants"`
+	ArenaWidth      uint       `json:"arenaWidth"`
+	ArenaHeight     uint       `json:"arenaHeight"`
+	BulletSize      uint       `json:"bulletSize"`
+	LuchadorSize    uint       `json:"luchadorSize"`
+	Fps             uint       `json:"fps"`
+	BuletSpeed      uint       `json:"buletSpeed"`
 }
 
 // Luchador definition
@@ -52,7 +60,7 @@ type Luchador struct {
 	UpdatedAt time.Time  `json:"updatedAt"`
 	DeletedAt *time.Time `json:"deletedAt"`
 	UserID    uint       `json:"userID"`
-	Name      string     `json:"name"`
+	Name      string     `gorm:"not null;unique_index" json:"name"`
 	Codes     []Code     `json:"codes"`
 	Configs   []Config   `json:"configs"`
 }

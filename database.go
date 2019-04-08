@@ -11,6 +11,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	try "gopkg.in/matryer/try.v1"
@@ -48,6 +49,13 @@ func BuildMysqlConfig() *DBconfig {
 		args:     connection}
 }
 
+// BuildMysqlConfig creates a DBconfig for Mysql based on environment variables
+func BuildSQLLiteConfig(fileName string) *DBconfig {
+	return &DBconfig{
+		dialect: "sqlite3",
+		args:    fileName}
+}
+
 // NewDataSource creates a DataSource instance
 func NewDataSource(config *DBconfig) *DataSource {
 	waitTime := 2 * time.Second
@@ -79,6 +87,7 @@ func NewDataSource(config *DBconfig) *DataSource {
 		if err != nil {
 			log.WithFields(log.Fields{
 				"waitTime": waitTime,
+				"err":      err,
 			}).Warn("Error connecting to the database, will retry.")
 
 			time.Sleep(waitTime)
@@ -205,6 +214,7 @@ func (ds *DataSource) createMatch(m *Match) *Match {
 		TimeEnd:       m.TimeEnd,
 		LastTimeAlive: m.LastTimeAlive,
 		Duration:      m.Duration,
+		Participants:  m.Participants,
 	}
 
 	ds.db.Create(&match)
@@ -287,10 +297,22 @@ func (ds *DataSource) findActiveMatches() *[]Match {
 	return &matches
 }
 
+func (ds *DataSource) findMaskConfig(id uint) *[]Config {
+
+	var configs []Config
+	ds.db.Where(&Config{LuchadorID: id}).Find(&configs)
+
+	log.WithFields(log.Fields{
+		"configs": configs,
+	}).Info("findMaskConfig")
+
+	return &configs
+}
+
 func (ds *DataSource) findMatch(id uint) *Match {
 
 	var match Match
-	ds.db.Where(&Match{ID: id}).Find(&match)
+	ds.db.Preload("Participants").Where(&Match{ID: id}).First(&match)
 
 	log.WithFields(log.Fields{
 		"id":    id,
@@ -309,6 +331,19 @@ func (ds *DataSource) findLuchadorByID(luchadorID uint) *Luchador {
 	log.WithFields(log.Fields{
 		"luchador": luchador,
 	}).Info("findLuchadorByID")
+
+	return &luchador
+}
+
+func (ds *DataSource) findLuchadorByName(name string) *Luchador {
+	var luchador Luchador
+	if ds.db.Where(&Luchador{Name: name}).First(&luchador).RecordNotFound() {
+		return nil
+	}
+
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+	}).Info("findLuchadorByName")
 
 	return &luchador
 }

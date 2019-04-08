@@ -1,0 +1,12 @@
+{
+  "arenaHeight": 600,
+  "arenaWidth": 1200,
+  "buletSpeed": 120,
+  "bulletSize": 16,
+  "duration": 1200000,
+  "fps": 30,
+  "luchadorSize": 60,
+  "maxParticipants": 14,
+  "minParticipants": 2,
+  "timeStart": "2019-04-07T18:11:04.634Z"
+}

@@ -1,0 +1,8 @@
+{
+  "codes": [
+    { "event": "onStart", "script": "turnGun(90)" },
+    { "event": "onRepeat", "script": "move(20)\nfire(3)" },
+    { "event": "onHitWall", "script": "turn(90)\nturnGun(90)" }
+  ],
+  "name": "otto"
+}

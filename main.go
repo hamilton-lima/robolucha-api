@@ -51,8 +51,6 @@ func main() {
 	addTestUsers(dataSource)
 	go dataSource.KeepAlive()
 
-	internalAPIKey := os.Getenv("INTERNAL_API_KEY")
-
 	port := os.Getenv("API_PORT")
 	if len(port) == 0 {
 		port = "5000"
@@ -62,6 +60,17 @@ func main() {
 		"port": port,
 	}).Debug("Port configuration")
 
+	internalAPIKey := os.Getenv("INTERNAL_API_KEY")
+	logRequestBody := os.Getenv("GIM_LOG_REQUEST_BODY")
+	router := createRouter(internalAPIKey, logRequestBody)
+	router.Run(":" + port)
+
+	log.WithFields(log.Fields{
+		"port": port,
+	}).Debug("Server is ready")
+}
+
+func createRouter(internalAPIKey string, logRequestBody string) *gin.Engine {
 	router := gin.Default()
 
 	config := cors.DefaultConfig()
@@ -69,6 +78,9 @@ func main() {
 	config.AllowCredentials = true
 	config.AddAllowHeaders("Authorization")
 	router.Use(cors.New(config))
+	if logRequestBody == "true" {
+		router.Use(RequestLogger())
+	}
 
 	publicAPI := router.Group("/public")
 	{
@@ -80,6 +92,7 @@ func main() {
 	internalAPI.Use(KeyIsValid(internalAPIKey))
 	{
 		internalAPI.POST("/match", createMatch)
+		internalAPI.POST("/game-component", createGameComponent)
 		internalAPI.GET("/luchador", getLuchadorByID)
 		internalAPI.POST("/match-participant", addMatchPartipant)
 		internalAPI.PUT("/end-match", endMatch)
@@ -91,6 +104,7 @@ func main() {
 	{
 		privateAPI.GET("/luchador", getLuchador)
 		privateAPI.PUT("/luchador", updateLuchador)
+		privateAPI.GET("/mask-config/:id", getMaskConfig)
 		privateAPI.PUT("/user/setting", updateUserSetting)
 		privateAPI.GET("/user/setting", findUserSetting)
 		privateAPI.GET("/match", getActiveMatches)
@@ -98,11 +112,7 @@ func main() {
 		privateAPI.POST("/join-match", joinMatch)
 	}
 
-	router.Run(":" + port)
-
-	log.WithFields(log.Fields{
-		"port": port,
-	}).Debug("Server is ready")
+	return router
 }
 
 // SessionIsValid check if Authoraization header is valid
@@ -269,12 +279,14 @@ func createMatch(c *gin.Context) {
 	}).Info("creating match")
 
 	match = dataSource.createMatch(match)
-
 	if match == nil {
 		log.Error("Invalid Match when saving")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
+
+	// load all the fields
+	match = dataSource.findMatch(match.ID)
 
 	log.WithFields(log.Fields{
 		"createMatch": match,
@@ -375,6 +387,85 @@ func updateLuchador(c *gin.Context) {
 	message := string(luchadorUpdateJSON)
 
 	Publish(channel, message)
+
+	c.JSON(http.StatusOK, luchador)
+}
+
+// getMaskConfig godoc
+// @Summary find maskConfig for a luchador
+// @Accept json
+// @Produce json
+// @Param id path int true "Luchador ID"
+// @Success 200 200 {array} main.Config
+// @Security ApiKeyAuth
+// @Router /private/mask-config/{id} [get]
+func getMaskConfig(c *gin.Context) {
+
+	id := c.Param("id")
+	aid, err := strconv.Atoi(id)
+	if err != nil {
+		log.Info("Invalid ID")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"id": aid,
+	}).Info("getMaskConfig")
+
+	configs := dataSource.findMaskConfig(uint(aid))
+
+	log.WithFields(log.Fields{
+		"configs": configs,
+	}).Info("getMaskConfig")
+
+	c.JSON(http.StatusOK, configs)
+}
+
+// createGameComponent godoc
+// @Summary Create Gamecomponent as Luchador
+// @Accept  json
+// @Produce  json
+// @Param request body main.Luchador true "Luchador"
+// @Success 200 {object} main.Luchador
+// @Security ApiKeyAuth
+// @Router /internal/game-component [post]
+func createGameComponent(c *gin.Context) {
+
+	var luchador *Luchador
+	err := c.BindJSON(&luchador)
+	if err != nil {
+		log.Info("Invalid body content on createGameComponent")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+		"action":   "before save",
+	}).Info("createGameComponent")
+
+	// validate if the luchador is the same from the user
+
+	found := dataSource.findLuchadorByName(luchador.Name)
+
+	if found == nil {
+		log.Info("Luchador not found, will create")
+		luchador.Configs = randomConfig()
+		log.WithFields(log.Fields{
+			"configs": luchador.Configs,
+		}).Info("Random config assigned to luchador")
+
+		luchador = dataSource.createLuchador(luchador)
+		luchador = dataSource.findLuchadorByID(luchador.ID)
+	} else {
+		luchador = found
+	}
+
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+		"action":   "after save",
+	}).Info("createGameComponent")
 
 	c.JSON(http.StatusOK, luchador)
 }
