@@ -718,7 +718,7 @@ func addMatchScore(c *gin.Context) {
 	}
 	score := dataSource.addMatchScore(scoreRequest)
 	if score == nil {
-		log.WithFields(log.fields{
+		log.WithFields(log.Fields{
 			"score": scoreRequest,
 		}).Error("Error saving score")
 		c.AbortWithStatus(http.StatusBadRequest)
@@ -726,7 +726,7 @@ func addMatchScore(c *gin.Context) {
 	}
 
 	log.WithFields(log.Fields{
-		"score":score,
+		"score": score,
 	}).Info("result")
 
 	c.JSON(http.StatusOK, score)

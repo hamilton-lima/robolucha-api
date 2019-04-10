@@ -376,7 +376,7 @@ func (ds *DataSource) addMatchParticipant(mp *MatchParticipant) *MatchParticipan
 	luchador = ds.findLuchadorByIDNoPreload(mp.LuchadorID)
 	if luchador == nil {
 		log.WithFields(log.Fields{
-			"luchadorID": mp.luchadorID,
+			"luchadorID": mp.LuchadorID,
 		}).Error("Luchador not found")
 		return nil
 	}
@@ -385,7 +385,7 @@ func (ds *DataSource) addMatchParticipant(mp *MatchParticipant) *MatchParticipan
 		if participant.ID == mp.LuchadorID {
 			log.WithFields(log.Fields{
 				"matchID":    mp.MatchID,
-				"luchadorID": mp.luchadorID,
+				"luchadorID": mp.LuchadorID,
 			}).Error("Luchador is already in the match")
 			return nil
 		}
@@ -439,7 +439,7 @@ func (ds *DataSource) addMatchScore(ms *MatchScore) *MatchScore {
 	match = ds.findMatch(ms.MatchID)
 	if match == nil {
 		log.WithFields(log.Fields{
-			"matchID":ms.matchID,
+			"matchID":ms.MatchID,
 		}).Error("Match not found")
 		return nil
 	}
