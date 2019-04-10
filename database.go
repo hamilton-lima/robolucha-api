@@ -322,6 +322,19 @@ func (ds *DataSource) findMatch(id uint) *Match {
 	return &match
 }
 
+func (ds *DataSource) findGameComponentByID(id uint) *GameComponent {
+	var gameComponent GameComponent
+	if ds.db.First(&gameComponent, id).RecordNotFound(){
+		return nil
+	}
+
+	log.WithFields(log.Fields{
+		"gameComponent": gameComponent,
+	}).Info("findGameComponentByID")
+
+	return &gameComponent
+}
+
 func (ds *DataSource) findLuchadorByID(luchadorID uint) *Luchador {
 	var luchador Luchador
 	if ds.db.Preload("Codes").Preload("Configs").Where(&Luchador{ID: luchadorID}).First(&luchador).RecordNotFound() {
@@ -363,7 +376,7 @@ func (ds *DataSource) addMatchParticipant(mp *MatchParticipant) *MatchParticipan
 	luchador = ds.findLuchadorByIDNoPreload(mp.LuchadorID)
 	if luchador == nil {
 		log.WithFields(log.Fields{
-			"luchadorID": mp.MatchID,
+			"luchadorID": mp.luchadorID,
 		}).Error("Luchador not found")
 		return nil
 	}
@@ -372,7 +385,7 @@ func (ds *DataSource) addMatchParticipant(mp *MatchParticipant) *MatchParticipan
 		if participant.ID == mp.LuchadorID {
 			log.WithFields(log.Fields{
 				"matchID":    mp.MatchID,
-				"luchadorID": mp.MatchID,
+				"luchadorID": mp.luchadorID,
 			}).Error("Luchador is already in the match")
 			return nil
 		}
@@ -419,4 +432,40 @@ func (ds *DataSource) findLuchadorConfigsByMatchID(id uint) *[]Luchador {
 	}).Debug("findLuchadorConfigsByMatchID")
 
 	return &participants
+}
+
+func (ds *DataSource) addMatchScore(ms *MatchScore) *MatchScore {
+	var match *Match
+	match = ds.findMatch(ms.MatchID)
+	if match == nil {
+		log.WithFields(log.Fields{
+			"matchID":ms.matchID,
+		}).Error("Match not found")
+		return nil
+	}
+
+	var gameComponent *GameComponent
+	gameComponent = ds.findGameComponentByID(ms.GameComponentID)
+	if gameComponent == nil{
+		log.WithFields(log.Fields{
+			"gameComponentID": ms.GameComponentID
+		}).Error("Game Component not found")
+		return nil
+	}
+
+	score := MatchScore{
+		MatchID: match.ID,
+		GameComponentID: gameComponent.ID,
+		Kills: ms.Kills,
+		Deaths: ms.Deaths,
+		Score: ms.Score,
+	}
+
+	ds.db.Create(&score)
+
+	log.WithFields(log.Fields{
+		"score": score,
+	}).Info("Score added")
+
+	return &score
 }
