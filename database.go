@@ -448,7 +448,7 @@ func (ds *DataSource) addMatchScore(ms *MatchScore) *MatchScore {
 	gameComponent = ds.findGameComponentByID(ms.GameComponentID)
 	if gameComponent == nil{
 		log.WithFields(log.Fields{
-			"gameComponentID": ms.GameComponentID
+			"gameComponentID": ms.GameComponentID,
 		}).Error("Game Component not found")
 		return nil
 	}
