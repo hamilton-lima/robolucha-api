@@ -94,29 +94,27 @@ type JoinMatch struct {
 	LuchadorID uint `json:"luchadorID"`
 }
 
-// Code definition
+// ScoreList definition
+type ScoreList struct {
+	Scores  []MatchScore `json:"scores"`
+	MatchID uint         `json:"matchID"`
+}
+
+// MatchParticipant definition
 type MatchParticipant struct {
 	LuchadorID uint `json:"luchadorID"`
 	MatchID    uint `json:"matchID"`
 }
 
+// MatchScore definition
 type MatchScore struct {
-	ID 				uint 		`gorm:"primary_key" json:"id,omitempty"`
-	CreatedAt 		time.Time	`json:"createdAt,omitempty"`
-	UpdatedAt 		time.Time	`json:"updatedAt,omitempty"`
-	DeletedAt 		*time.Time	`json:"deletedAt,omitempty"`
-	MatchID 		uint 		`json:"MatchID"`
-	GameComponentID	uint 		`json:"GameComponentID"`
-	Kills 			int 		`json:"Kills"`
-	Deaths 			int 		`json:"Deaths"`
-	Score 			int 		`json:"Score"`
-	
-}
-
-type GameComponent struct {
-	ID			uint		`gorm:"primary_key" json:"id,omitempty"`
-	CreatedAt 	time.Time	`json:"createdAt"`
-	UpdatedAt 	time.Time	`json:"updatedAt"`
-	DeletedAt 	*time.Time	`json:"deletedAt"`
-	Name		string		`json:"name"`
+	ID         uint       `gorm:"primary_key" json:"id,omitempty"`
+	CreatedAt  time.Time  `json:"createdAt,omitempty"`
+	UpdatedAt  time.Time  `json:"updatedAt,omitempty"`
+	DeletedAt  *time.Time `json:"deletedAt,omitempty"`
+	LuchadorID uint       `json:"luchadorID"`
+	MatchID    uint       `json:"matchID"`
+	Kills      int        `json:"kills"`
+	Deaths     int        `json:"deaths"`
+	Score      int        `json:"score"`
 }

@@ -97,6 +97,7 @@ func createRouter(internalAPIKey string, logRequestBody string) *gin.Engine {
 		internalAPI.POST("/match-participant", addMatchPartipant)
 		internalAPI.PUT("/end-match", endMatch)
 		internalAPI.GET("/ready", getReady)
+		internalAPI.POST("/add-match-scores", addMatchScores)
 	}
 
 	privateAPI := router.Group("/private")
@@ -110,7 +111,6 @@ func createRouter(internalAPIKey string, logRequestBody string) *gin.Engine {
 		privateAPI.GET("/match", getActiveMatches)
 		privateAPI.GET("/match-config", getLuchadorConfigsForCurrentMatch)
 		privateAPI.POST("/join-match", joinMatch)
-		privateAPI.POST("/add-score", joinMatch)
 	}
 
 	return router
@@ -704,19 +704,20 @@ func endMatch(c *gin.Context) {
 // @Summary saves a match score
 // @Accept json
 // @Produce json
-// @Param request body main.MatchScore true "MatchScore"
+// @Param request body main.ScoreList true "ScoreList"
 // @Success 200 {object} main.MatchScore
 // @Security ApiKeyAuth
-// @Router /private/add-score [post]
-func addMatchScore(c *gin.Context) {
-	var scoreRequest *MatchScore
+// @Router /internal/add-match-scores [post]
+func addMatchScores(c *gin.Context) {
+	var scoreRequest *ScoreList
 	err := c.BindJSON(&scoreRequest)
 	if err != nil {
 		log.Info("Invalid body content on addMatchScore")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
-	score := dataSource.addMatchScore(scoreRequest)
+
+	score := dataSource.addMatchScores(scoreRequest)
 	if score == nil {
 		log.WithFields(log.Fields{
 			"score": scoreRequest,
