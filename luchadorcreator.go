@@ -132,6 +132,28 @@ func randomConfig() []Config {
 	return list
 }
 
+func randomName(list []Config) string {
+	var primaryColor = getFromConfigList(list, "mask.primary.color").Value
+	var nounList = []string{
+		"Abismo", "Comando", "Perro", "Cabeza", "Gato", "Toro", "Chupacabra", "Taco", "Soldado", "Huracán", "Rey", "Pirata",
+	} //change to a JSON file?
+	var adjectiveList = []string{
+		"Grande", "Insano", "Fuerte", "Afortunado", "Ligero", "Muerto", "Peligroso", "Furioso", "Terrible",
+	} //change to a JSON file?
+
+	return "El " + nounList[random(len(nounList))] + " " + primaryColor + " " + adjectiveList[random(len(adjectiveList))]
+}
+
+func getFromConfigList(list []Config, key string) Config {
+	for i := range list {
+		if list[i].Key == key {
+			// Found!
+			return list[i]
+		}
+	}
+	return Config{}
+}
+
 func add2ConfigList(list []Config, key string, value string) []Config {
 	return append(list, Config{Key: key, Value: value})
 }
