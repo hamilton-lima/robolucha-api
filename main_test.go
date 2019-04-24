@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -124,38 +125,66 @@ func TestAddScores(t *testing.T) {
 	dataSource = NewDataSource(BuildSQLLiteConfig(DB_NAME))
 	defer dataSource.db.Close()
 
-	luchador1 := new(Luchador)
-	luchador1.ID = 1
-	luchador1.Name = "foo"
-	luchador2 := new(Luchador)
-	luchador2.ID = 2
-	luchador2.Name = "bar"
-	luchador3 := new(Luchador)
-	luchador3.ID = 3
-	luchador3.Name = "dee"
+	luchador1 := dataSource.createLuchador(&Luchador{Name: "foo"})
+	luchador2 := dataSource.createLuchador(&Luchador{Name: "bar"})
+	luchador3 := dataSource.createLuchador(&Luchador{Name: "dee"})
 
-	match := new(Match)
-	match.ID = 10
-	match.Duration = 600000
-	match.MinParticipants = 1
-	match.MaxParticipants = 10
-	match.TimeStart = time.Now()
-	match.Participants = []Luchador{*luchador1, *luchador2, *luchador3}
+	matchData := Match{
+		Duration:        600000,
+		MinParticipants: 1,
+		MaxParticipants: 10,
+		TimeStart:       time.Now(),
+		Participants:    []Luchador{*luchador1, *luchador2, *luchador3},
+	}
 
-	dataSource.createLuchador(luchador1)
-	dataSource.createLuchador(luchador2)
-	dataSource.createLuchador(luchador3)
-	dataSource.createMatch(match)
+	match := dataSource.createMatch(&matchData)
+
+	matchID := fmt.Sprintf("%v", match.ID)
+	luchador1ID := fmt.Sprintf("%v", luchador1.ID)
+	luchador2ID := fmt.Sprintf("%v", luchador2.ID)
+	luchador3ID := fmt.Sprintf("%v", luchador3.ID)
 
 	plan, _ := ioutil.ReadFile("tests/add-match-scores.json")
 	body := string(plan)
-	fmt.Println(body)
+
+	body = strings.Replace(body, "{{.matchID}}", matchID, -1)
+	body = strings.Replace(body, "{{.luchadorID1}}", luchador1ID, -1)
+	body = strings.Replace(body, "{{.luchadorID2}}", luchador2ID, -1)
+	body = strings.Replace(body, "{{.luchadorID3}}", luchador3ID, -1)
+
+	log.WithFields(log.Fields{
+		"body": body,
+	}).Info("TestAddScores")
 
 	router := createRouter(API_KEY, "true")
 	w := performRequest(router, "POST", "/internal/add-match-scores", body, API_KEY)
-	resultScores := dataSource.getMatchScoresByMatchID(10)
+	resultScores := dataSource.getMatchScoresByMatchID(match.ID)
 	assert.Equal(t, 3, len(*resultScores))
 	assert.Equal(t, http.StatusOK, w.Code)
+
+	// parse request body in object to validate the result
+	var scoreList ScoreList
+	json.Unmarshal([]byte(body), &scoreList)
+
+	// check if all data was saved correctly
+	for _, scoreFromBody := range scoreList.Scores {
+		found := false
+		for _, scoreFromDB := range *resultScores {
+			if scoreFromBody.LuchadorID == scoreFromDB.LuchadorID &&
+				scoreFromBody.Kills == scoreFromDB.Kills &&
+				scoreFromBody.Deaths == scoreFromDB.Deaths &&
+				scoreFromBody.Score == scoreFromDB.Score {
+
+				found = true
+				break
+			}
+		}
+		assert.True(t, found)
+		log.WithFields(log.Fields{
+			"score-from-body": scoreFromBody,
+		}).Info("TestAddScores")
+	}
+
 }
 
 func elementsMatch(t *testing.T, a []Config, b []Config) {

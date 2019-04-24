@@ -436,9 +436,9 @@ func (ds *DataSource) findLuchadorConfigsByMatchID(id uint) *[]Luchador {
 }
 
 func (ds *DataSource) getMatchScoresByMatchID(id uint) *[]MatchScore {
-	result := []MatchScore{}
 
-	ds.db.Find(&result, "match_id = ?", id) //First(&result, "matchId = ?", id)
+	result := []MatchScore{}
+	ds.db.Where(&MatchScore{MatchID: id}).Find(&result)
 
 	for _, val := range result {
 		log.WithFields(log.Fields{
@@ -447,42 +447,67 @@ func (ds *DataSource) getMatchScoresByMatchID(id uint) *[]MatchScore {
 			"score":      val.Score,
 		}).Debug("getMatchScoresByMatchID")
 	}
+
 	return &result
 }
 
 func (ds *DataSource) addMatchScores(ms *ScoreList) *ScoreList {
-	var match *Match
-	for _, val := range ms.Scores {
 
-		match = ds.findMatch(ms.MatchID)
-		if match == nil {
-			log.WithFields(log.Fields{
-				"matchID": ms.MatchID,
-			}).Error("Match not found")
-			return nil
-		}
+	log.WithFields(log.Fields{
+		"action":    "start",
+		"matchID":   ms.MatchID,
+		"scorelist": ms,
+	}).Info("addMatchScores")
+
+	var match *Match
+	match = ds.findMatch(ms.MatchID)
+	if match == nil {
+		log.WithFields(log.Fields{
+			"matchID": ms.MatchID,
+		}).Error("Match not found")
+		return nil
+	}
+
+	log.WithFields(log.Fields{
+		"action": "match-found",
+		"match":  match,
+	}).Info("addMatchScores")
+
+	for _, score := range ms.Scores {
 
 		var luchador *Luchador
-		luchador = ds.findLuchadorByID(val.LuchadorID)
+		luchador = ds.findLuchadorByID(score.LuchadorID)
 		if luchador == nil {
 			log.WithFields(log.Fields{
-				"luchadorID": val.LuchadorID,
+				"luchadorID": score.LuchadorID,
 			}).Error("Luchador not found")
 			return nil
 		}
 
+		log.WithFields(log.Fields{
+			"action":   "luchador-found",
+			"luchador": luchador,
+		}).Info("addMatchScores")
+
 		score := MatchScore{
 			LuchadorID: luchador.ID,
-			Kills:      val.Kills,
-			Deaths:     val.Deaths,
-			Score:      val.Score,
+			MatchID:    match.ID,
+			Kills:      score.Kills,
+			Deaths:     score.Deaths,
+			Score:      score.Score,
 		}
+
+		log.WithFields(log.Fields{
+			"action": "before-save",
+			"score":  score,
+		}).Info("addMatchScores")
 
 		ds.db.Create(&score)
 
 		log.WithFields(log.Fields{
-			"score": score,
-		}).Info("Score added")
+			"action": "after-save",
+			"score":  score,
+		}).Info("addMatchScores")
 	}
 
 	return ms
