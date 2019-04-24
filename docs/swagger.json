@@ -204,6 +204,43 @@
                 }
             }
         },
+        "/private/add-score": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "saves a match score",
+                "parameters": [
+                    {
+                        "description": "MatchScore",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.MatchScore"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.MatchScore"
+                        }
+                    }
+                }
+            }
+        },
         "/private/join-match": {
             "post": {
                 "security": [
@@ -683,6 +720,38 @@
                 },
                 "matchID": {
                     "type": "integer"
+                }
+            }
+        },
+        "main.MatchScore": {
+            "type": "object",
+            "properties": {
+                "Deaths": {
+                    "type": "integer"
+                },
+                "GameComponentID": {
+                    "type": "integer"
+                },
+                "Kills": {
+                    "type": "integer"
+                },
+                "MatchID": {
+                    "type": "integer"
+                },
+                "Score": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
                 }
             }
         },

@@ -126,6 +126,27 @@ definitions:
       matchID:
         type: integer
     type: object
+  main.MatchScore:
+    properties:
+      Deaths:
+        type: integer
+      GameComponentID:
+        type: integer
+      Kills:
+        type: integer
+      MatchID:
+        type: integer
+      Score:
+        type: integer
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
   main.UserSetting:
     properties:
       createdAt:
@@ -268,6 +289,29 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: returns application health check information
+  /private/add-score:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: MatchScore
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.MatchScore'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.MatchScore'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: saves a match score
   /private/join-match:
     post:
       consumes:
