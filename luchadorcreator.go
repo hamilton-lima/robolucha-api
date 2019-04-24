@@ -118,7 +118,10 @@ func randomConfig() []Config {
 	list := []Config{}
 
 	for _, color := range maskColors {
-		list = add2ConfigList(list, color, randomColor())
+		randomizedColor := NMSColor{"Black", "#000000"} //placeholder
+		randomizedColor = randomColor()
+		list = add2ConfigList(list, color, randomizedColor.hex)
+		list = add2ConfigList(list, color+".name", randomizedColor.name)
 	}
 
 	for shape, options := range maskShapes {
@@ -133,7 +136,7 @@ func randomConfig() []Config {
 }
 
 func randomName(list []Config) string {
-	var primaryColor = getFromConfigList(list, "mask.primary.color").Value
+	var primaryColor = getFromConfigList(list, "mask.primary.color.name").Value
 	var nounList = []string{
 		"Abismo", "Comando", "Perro", "Cabeza", "Gato", "Toro", "Chupacabra", "Taco", "Soldado", "Huracán", "Rey", "Pirata",
 	} //change to a JSON file?
@@ -162,7 +165,7 @@ func randomString(list []string) string {
 	return list[random(len(list))]
 }
 
-func randomColor() string {
+func randomColor() NMSColor {
 	return NMSCOLORS[random(len(NMSCOLORS))]
 }
 
