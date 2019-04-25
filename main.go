@@ -361,6 +361,11 @@ func updateLuchador(c *gin.Context) {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
+	if len(luchador.Name) > 30 {
+		log.Info("Luchador name length above maximum permitted (30)")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
 
 	log.WithFields(log.Fields{
 		"luchador": luchador,
