@@ -1,0 +1,27 @@
+{
+    "matchID": 10,
+    "scores":[
+        {
+        "luchadorID" : 1,
+        "matchID": 10,
+        "kills": 4,
+        "deaths": 3,
+        "score": 1
+        },
+        {
+        "luchadorID" : 2,
+        "matchID": 10,
+        "kills": 2,
+        "deaths": 3,
+        "score": -1
+        },
+        {
+        "luchadorID" : 3,
+        "matchID": 10,
+        "kills": 8,
+        "deaths": 1,
+        "score": 7
+        }
+    ]
+
+}

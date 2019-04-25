@@ -110,6 +110,7 @@ func NewDataSource(config *DBconfig) *DataSource {
 	db.AutoMigrate(&Luchador{})
 	db.AutoMigrate(&Code{})
 	db.AutoMigrate(&Config{})
+	db.AutoMigrate(&MatchScore{})
 
 	secret := os.Getenv("API_SECRET")
 
@@ -322,6 +323,19 @@ func (ds *DataSource) findMatch(id uint) *Match {
 	return &match
 }
 
+// func (ds *DataSource) findGameComponentByID(id uint) *Luchador {
+// 	var luchador Luchador
+// 	if ds.db.First(&luchador, id).RecordNotFound(){
+// 		return nil
+// 	}
+
+// 	log.WithFields(log.Fields{
+// 		"luchador": luchador,
+// 	}).Info("findGameComponentByID")
+
+// 	return &gameComponent
+// }
+
 func (ds *DataSource) findLuchadorByID(luchadorID uint) *Luchador {
 	var luchador Luchador
 	if ds.db.Preload("Codes").Preload("Configs").Where(&Luchador{ID: luchadorID}).First(&luchador).RecordNotFound() {
@@ -363,7 +377,7 @@ func (ds *DataSource) addMatchParticipant(mp *MatchParticipant) *MatchParticipan
 	luchador = ds.findLuchadorByIDNoPreload(mp.LuchadorID)
 	if luchador == nil {
 		log.WithFields(log.Fields{
-			"luchadorID": mp.MatchID,
+			"luchadorID": mp.LuchadorID,
 		}).Error("Luchador not found")
 		return nil
 	}
@@ -372,7 +386,7 @@ func (ds *DataSource) addMatchParticipant(mp *MatchParticipant) *MatchParticipan
 		if participant.ID == mp.LuchadorID {
 			log.WithFields(log.Fields{
 				"matchID":    mp.MatchID,
-				"luchadorID": mp.MatchID,
+				"luchadorID": mp.LuchadorID,
 			}).Error("Luchador is already in the match")
 			return nil
 		}
@@ -419,4 +433,57 @@ func (ds *DataSource) findLuchadorConfigsByMatchID(id uint) *[]Luchador {
 	}).Debug("findLuchadorConfigsByMatchID")
 
 	return &participants
+}
+
+func (ds *DataSource) getMatchScoresByMatchID(id uint) *[]MatchScore {
+	result := []MatchScore{}
+
+	ds.db.Find(&result, "match_id = ?", id) //First(&result, "matchId = ?", id)
+
+	for _, val := range result {
+		log.WithFields(log.Fields{
+			"matchId":    val.MatchID,
+			"luchadorId": val.LuchadorID,
+			"score":      val.Score,
+		}).Debug("getMatchScoresByMatchID")
+	}
+	return &result
+}
+
+func (ds *DataSource) addMatchScores(ms *ScoreList) *ScoreList {
+	var match *Match
+	for _, val := range ms.Scores {
+
+		match = ds.findMatch(ms.MatchID)
+		if match == nil {
+			log.WithFields(log.Fields{
+				"matchID": ms.MatchID,
+			}).Error("Match not found")
+			return nil
+		}
+
+		var luchador *Luchador
+		luchador = ds.findLuchadorByID(val.LuchadorID)
+		if luchador == nil {
+			log.WithFields(log.Fields{
+				"luchadorID": val.LuchadorID,
+			}).Error("Luchador not found")
+			return nil
+		}
+
+		score := MatchScore{
+			LuchadorID: luchador.ID,
+			Kills:      val.Kills,
+			Deaths:     val.Deaths,
+			Score:      val.Score,
+		}
+
+		ds.db.Create(&score)
+
+		log.WithFields(log.Fields{
+			"score": score,
+		}).Info("Score added")
+	}
+
+	return ms
 }
