@@ -10,6 +10,43 @@
     "host": "localhost:8080",
     "basePath": "/",
     "paths": {
+        "/internal/add-match-scores": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "saves a match score",
+                "parameters": [
+                    {
+                        "description": "ScoreList",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.ScoreList"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.MatchScore"
+                        }
+                    }
+                }
+            }
+        },
         "/internal/end-match": {
             "put": {
                 "security": [
@@ -201,43 +238,6 @@
                 "summary": "returns application health check information",
                 "responses": {
                     "200": {}
-                }
-            }
-        },
-        "/private/add-score": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "saves a match score",
-                "parameters": [
-                    {
-                        "description": "MatchScore",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/main.MatchScore"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/main.MatchScore"
-                        }
-                    }
                 }
             }
         },
@@ -726,23 +726,11 @@
         "main.MatchScore": {
             "type": "object",
             "properties": {
-                "Deaths": {
-                    "type": "integer"
-                },
-                "GameComponentID": {
-                    "type": "integer"
-                },
-                "Kills": {
-                    "type": "integer"
-                },
-                "MatchID": {
-                    "type": "integer"
-                },
-                "Score": {
-                    "type": "integer"
-                },
                 "createdAt": {
                     "type": "string"
+                },
+                "deaths": {
+                    "type": "integer"
                 },
                 "deletedAt": {
                     "type": "string"
@@ -750,8 +738,34 @@
                 "id": {
                     "type": "integer"
                 },
+                "kills": {
+                    "type": "integer"
+                },
+                "luchadorID": {
+                    "type": "integer"
+                },
+                "matchID": {
+                    "type": "integer"
+                },
+                "score": {
+                    "type": "integer"
+                },
                 "updatedAt": {
                     "type": "string"
+                }
+            }
+        },
+        "main.ScoreList": {
+            "type": "object",
+            "properties": {
+                "matchID": {
+                    "type": "integer"
+                },
+                "scores": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/main.MatchScore"
+                    }
                 }
             }
         },
