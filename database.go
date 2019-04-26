@@ -455,25 +455,27 @@ func (ds *DataSource) addMatchScores(ms *ScoreList) *ScoreList {
 
 	log.WithFields(log.Fields{
 		"action":    "start",
-		"matchID":   ms.MatchID,
 		"scorelist": ms,
 	}).Info("addMatchScores")
 
-	var match *Match
-	match = ds.findMatch(ms.MatchID)
-	if match == nil {
-		log.WithFields(log.Fields{
-			"matchID": ms.MatchID,
-		}).Error("Match not found")
-		return nil
-	}
-
-	log.WithFields(log.Fields{
-		"action": "match-found",
-		"match":  match,
-	}).Info("addMatchScores")
+	var match *Match = nil
 
 	for _, score := range ms.Scores {
+
+		if match == nil {
+			match = ds.findMatch(score.MatchID)
+			if match == nil {
+				log.WithFields(log.Fields{
+					"matchID": score.MatchID,
+				}).Error("Match not found")
+				return nil
+			}
+
+			log.WithFields(log.Fields{
+				"action": "match-found",
+				"match":  match,
+			}).Info("addMatchScores")
+		}
 
 		var luchador *Luchador
 		luchador = ds.findLuchadorByID(score.LuchadorID)
