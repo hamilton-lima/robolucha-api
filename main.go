@@ -318,7 +318,7 @@ func getLuchador(c *gin.Context) {
 
 		luchador.Codes = defaultCode()
 		luchador.Configs = randomConfig()
-
+		luchador.Name = randomName(luchador.Configs)
 		log.WithFields(log.Fields{
 			"getLuchador": luchador,
 		}).Info("creating luchador")
