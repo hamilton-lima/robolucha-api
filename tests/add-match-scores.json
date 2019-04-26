@@ -1,23 +1,23 @@
 {
-    "matchID": 10,
+    "matchID": {{.matchID}},
     "scores":[
         {
-        "luchadorID" : 1,
-        "matchID": 10,
+        "luchadorID" : {{.luchadorID1}},
+        "matchID": {{.matchID}},
         "kills": 4,
         "deaths": 3,
         "score": 1
         },
         {
-        "luchadorID" : 2,
-        "matchID": 10,
+        "luchadorID" : {{.luchadorID2}},
+        "matchID": {{.matchID}},
         "kills": 2,
         "deaths": 3,
         "score": -1
         },
         {
-        "luchadorID" : 3,
-        "matchID": 10,
+        "luchadorID" : {{.luchadorID3}},
+        "matchID": {{.matchID}},
         "kills": 8,
         "deaths": 1,
         "score": 7
