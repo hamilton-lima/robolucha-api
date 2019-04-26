@@ -149,8 +149,6 @@ definitions:
     type: object
   main.ScoreList:
     properties:
-      matchID:
-        type: integer
       scores:
         items:
           $ref: '#/definitions/main.MatchScore'

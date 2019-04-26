@@ -96,8 +96,7 @@ type JoinMatch struct {
 
 // ScoreList definition
 type ScoreList struct {
-	Scores  []MatchScore `json:"scores"`
-	MatchID uint         `json:"matchID"`
+	Scores []MatchScore `json:"scores"`
 }
 
 // MatchParticipant definition

@@ -758,9 +758,6 @@
         "main.ScoreList": {
             "type": "object",
             "properties": {
-                "matchID": {
-                    "type": "integer"
-                },
                 "scores": {
                     "type": "array",
                     "items": {
