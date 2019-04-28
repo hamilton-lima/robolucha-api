@@ -374,6 +374,33 @@
                 }
             }
         },
+        "/private/mask-random": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "create random maskConfig",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.Config"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/private/match": {
             "get": {
                 "security": [
