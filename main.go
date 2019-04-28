@@ -106,6 +106,7 @@ func createRouter(internalAPIKey string, logRequestBody string) *gin.Engine {
 		privateAPI.GET("/luchador", getLuchador)
 		privateAPI.PUT("/luchador", updateLuchador)
 		privateAPI.GET("/mask-config/:id", getMaskConfig)
+		privateAPI.GET("/mask-random", getRandomMaskConfig)
 		privateAPI.PUT("/user/setting", updateUserSetting)
 		privateAPI.GET("/user/setting", findUserSetting)
 		privateAPI.GET("/match", getActiveMatches)
@@ -419,6 +420,25 @@ func getMaskConfig(c *gin.Context) {
 	log.WithFields(log.Fields{
 		"configs": configs,
 	}).Info("getMaskConfig")
+
+	c.JSON(http.StatusOK, configs)
+}
+
+// getRandomMaskConfig godoc
+// @Summary create random maskConfig
+// @Accept json
+// @Produce json
+// @Success 200 200 {array} main.Config
+// @Security ApiKeyAuth
+// @Router /private/mask-random [get]
+func getRandomMaskConfig(c *gin.Context) {
+
+	log.Info("getRandomMaskConfig")
+	configs := randomConfig()
+
+	log.WithFields(log.Fields{
+		"configs": configs,
+	}).Info("getRandomMaskConfig")
 
 	c.JSON(http.StatusOK, configs)
 }

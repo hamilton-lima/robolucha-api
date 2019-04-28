@@ -401,6 +401,22 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: find maskConfig for a luchador
+  /private/mask-random:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.Config'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: create random maskConfig
   /private/match:
     get:
       consumes:
