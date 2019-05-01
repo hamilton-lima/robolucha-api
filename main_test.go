@@ -117,6 +117,72 @@ func TestCreateGameComponent(t *testing.T) {
 	elementsMatch(t, luchadorFromDB.Configs, configsFromDB)
 }
 
+func TestRenameLuchador(t *testing.T) {
+	os.Setenv("GORM_DEBUG", "true")
+	os.Setenv("API_ADD_TEST_USERS", "true")
+
+	os.Remove(DB_NAME)
+	dataSource = NewDataSource(BuildSQLLiteConfig(DB_NAME))
+	defer dataSource.db.Close()
+	addTestUsers(dataSource)
+
+	// plan, _ := ioutil.ReadFile("tests/create-gamecomponent1.json")
+	// body := string(plan)
+	// fmt.Println(body)
+
+	router := createRouter(API_KEY, "true")
+
+	// w := performRequest(router, "POST", "/internal/game-component", body, API_KEY)
+	// assert.Equal(t, http.StatusOK, w.Code)
+
+	// var luchador Luchador
+	// json.Unmarshal(w.Body.Bytes(), &luchador)
+	// assert.True(t, luchador.Name == "otto")
+	// prevName := luchador.Name
+
+	// we have to login to make name changes
+	w := performRequest(router, "POST", "/public/login", `{"email": "foo@bar"}`, "")
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var loginResponse LoginResponse
+	json.Unmarshal(w.Body.Bytes(), &loginResponse)
+	t.Log(loginResponse.UUID)
+	user := dataSource.findUserBySession(loginResponse.UUID)
+	t.Log(user.ID)
+
+	luchador := dataSource.findLuchador(user)
+
+	t.Log(luchador)
+
+	assert.False(t, loginResponse.Error)
+	assert.Greater(t, len(loginResponse.UUID), 0)
+
+	// first try to change to a valid name
+	// luchador.Name = "lucharito"
+
+	plan2, _ := json.Marshal(luchador)
+	body2 := string(plan2)
+	// fmt.Println("body2")
+	fmt.Println(body2)
+
+	fmt.Println(loginResponse.UUID)
+	w = performRequest(router, "PUT", "/private/luchador", body2, loginResponse.UUID)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response UpdateLuchadorResponse
+
+	json.Unmarshal(w.Body.Bytes(), &response)
+
+	t.Log(w.Body.String())
+
+	// assert.False(t, response.luchador.Name != prevName)
+	assert.Equal(t, "lucharito", response.luchador.Name)
+
+	// then try a too large name
+	// luchador.Name = "123456789012345678901234567890aaaaaa"
+
+}
+
 func elementsMatch(t *testing.T, a []Config, b []Config) {
 	for _, configA := range a {
 		found := false

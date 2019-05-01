@@ -36,6 +36,12 @@ type LoginResponse struct {
 	UUID  string `json:"uuid"`
 }
 
+//UpdateLuchadorResponse data structure
+type UpdateLuchadorResponse struct {
+	Errors   []string `json:"errors"`
+	luchador Luchador `json:"luchador`
+}
+
 var dataSource *DataSource
 
 func main() {
@@ -347,24 +353,27 @@ func getLuchador(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param request body main.Luchador true "Luchador"
-// @Success 200 {object} main.Luchador
+// @Success 200 {object} main.UpdateLuchadorResponse
 // @Security ApiKeyAuth
 // @Router /private/luchador [put]
 func updateLuchador(c *gin.Context) {
 	val, _ := c.Get("user")
 	user := val.(*User)
-
+	// response := UpdateLuchadorResponse{}
+	var response UpdateLuchadorResponse
 	var luchador *Luchador
 	err := c.BindJSON(&luchador)
 	if err != nil {
 		log.Info("Invalid body content on updateLuchador")
+		// response.Errors = append(response.Errors, "Invalid body content on updateLuchador")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 	if len(luchador.Name) > 30 {
 		log.Info("Luchador name length above maximum permitted (30)")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
+		response.Errors = append(response.Errors, "Luchador name length above maximum permitted (30)")
+		//c.AbortWithStatus(http.StatusBadRequest)
+		//return
 	}
 
 	log.WithFields(log.Fields{
@@ -375,25 +384,32 @@ func updateLuchador(c *gin.Context) {
 	// validate if the luchador is the same from the user
 
 	luchador = dataSource.updateLuchador(user, luchador)
-
+	response.luchador = *luchador
 	if luchador == nil {
 		log.Info("Invalid Luchador when saving, missing ID?")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
+		response.Errors = append(response.Errors, "Invalid Luchador when saving, missing ID?")
+
+		//c.AbortWithStatus(http.StatusBadRequest)
+		//return
 	}
 
 	log.WithFields(log.Fields{
 		"luchador": luchador,
 		"action":   "after save",
+		"errors":   response.Errors,
 	}).Info("updateLuchador")
 
-	channel := fmt.Sprintf("luchador.%v.update", luchador.ID)
-	luchadorUpdateJSON, _ := json.Marshal(luchador)
-	message := string(luchadorUpdateJSON)
+	if len(response.Errors) == 0 {
+		// channel := fmt.Sprintf("luchador.%v.update", luchador.ID)
+		// luchadorUpdateJSON, _ := json.Marshal(luchador)
+		// message := string(luchadorUpdateJSON)
 
-	Publish(channel, message)
+		// Publish(channel, message)
 
-	c.JSON(http.StatusOK, luchador)
+		c.JSON(http.StatusOK, response)
+	} else {
+		c.JSON(http.StatusBadRequest, response)
+	}
 }
 
 // getMaskConfig godoc
