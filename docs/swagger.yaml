@@ -126,6 +126,34 @@ definitions:
       matchID:
         type: integer
     type: object
+  main.MatchScore:
+    properties:
+      createdAt:
+        type: string
+      deaths:
+        type: integer
+      deletedAt:
+        type: string
+      id:
+        type: integer
+      kills:
+        type: integer
+      luchadorID:
+        type: integer
+      matchID:
+        type: integer
+      score:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  main.ScoreList:
+    properties:
+      scores:
+        items:
+          $ref: '#/definitions/main.MatchScore'
+        type: array
+    type: object
   main.UserSetting:
     properties:
       createdAt:
@@ -149,6 +177,29 @@ info:
   title: Robolucha API
   version: "1.0"
 paths:
+  /internal/add-match-scores:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ScoreList
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.ScoreList'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.MatchScore'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: saves a match score
   /internal/end-match:
     put:
       consumes:
@@ -350,6 +401,22 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: find maskConfig for a luchador
+  /private/mask-random:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.Config'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: create random maskConfig
   /private/match:
     get:
       consumes:

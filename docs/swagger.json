@@ -10,6 +10,43 @@
     "host": "localhost:8080",
     "basePath": "/",
     "paths": {
+        "/internal/add-match-scores": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "saves a match score",
+                "parameters": [
+                    {
+                        "description": "ScoreList",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.ScoreList"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.MatchScore"
+                        }
+                    }
+                }
+            }
+        },
         "/internal/end-match": {
             "put": {
                 "security": [
@@ -324,6 +361,33 @@
                         "required": true
                     }
                 ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.Config"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/private/mask-random": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "create random maskConfig",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -683,6 +747,49 @@
                 },
                 "matchID": {
                     "type": "integer"
+                }
+            }
+        },
+        "main.MatchScore": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deaths": {
+                    "type": "integer"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "kills": {
+                    "type": "integer"
+                },
+                "luchadorID": {
+                    "type": "integer"
+                },
+                "matchID": {
+                    "type": "integer"
+                },
+                "score": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "main.ScoreList": {
+            "type": "object",
+            "properties": {
+                "scores": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/main.MatchScore"
+                    }
                 }
             }
         },
