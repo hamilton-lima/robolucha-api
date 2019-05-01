@@ -43,6 +43,7 @@ type UpdateLuchadorResponse struct {
 }
 
 var dataSource *DataSource
+var publisher Publisher
 
 func main() {
 	log.SetFormatter(&log.JSONFormatter{})
@@ -53,6 +54,8 @@ func main() {
 
 	dataSource = NewDataSource(BuildMysqlConfig())
 	defer dataSource.db.Close()
+
+	publisher = RedisPublisher{}
 
 	addTestUsers(dataSource)
 	go dataSource.KeepAlive()
@@ -402,11 +405,10 @@ func updateLuchador(c *gin.Context) {
 	}).Info("updateLuchador")
 
 	if len(response.Errors) == 0 {
-		// channel := fmt.Sprintf("luchador.%v.update", luchador.ID)
-		// luchadorUpdateJSON, _ := json.Marshal(luchador)
-		// message := string(luchadorUpdateJSON)
-
-		// Publish(channel, message)
+		channel := fmt.Sprintf("luchador.%v.update", luchador.ID)
+		luchadorUpdateJSON, _ := json.Marshal(luchador)
+		message := string(luchadorUpdateJSON)
+		publisher.Publish(channel, message)
 
 		c.JSON(http.StatusOK, response)
 	} else {
@@ -616,7 +618,7 @@ func joinMatch(c *gin.Context) {
 	joinMatchJSON, _ := json.Marshal(joinMatch)
 	message := string(joinMatchJSON)
 
-	Publish(channel, message)
+	publisher.Publish(channel, message)
 
 	c.JSON(http.StatusOK, match)
 }

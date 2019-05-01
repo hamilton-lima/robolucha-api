@@ -119,6 +119,16 @@ func TestCreateGameComponent(t *testing.T) {
 	elementsMatch(t, luchadorFromDB.Configs, configsFromDB)
 }
 
+type MockPublisher struct {
+}
+
+func (redis MockPublisher) Publish(channel string, message string) {
+	log.WithFields(log.Fields{
+		"channel": channel,
+		"message": message,
+	}).Info("mock publisher")
+}
+
 func TestRenameLuchador(t *testing.T) {
 	os.Setenv("GORM_DEBUG", "true")
 	os.Setenv("API_ADD_TEST_USERS", "true")
@@ -128,19 +138,9 @@ func TestRenameLuchador(t *testing.T) {
 	defer dataSource.db.Close()
 	addTestUsers(dataSource)
 
-	// plan, _ := ioutil.ReadFile("tests/create-gamecomponent1.json")
-	// body := string(plan)
-	// fmt.Println(body)
+	publisher = MockPublisher{}
 
 	router := createRouter(API_KEY, "true")
-
-	// w := performRequest(router, "POST", "/internal/game-component", body, API_KEY)
-	// assert.Equal(t, http.StatusOK, w.Code)
-
-	// var luchador Luchador
-	// json.Unmarshal(w.Body.Bytes(), &luchador)
-	// assert.True(t, luchador.Name == "otto")
-	// prevName := luchador.Name
 
 	// we have to login to make name changes
 	w := performRequest(router, "POST", "/public/login", `{"email": "foo@bar"}`, "")
