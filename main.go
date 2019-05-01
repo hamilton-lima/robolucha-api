@@ -103,6 +103,7 @@ func createRouter(internalAPIKey string, logRequestBody string) *gin.Engine {
 		internalAPI.POST("/match-participant", addMatchPartipant)
 		internalAPI.PUT("/end-match", endMatch)
 		internalAPI.GET("/ready", getReady)
+		internalAPI.POST("/add-match-scores", addMatchScores)
 	}
 
 	privateAPI := router.Group("/private")
@@ -111,6 +112,7 @@ func createRouter(internalAPIKey string, logRequestBody string) *gin.Engine {
 		privateAPI.GET("/luchador", getLuchador)
 		privateAPI.PUT("/luchador", updateLuchador)
 		privateAPI.GET("/mask-config/:id", getMaskConfig)
+		privateAPI.GET("/mask-random", getRandomMaskConfig)
 		privateAPI.PUT("/user/setting", updateUserSetting)
 		privateAPI.GET("/user/setting", findUserSetting)
 		privateAPI.GET("/match", getActiveMatches)
@@ -323,7 +325,7 @@ func getLuchador(c *gin.Context) {
 
 		luchador.Codes = defaultCode()
 		luchador.Configs = randomConfig()
-
+		luchador.Name = randomName(luchador.Configs)
 		log.WithFields(log.Fields{
 			"getLuchador": luchador,
 		}).Info("creating luchador")
@@ -439,6 +441,25 @@ func getMaskConfig(c *gin.Context) {
 	log.WithFields(log.Fields{
 		"configs": configs,
 	}).Info("getMaskConfig")
+
+	c.JSON(http.StatusOK, configs)
+}
+
+// getRandomMaskConfig godoc
+// @Summary create random maskConfig
+// @Accept json
+// @Produce json
+// @Success 200 200 {array} main.Config
+// @Security ApiKeyAuth
+// @Router /private/mask-random [get]
+func getRandomMaskConfig(c *gin.Context) {
+
+	log.Info("getRandomMaskConfig")
+	configs := randomConfig()
+
+	log.WithFields(log.Fields{
+		"configs": configs,
+	}).Info("getRandomMaskConfig")
 
 	c.JSON(http.StatusOK, configs)
 }
@@ -718,4 +739,37 @@ func endMatch(c *gin.Context) {
 	}).Info("result")
 
 	c.JSON(http.StatusOK, match)
+}
+
+// addMatchScore godoc
+// @Summary saves a match score
+// @Accept json
+// @Produce json
+// @Param request body main.ScoreList true "ScoreList"
+// @Success 200 {object} main.MatchScore
+// @Security ApiKeyAuth
+// @Router /internal/add-match-scores [post]
+func addMatchScores(c *gin.Context) {
+	var scoreRequest *ScoreList
+	err := c.BindJSON(&scoreRequest)
+	if err != nil {
+		log.Info("Invalid body content on addMatchScore")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	score := dataSource.addMatchScores(scoreRequest)
+	if score == nil {
+		log.WithFields(log.Fields{
+			"score": scoreRequest,
+		}).Error("Error saving score")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"score": score,
+	}).Info("result")
+
+	c.JSON(http.StatusOK, score)
 }

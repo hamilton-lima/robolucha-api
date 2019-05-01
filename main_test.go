@@ -8,7 +8,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -180,6 +182,73 @@ func TestRenameLuchador(t *testing.T) {
 
 	// then try a too large name
 	// luchador.Name = "123456789012345678901234567890aaaaaa"
+}
+
+func TestAddScores(t *testing.T) {
+	os.Setenv("GORM_DEBUG", "true")
+	os.Remove(DB_NAME)
+	dataSource = NewDataSource(BuildSQLLiteConfig(DB_NAME))
+	defer dataSource.db.Close()
+
+	luchador1 := dataSource.createLuchador(&Luchador{Name: "foo"})
+	luchador2 := dataSource.createLuchador(&Luchador{Name: "bar"})
+	luchador3 := dataSource.createLuchador(&Luchador{Name: "dee"})
+
+	matchData := Match{
+		Duration:        600000,
+		MinParticipants: 1,
+		MaxParticipants: 10,
+		TimeStart:       time.Now(),
+		Participants:    []Luchador{*luchador1, *luchador2, *luchador3},
+	}
+
+	match := dataSource.createMatch(&matchData)
+
+	matchID := fmt.Sprintf("%v", match.ID)
+	luchador1ID := fmt.Sprintf("%v", luchador1.ID)
+	luchador2ID := fmt.Sprintf("%v", luchador2.ID)
+	luchador3ID := fmt.Sprintf("%v", luchador3.ID)
+
+	plan, _ := ioutil.ReadFile("tests/add-match-scores.json")
+	body := string(plan)
+
+	body = strings.Replace(body, "{{.matchID}}", matchID, -1)
+	body = strings.Replace(body, "{{.luchadorID1}}", luchador1ID, -1)
+	body = strings.Replace(body, "{{.luchadorID2}}", luchador2ID, -1)
+	body = strings.Replace(body, "{{.luchadorID3}}", luchador3ID, -1)
+
+	log.WithFields(log.Fields{
+		"body": body,
+	}).Info("TestAddScores")
+
+	router := createRouter(API_KEY, "true")
+	w := performRequest(router, "POST", "/internal/add-match-scores", body, API_KEY)
+	resultScores := dataSource.getMatchScoresByMatchID(match.ID)
+	assert.Equal(t, 3, len(*resultScores))
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// parse request body in object to validate the result
+	var scoreList ScoreList
+	json.Unmarshal([]byte(body), &scoreList)
+
+	// check if all data was saved correctly
+	for _, scoreFromBody := range scoreList.Scores {
+		found := false
+		for _, scoreFromDB := range *resultScores {
+			if scoreFromBody.LuchadorID == scoreFromDB.LuchadorID &&
+				scoreFromBody.Kills == scoreFromDB.Kills &&
+				scoreFromBody.Deaths == scoreFromDB.Deaths &&
+				scoreFromBody.Score == scoreFromDB.Score {
+
+				found = true
+				break
+			}
+		}
+		assert.True(t, found)
+		log.WithFields(log.Fields{
+			"score-from-body": scoreFromBody,
+		}).Info("TestAddScores")
+	}
 
 }
 
