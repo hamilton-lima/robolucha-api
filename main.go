@@ -39,7 +39,7 @@ type LoginResponse struct {
 //UpdateLuchadorResponse data structure
 type UpdateLuchadorResponse struct {
 	Errors   []string `json:"errors"`
-	luchador Luchador `json:"luchador`
+	Luchador Luchador `json:"luchador"`
 }
 
 var dataSource *DataSource
@@ -314,12 +314,16 @@ func createMatch(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /private/luchador [get]
 func getLuchador(c *gin.Context) {
-
 	val, _ := c.Get("user")
 	user := val.(*User)
 	var luchador *Luchador
 
 	luchador = dataSource.findLuchador(user)
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+		"user":     user,
+	}).Info("after find luchador on getLuchador")
+
 	if luchador == nil {
 		luchador = &Luchador{
 			UserID: user.ID,
@@ -364,42 +368,48 @@ func getLuchador(c *gin.Context) {
 func updateLuchador(c *gin.Context) {
 	val, _ := c.Get("user")
 	user := val.(*User)
-	// response := UpdateLuchadorResponse{}
-	var response UpdateLuchadorResponse
+
+	response := UpdateLuchadorResponse{}
 	var luchador *Luchador
 	err := c.BindJSON(&luchador)
 	if err != nil {
 		log.Info("Invalid body content on updateLuchador")
-		// response.Errors = append(response.Errors, "Invalid body content on updateLuchador")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
+
 	if len(luchador.Name) > 30 {
 		log.Info("Luchador name length above maximum permitted (30)")
 		response.Errors = append(response.Errors, "Luchador name length above maximum permitted (30)")
-		//c.AbortWithStatus(http.StatusBadRequest)
-		//return
 	}
 
 	log.WithFields(log.Fields{
 		"luchador": luchador,
 		"action":   "before save",
-	}).Info("updateLuchador")
+	}).Debug("updateLuchador")
 
 	// validate if the luchador is the same from the user
+	currentLuchador := dataSource.findLuchador(user)
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+		"user":     user,
+	}).Info("find luchador for current user")
+	if luchador.ID != currentLuchador.ID {
+		log.Info("Invalid Luchador.ID on updateLuchador")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
 
-	luchador = dataSource.updateLuchador(user, luchador)
-	response.luchador = *luchador
+	luchador = dataSource.updateLuchador(luchador)
+	response.Luchador = *luchador
+
 	if luchador == nil {
 		log.Info("Invalid Luchador when saving, missing ID?")
 		response.Errors = append(response.Errors, "Invalid Luchador when saving, missing ID?")
-
-		//c.AbortWithStatus(http.StatusBadRequest)
-		//return
 	}
 
 	log.WithFields(log.Fields{
-		"luchador": luchador,
+		"response": response,
 		"action":   "after save",
 		"errors":   response.Errors,
 	}).Info("updateLuchador")
@@ -409,11 +419,9 @@ func updateLuchador(c *gin.Context) {
 		luchadorUpdateJSON, _ := json.Marshal(luchador)
 		message := string(luchadorUpdateJSON)
 		publisher.Publish(channel, message)
-
-		c.JSON(http.StatusOK, response)
-	} else {
-		c.JSON(http.StatusBadRequest, response)
 	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 // getMaskConfig godoc

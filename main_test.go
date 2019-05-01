@@ -126,11 +126,15 @@ func (redis MockPublisher) Publish(channel string, message string) {
 	log.WithFields(log.Fields{
 		"channel": channel,
 		"message": message,
-	}).Info("mock publisher")
+	}).Debug("mock publisher")
 }
 
 func TestRenameLuchador(t *testing.T) {
-	os.Setenv("GORM_DEBUG", "true")
+	log.SetFormatter(&log.JSONFormatter{})
+	log.SetOutput(os.Stdout)
+	log.SetLevel(log.ErrorLevel)
+
+	os.Setenv("GORM_DEBUG", "false")
 	os.Setenv("API_ADD_TEST_USERS", "true")
 
 	os.Remove(DB_NAME)
@@ -139,7 +143,6 @@ func TestRenameLuchador(t *testing.T) {
 	addTestUsers(dataSource)
 
 	publisher = MockPublisher{}
-
 	router := createRouter(API_KEY, "true")
 
 	// we have to login to make name changes
@@ -151,14 +154,13 @@ func TestRenameLuchador(t *testing.T) {
 		"UUID": loginResponse.UUID,
 	}).Info("after login")
 
-	w = performRequest(router, "GET", "/luchador", "", loginResponse.UUID)
-	assert.Equal(t, http.StatusOK, w.Code)
+	getLuchador := performRequest(router, "GET", "/private/luchador", "", loginResponse.UUID)
+	assert.Equal(t, http.StatusOK, getLuchador.Code)
 	var luchador Luchador
-	json.Unmarshal(w.Body.Bytes(), &luchador)
-	t.Log(luchador)
+	json.Unmarshal(getLuchador.Body.Bytes(), &luchador)
 
 	log.WithFields(log.Fields{
-		"luchador": luchador,
+		"luchador": luchador.Name,
 	}).Info("luchador after login")
 
 	assert.False(t, loginResponse.Error)
@@ -169,7 +171,7 @@ func TestRenameLuchador(t *testing.T) {
 	plan2, _ := json.Marshal(luchador)
 	body2 := string(plan2)
 	log.WithFields(log.Fields{
-		"luchador": luchador,
+		"luchador": luchador.Name,
 	}).Info("luchador before update")
 
 	w = performRequest(router, "PUT", "/private/luchador", body2, loginResponse.UUID)
@@ -179,12 +181,11 @@ func TestRenameLuchador(t *testing.T) {
 	json.Unmarshal(w.Body.Bytes(), &response)
 
 	log.WithFields(log.Fields{
-		"body":     w.Body.String(),
-		"response": response,
+		"response":          response.Luchador.Name,
+		"response.luchador": response.Luchador,
 	}).Info("after luchador update")
 
-	// assert.False(t, response.luchador.Name != prevName)
-	assert.Equal(t, "lucharito", response.luchador.Name)
+	assert.Equal(t, "lucharito", response.Luchador.Name)
 
 	// then try a too large name
 	// luchador.Name = "123456789012345678901234567890aaaaaa"
