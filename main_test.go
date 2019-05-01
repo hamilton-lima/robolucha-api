@@ -143,37 +143,43 @@ func TestRenameLuchador(t *testing.T) {
 	// we have to login to make name changes
 	w := performRequest(router, "POST", "/public/login", `{"email": "foo@bar"}`, "")
 	assert.Equal(t, http.StatusOK, w.Code)
-
 	var loginResponse LoginResponse
 	json.Unmarshal(w.Body.Bytes(), &loginResponse)
-	t.Log(loginResponse.UUID)
-	user := dataSource.findUserBySession(loginResponse.UUID)
-	t.Log(user.ID)
+	log.WithFields(log.Fields{
+		"UUID": loginResponse.UUID,
+	}).Info("after login")
 
-	luchador := dataSource.findLuchador(user)
-
+	w = performRequest(router, "GET", "/luchador", "", loginResponse.UUID)
+	assert.Equal(t, http.StatusOK, w.Code)
+	var luchador Luchador
+	json.Unmarshal(w.Body.Bytes(), &luchador)
 	t.Log(luchador)
+
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+	}).Info("luchador after login")
 
 	assert.False(t, loginResponse.Error)
 	assert.Greater(t, len(loginResponse.UUID), 0)
 
 	// first try to change to a valid name
-	// luchador.Name = "lucharito"
-
+	luchador.Name = "lucharito"
 	plan2, _ := json.Marshal(luchador)
 	body2 := string(plan2)
-	// fmt.Println("body2")
-	fmt.Println(body2)
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+	}).Info("luchador before update")
 
-	fmt.Println(loginResponse.UUID)
 	w = performRequest(router, "PUT", "/private/luchador", body2, loginResponse.UUID)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response UpdateLuchadorResponse
-
 	json.Unmarshal(w.Body.Bytes(), &response)
 
-	t.Log(w.Body.String())
+	log.WithFields(log.Fields{
+		"body":     w.Body.String(),
+		"response": response,
+	}).Info("after luchador update")
 
 	// assert.False(t, response.luchador.Name != prevName)
 	assert.Equal(t, "lucharito", response.luchador.Name)
