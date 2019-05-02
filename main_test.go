@@ -187,8 +187,51 @@ func TestRenameLuchador(t *testing.T) {
 
 	assert.Equal(t, "lucharito", response.Luchador.Name)
 
+	//then try the existing name
+	luchador.Name = "lucharito"
+
+	plan2, _ = json.Marshal(luchador)
+	body2 = string(plan2)
+
+	log.WithFields(log.Fields{
+		"luchador": luchador.Name,
+	}).Info("luchador before large update")
+
+	w = performRequest(router, "PUT", "/private/luchador", body2, loginResponse.UUID)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	json.Unmarshal(w.Body.Bytes(), &response)
+
+	log.WithFields(log.Fields{
+		"response":        response.Luchador.Name,
+		"response.errors": response.Errors,
+	}).Info("after luchador update")
+
+	t.Log(response.Errors)
+	assert.Greater(t, len(response.Errors), 0)
+
 	// then try a too large name
-	// luchador.Name = "123456789012345678901234567890aaaaaa"
+	luchador.Name = "123456789012345678901234567890aaaaaa"
+
+	plan2, _ = json.Marshal(luchador)
+	body2 = string(plan2)
+
+	log.WithFields(log.Fields{
+		"luchador": luchador.Name,
+	}).Info("luchador before large update")
+
+	w = performRequest(router, "PUT", "/private/luchador", body2, loginResponse.UUID)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	json.Unmarshal(w.Body.Bytes(), &response)
+
+	log.WithFields(log.Fields{
+		"response":        response.Luchador.Name,
+		"response.errors": response.Errors,
+	}).Info("after luchador update")
+
+	t.Log(response.Errors)
+	assert.Greater(t, len(response.Errors), 0)
 }
 
 func TestAddScores(t *testing.T) {
