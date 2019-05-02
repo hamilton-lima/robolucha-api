@@ -383,6 +383,12 @@ func updateLuchador(c *gin.Context) {
 		response.Errors = append(response.Errors, "Luchador name length above maximum permitted (30)")
 	}
 
+	luchadorSameName := dataSource.findLuchadorByName(luchador.Name)
+	if luchadorSameName != nil {
+		log.Info("Luchador with this name already exists")
+		response.Errors = append(response.Errors, "Luchador with this name already exists")
+	}
+
 	log.WithFields(log.Fields{
 		"luchador": luchador,
 		"action":   "before save",
