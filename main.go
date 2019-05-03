@@ -36,7 +36,14 @@ type LoginResponse struct {
 	UUID  string `json:"uuid"`
 }
 
+//UpdateLuchadorResponse data structure
+type UpdateLuchadorResponse struct {
+	Errors   []string `json:"errors"`
+	Luchador Luchador `json:"luchador"`
+}
+
 var dataSource *DataSource
+var publisher Publisher
 
 func main() {
 	log.SetFormatter(&log.JSONFormatter{})
@@ -47,6 +54,8 @@ func main() {
 
 	dataSource = NewDataSource(BuildMysqlConfig())
 	defer dataSource.db.Close()
+
+	publisher = RedisPublisher{}
 
 	addTestUsers(dataSource)
 	go dataSource.KeepAlive()
@@ -305,12 +314,16 @@ func createMatch(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /private/luchador [get]
 func getLuchador(c *gin.Context) {
-
 	val, _ := c.Get("user")
 	user := val.(*User)
 	var luchador *Luchador
 
 	luchador = dataSource.findLuchador(user)
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+		"user":     user,
+	}).Info("after find luchador on getLuchador")
+
 	if luchador == nil {
 		luchador = &Luchador{
 			UserID: user.ID,
@@ -349,13 +362,14 @@ func getLuchador(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param request body main.Luchador true "Luchador"
-// @Success 200 {object} main.Luchador
+// @Success 200 {object} main.UpdateLuchadorResponse
 // @Security ApiKeyAuth
 // @Router /private/luchador [put]
 func updateLuchador(c *gin.Context) {
 	val, _ := c.Get("user")
 	user := val.(*User)
 
+	response := UpdateLuchadorResponse{}
 	var luchador *Luchador
 	err := c.BindJSON(&luchador)
 	if err != nil {
@@ -364,33 +378,56 @@ func updateLuchador(c *gin.Context) {
 		return
 	}
 
-	log.WithFields(log.Fields{
-		"luchador": luchador,
-		"action":   "before save",
-	}).Info("updateLuchador")
+	if len(luchador.Name) > 30 {
+		log.Info("Luchador name length above maximum permitted (30)")
+		response.Errors = append(response.Errors, "Luchador name length above maximum permitted (30)")
+	}
 
-	// validate if the luchador is the same from the user
-
-	luchador = dataSource.updateLuchador(user, luchador)
-
-	if luchador == nil {
-		log.Info("Invalid Luchador when saving, missing ID?")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
+	luchadorSameName := dataSource.findLuchadorByName(luchador.Name)
+	if luchadorSameName != nil {
+		log.Info("Luchador with this name already exists")
+		response.Errors = append(response.Errors, "Luchador with this name already exists")
 	}
 
 	log.WithFields(log.Fields{
 		"luchador": luchador,
+		"action":   "before save",
+	}).Debug("updateLuchador")
+
+	// validate if the luchador is the same from the user
+	currentLuchador := dataSource.findLuchador(user)
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+		"user":     user,
+	}).Info("find luchador for current user")
+	if luchador.ID != currentLuchador.ID {
+		log.Info("Invalid Luchador.ID on updateLuchador")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	luchador = dataSource.updateLuchador(luchador)
+	response.Luchador = *luchador
+
+	if luchador == nil {
+		log.Info("Invalid Luchador when saving, missing ID?")
+		response.Errors = append(response.Errors, "Invalid Luchador when saving, missing ID?")
+	}
+
+	log.WithFields(log.Fields{
+		"response": response,
 		"action":   "after save",
+		"errors":   response.Errors,
 	}).Info("updateLuchador")
 
-	channel := fmt.Sprintf("luchador.%v.update", luchador.ID)
-	luchadorUpdateJSON, _ := json.Marshal(luchador)
-	message := string(luchadorUpdateJSON)
+	if len(response.Errors) == 0 {
+		channel := fmt.Sprintf("luchador.%v.update", luchador.ID)
+		luchadorUpdateJSON, _ := json.Marshal(luchador)
+		message := string(luchadorUpdateJSON)
+		publisher.Publish(channel, message)
+	}
 
-	Publish(channel, message)
-
-	c.JSON(http.StatusOK, luchador)
+	c.JSON(http.StatusOK, response)
 }
 
 // getMaskConfig godoc
@@ -595,7 +632,7 @@ func joinMatch(c *gin.Context) {
 	joinMatchJSON, _ := json.Marshal(joinMatch)
 	message := string(joinMatchJSON)
 
-	Publish(channel, message)
+	publisher.Publish(channel, message)
 
 	c.JSON(http.StatusOK, match)
 }

@@ -204,7 +204,7 @@ func (ds *DataSource) createSession(user *User) *Session {
 	log.WithFields(log.Fields{
 		"user": session.UserID,
 		"uuid": session.UUID,
-	}).Error("Session created")
+	}).Info("Session created")
 
 	return &session
 }
@@ -271,19 +271,23 @@ func (ds *DataSource) findLuchadorByIDNoPreload(id uint) *Luchador {
 	return &luchador
 }
 
-func (ds *DataSource) updateLuchador(user *User, luchador *Luchador) *Luchador {
+func (ds *DataSource) updateLuchador(luchador *Luchador) *Luchador {
 	var current Luchador
 	if ds.db.First(&current, luchador.ID).RecordNotFound() {
 		return nil
 	}
 
-	ds.db.Save(&luchador)
+	current.Name = luchador.Name
+	current.Codes = luchador.Codes
+	current.Configs = luchador.Configs
+
+	ds.db.Save(&current)
 
 	log.WithFields(log.Fields{
-		"luchador": luchador,
+		"luchador": current,
 	}).Info("updateLuchador")
 
-	return luchador
+	return &current
 }
 
 func (ds *DataSource) findActiveMatches() *[]Match {
