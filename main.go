@@ -21,29 +21,17 @@ import (
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
+	_ "gitlab.com/robolucha/robolucha-api/context"
+	_ "gitlab.com/robolucha/robolucha-api/datasource"
 	_ "gitlab.com/robolucha/robolucha-api/docs"
+	"gitlab.com/robolucha/robolucha-api/routes/public"
 )
-
-// LoginRequest data structure
-type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-// LoginResponse data structure
-type LoginResponse struct {
-	Error bool   `json:"error"`
-	UUID  string `json:"uuid"`
-}
 
 //UpdateLuchadorResponse data structure
 type UpdateLuchadorResponse struct {
 	Errors   []string `json:"errors"`
 	Luchador Luchador `json:"luchador"`
 }
-
-var dataSource *DataSource
-var publisher Publisher
 
 func main() {
 	log.SetFormatter(&log.JSONFormatter{})
@@ -52,13 +40,13 @@ func main() {
 
 	log.Info("Robolucha API, start.")
 
-	dataSource = NewDataSource(BuildMysqlConfig())
-	defer dataSource.db.Close()
+	Context.ds = NewDataSource(BuildMysqlConfig())
+	defer Context.ds.db.Close()
 
-	publisher = RedisPublisher{}
+	Context.pub = RedisPublisher{}
 
-	AddTestUsers(dataSource)
-	go dataSource.KeepAlive()
+	AddTestUsers(Context.ds)
+	go Context.ds.KeepAlive()
 
 	port := os.Getenv("API_PORT")
 	if len(port) == 0 {
@@ -93,7 +81,7 @@ func createRouter(internalAPIKey string, logRequestBody string) *gin.Engine {
 
 	publicAPI := router.Group("/public")
 	{
-		publicAPI.POST("/login", handleLogin)
+		publicAPI.POST("/login", public.HandleLogin)
 		publicAPI.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 
@@ -135,7 +123,7 @@ func SessionIsValid() gin.HandlerFunc {
 			c.AbortWithStatus(http.StatusForbidden)
 		}
 
-		user := dataSource.findUserBySession(authorization)
+		user := Context.ds.findUserBySession(authorization)
 		if user == nil {
 			log.WithFields(log.Fields{
 				"UUID": authorization,
@@ -169,42 +157,6 @@ func KeyIsValid(key string) gin.HandlerFunc {
 	}
 }
 
-// handleLogin godoc
-// @Summary Logs the user
-// @Accept  json
-// @Produce  json
-// @Param request body main.LoginRequest true "LoginRequest"
-// @Success 200 {object} main.LoginResponse
-// @Router /public/login [post]
-func handleLogin(c *gin.Context) {
-
-	var json LoginRequest
-	err := c.BindJSON(&json)
-	if err != nil {
-		log.Info("Invalid body content on Login")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
-
-	log.WithFields(log.Fields{
-		"email": json.Email,
-	}).Info("Login Attempt")
-
-	response := LoginResponse{Error: true}
-	user := dataSource.findUserByEmail(json.Email)
-	log.WithFields(log.Fields{
-		"user": user,
-	}).Debug("User found after login")
-
-	if user != nil {
-		session := dataSource.createSession(user)
-		response.Error = false
-		response.UUID = session.UUID
-	}
-
-	c.JSON(http.StatusOK, response)
-}
-
 // findUserSetting godoc
 // @Summary find current user userSetting
 // @Accept  json
@@ -218,7 +170,7 @@ func findUserSetting(c *gin.Context) {
 	val, _ := c.Get("user")
 	user := val.(*User)
 
-	userSetting := dataSource.findUserSettingByUser(user)
+	userSetting := Context.ds.findUserSettingByUser(user)
 
 	log.WithFields(log.Fields{
 		"userSetting": userSetting,
@@ -249,7 +201,7 @@ func updateUserSetting(c *gin.Context) {
 		"userSetting": userSetting,
 	}).Info("Updating userSetting")
 
-	userSetting = dataSource.updateUserSetting(userSetting)
+	userSetting = Context.ds.updateUserSetting(userSetting)
 
 	if userSetting == nil {
 		log.Info("Invalid User setting when saving, missing ID?")
@@ -289,7 +241,7 @@ func createMatch(c *gin.Context) {
 		"createMatch": match,
 	}).Info("creating match")
 
-	match = dataSource.createMatch(match)
+	match = Context.ds.createMatch(match)
 	if match == nil {
 		log.Error("Invalid Match when saving")
 		c.AbortWithStatus(http.StatusBadRequest)
@@ -297,7 +249,7 @@ func createMatch(c *gin.Context) {
 	}
 
 	// load all the fields
-	match = dataSource.findMatch(match.ID)
+	match = Context.ds.findMatch(match.ID)
 
 	log.WithFields(log.Fields{
 		"createMatch": match,
@@ -318,7 +270,7 @@ func getLuchador(c *gin.Context) {
 	user := val.(*User)
 	var luchador *Luchador
 
-	luchador = dataSource.findLuchador(user)
+	luchador = Context.ds.findLuchador(user)
 	log.WithFields(log.Fields{
 		"luchador": luchador,
 		"user":     user,
@@ -337,7 +289,7 @@ func getLuchador(c *gin.Context) {
 			"getLuchador": luchador,
 		}).Info("creating luchador")
 
-		luchador = dataSource.createLuchador(luchador)
+		luchador = Context.ds.createLuchador(luchador)
 
 		if luchador == nil {
 			log.Error("Invalid Luchador when saving")
@@ -383,7 +335,7 @@ func updateLuchador(c *gin.Context) {
 		response.Errors = append(response.Errors, "Luchador name length above maximum permitted (30)")
 	}
 
-	luchadorSameName := dataSource.findLuchadorByName(luchador.Name)
+	luchadorSameName := Context.ds.findLuchadorByName(luchador.Name)
 	if luchadorSameName != nil {
 		log.Info("Luchador with this name already exists")
 		response.Errors = append(response.Errors, "Luchador with this name already exists")
@@ -395,7 +347,7 @@ func updateLuchador(c *gin.Context) {
 	}).Debug("updateLuchador")
 
 	// validate if the luchador is the same from the user
-	currentLuchador := dataSource.findLuchador(user)
+	currentLuchador := Context.ds.findLuchador(user)
 	log.WithFields(log.Fields{
 		"luchador": luchador,
 		"user":     user,
@@ -406,7 +358,7 @@ func updateLuchador(c *gin.Context) {
 		return
 	}
 
-	luchador = dataSource.updateLuchador(luchador)
+	luchador = Context.ds.updateLuchador(luchador)
 	response.Luchador = *luchador
 
 	if luchador == nil {
@@ -424,7 +376,7 @@ func updateLuchador(c *gin.Context) {
 		channel := fmt.Sprintf("luchador.%v.update", luchador.ID)
 		luchadorUpdateJSON, _ := json.Marshal(luchador)
 		message := string(luchadorUpdateJSON)
-		publisher.Publish(channel, message)
+		Context.pub.Publish(channel, message)
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -452,7 +404,7 @@ func getMaskConfig(c *gin.Context) {
 		"id": aid,
 	}).Info("getMaskConfig")
 
-	configs := dataSource.findMaskConfig(uint(aid))
+	configs := Context.ds.findMaskConfig(uint(aid))
 
 	log.WithFields(log.Fields{
 		"configs": configs,
@@ -505,7 +457,7 @@ func createGameComponent(c *gin.Context) {
 
 	// validate if the luchador is the same from the user
 
-	found := dataSource.findLuchadorByName(luchador.Name)
+	found := Context.ds.findLuchadorByName(luchador.Name)
 
 	if found == nil {
 		log.Info("Luchador not found, will create")
@@ -514,8 +466,8 @@ func createGameComponent(c *gin.Context) {
 			"configs": luchador.Configs,
 		}).Info("Random config assigned to luchador")
 
-		luchador = dataSource.createLuchador(luchador)
-		luchador = dataSource.findLuchadorByID(luchador.ID)
+		luchador = Context.ds.createLuchador(luchador)
+		luchador = Context.ds.findLuchadorByID(luchador.ID)
 	} else {
 		luchador = found
 	}
@@ -539,7 +491,7 @@ func getActiveMatches(c *gin.Context) {
 
 	var matches *[]Match
 
-	matches = dataSource.findActiveMatches()
+	matches = Context.ds.findActiveMatches()
 	log.WithFields(log.Fields{
 		"matches": matches,
 	}).Info("getActiveMatches")
@@ -571,7 +523,7 @@ func getLuchadorConfigsForCurrentMatch(c *gin.Context) {
 
 	var result *[]Luchador
 
-	result = dataSource.findLuchadorConfigsByMatchID(matchID)
+	result = Context.ds.findLuchadorConfigsByMatchID(matchID)
 	log.WithFields(log.Fields{
 		"result": result,
 	}).Debug("getLuchadorConfigsForCurrentMatch")
@@ -601,7 +553,7 @@ func joinMatch(c *gin.Context) {
 	user := val.(*User)
 
 	var luchador *Luchador
-	luchador = dataSource.findLuchador(user)
+	luchador = Context.ds.findLuchador(user)
 	if luchador == nil {
 		log.WithFields(log.Fields{
 			"user": user,
@@ -614,7 +566,7 @@ func joinMatch(c *gin.Context) {
 	joinMatch.LuchadorID = luchador.ID
 
 	var match *Match
-	match = dataSource.findMatch(joinMatch.MatchID)
+	match = Context.ds.findMatch(joinMatch.MatchID)
 	if match == nil {
 		log.WithFields(log.Fields{
 			"user": user,
@@ -632,7 +584,7 @@ func joinMatch(c *gin.Context) {
 	joinMatchJSON, _ := json.Marshal(joinMatch)
 	message := string(joinMatchJSON)
 
-	publisher.Publish(channel, message)
+	Context.pub.Publish(channel, message)
 
 	c.JSON(http.StatusOK, match)
 }
@@ -661,7 +613,7 @@ func getLuchadorByID(c *gin.Context) {
 
 	var luchador *Luchador
 
-	luchador = dataSource.findLuchadorByID(luchadorID)
+	luchador = Context.ds.findLuchadorByID(luchadorID)
 	if luchador == nil {
 		log.WithFields(log.Fields{
 			"luchadorID": luchadorID,
@@ -705,7 +657,7 @@ func addMatchPartipant(c *gin.Context) {
 		return
 	}
 
-	matchParticipant := dataSource.addMatchParticipant(matchParticipantRequest)
+	matchParticipant := Context.ds.addMatchParticipant(matchParticipantRequest)
 	if matchParticipant == nil {
 		log.WithFields(log.Fields{
 			"matchParticipant": matchParticipantRequest,
@@ -740,7 +692,7 @@ func endMatch(c *gin.Context) {
 		return
 	}
 
-	match := dataSource.endMatch(matchRequest)
+	match := Context.ds.endMatch(matchRequest)
 	if match == nil {
 		log.WithFields(log.Fields{
 			"match": matchRequest,
@@ -774,7 +726,7 @@ func addMatchScores(c *gin.Context) {
 		return
 	}
 
-	score := dataSource.addMatchScores(scoreRequest)
+	score := Context.ds.addMatchScores(scoreRequest)
 	if score == nil {
 		log.WithFields(log.Fields{
 			"score": scoreRequest,
