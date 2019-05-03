@@ -57,7 +57,7 @@ func main() {
 
 	publisher = RedisPublisher{}
 
-	addTestUsers(dataSource)
+	AddTestUsers(dataSource)
 	go dataSource.KeepAlive()
 
 	port := os.Getenv("API_PORT")

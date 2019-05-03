@@ -332,7 +332,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.Luchador"
+                            "$ref": "#/definitions/main.UpdateLuchadorResponse"
                         }
                     }
                 }
@@ -790,6 +790,21 @@
                     "items": {
                         "$ref": "#/definitions/main.MatchScore"
                     }
+                }
+            }
+        },
+        "main.UpdateLuchadorResponse": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "luchador": {
+                    "type": "object",
+                    "$ref": "#/definitions/main.Luchador"
                 }
             }
         },
