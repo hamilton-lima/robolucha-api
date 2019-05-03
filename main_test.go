@@ -1,12 +1,10 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
@@ -16,32 +14,21 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/robolucha/robolucha-api/test"
 )
-
-const API_KEY = "123456"
-const DB_NAME = "./tests/robolucha-api-test.db"
-
-func performRequest(r http.Handler, method, path string, body string, authorization string) *httptest.ResponseRecorder {
-	req, _ := http.NewRequest(method, path, bytes.NewBufferString(body))
-	req.Header.Set("Authorization", authorization)
-
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	return w
-}
 
 func TestCreateMatch(t *testing.T) {
 	os.Setenv("GORM_DEBUG", "true")
-	os.Remove(DB_NAME)
-	dataSource = NewDataSource(BuildSQLLiteConfig(DB_NAME))
+	os.Remove(test.DB_NAME)
+	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
 	defer dataSource.db.Close()
 
-	plan, _ := ioutil.ReadFile("tests/create-match.json")
+	plan, _ := ioutil.ReadFile("test-data/create-match.json")
 	body := string(plan)
 	fmt.Println(body)
 
-	router := createRouter(API_KEY, "true")
-	w := performRequest(router, "POST", "/internal/match", body, API_KEY)
+	router := createRouter(test.API_KEY, "true")
+	w := test.PerformRequest(router, "POST", "/internal/match", body, test.API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
@@ -49,17 +36,17 @@ func TestCreateGameComponent(t *testing.T) {
 	os.Setenv("GORM_DEBUG", "true")
 	os.Setenv("API_ADD_TEST_USERS", "true")
 
-	os.Remove(DB_NAME)
-	dataSource = NewDataSource(BuildSQLLiteConfig(DB_NAME))
+	os.Remove(test.DB_NAME)
+	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
 	defer dataSource.db.Close()
-	addTestUsers(dataSource)
+	AddTestUsers(dataSource)
 
-	plan, _ := ioutil.ReadFile("tests/create-gamecomponent1.json")
+	plan, _ := ioutil.ReadFile("test-data/create-gamecomponent1.json")
 	body := string(plan)
 	fmt.Println(body)
 
-	router := createRouter(API_KEY, "true")
-	w := performRequest(router, "POST", "/internal/game-component", body, API_KEY)
+	router := createRouter(test.API_KEY, "true")
+	w := test.PerformRequest(router, "POST", "/internal/game-component", body, test.API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var luchador Luchador
@@ -70,7 +57,7 @@ func TestCreateGameComponent(t *testing.T) {
 	}).Info("First call to create game component")
 
 	// retry to check for duplicate
-	w = performRequest(router, "POST", "/internal/game-component", body, API_KEY)
+	w = test.PerformRequest(router, "POST", "/internal/game-component", body, test.API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var luchador2 Luchador
@@ -119,16 +106,6 @@ func TestCreateGameComponent(t *testing.T) {
 	elementsMatch(t, luchadorFromDB.Configs, configsFromDB)
 }
 
-type MockPublisher struct {
-}
-
-func (redis MockPublisher) Publish(channel string, message string) {
-	log.WithFields(log.Fields{
-		"channel": channel,
-		"message": message,
-	}).Debug("mock publisher")
-}
-
 func TestRenameLuchador(t *testing.T) {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stdout)
@@ -137,16 +114,16 @@ func TestRenameLuchador(t *testing.T) {
 	os.Setenv("GORM_DEBUG", "false")
 	os.Setenv("API_ADD_TEST_USERS", "true")
 
-	os.Remove(DB_NAME)
-	dataSource = NewDataSource(BuildSQLLiteConfig(DB_NAME))
+	os.Remove(test.DB_NAME)
+	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
 	defer dataSource.db.Close()
-	addTestUsers(dataSource)
+	AddTestUsers(dataSource)
 
-	publisher = MockPublisher{}
-	router := createRouter(API_KEY, "true")
+	publisher = test.MockPublisher{}
+	router := createRouter(test.API_KEY, "true")
 
 	// we have to login to make name changes
-	w := performRequest(router, "POST", "/public/login", `{"email": "foo@bar"}`, "")
+	w := test.PerformRequest(router, "POST", "/public/login", `{"email": "foo@bar"}`, "")
 	assert.Equal(t, http.StatusOK, w.Code)
 	var loginResponse LoginResponse
 	json.Unmarshal(w.Body.Bytes(), &loginResponse)
@@ -154,7 +131,7 @@ func TestRenameLuchador(t *testing.T) {
 		"UUID": loginResponse.UUID,
 	}).Info("after login")
 
-	getLuchador := performRequest(router, "GET", "/private/luchador", "", loginResponse.UUID)
+	getLuchador := test.PerformRequest(router, "GET", "/private/luchador", "", loginResponse.UUID)
 	assert.Equal(t, http.StatusOK, getLuchador.Code)
 	var luchador Luchador
 	json.Unmarshal(getLuchador.Body.Bytes(), &luchador)
@@ -174,7 +151,7 @@ func TestRenameLuchador(t *testing.T) {
 		"luchador": luchador.Name,
 	}).Info("luchador before update")
 
-	w = performRequest(router, "PUT", "/private/luchador", body2, loginResponse.UUID)
+	w = test.PerformRequest(router, "PUT", "/private/luchador", body2, loginResponse.UUID)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response UpdateLuchadorResponse
@@ -197,7 +174,7 @@ func TestRenameLuchador(t *testing.T) {
 		"luchador": luchador.Name,
 	}).Info("luchador before large update")
 
-	w = performRequest(router, "PUT", "/private/luchador", body2, loginResponse.UUID)
+	w = test.PerformRequest(router, "PUT", "/private/luchador", body2, loginResponse.UUID)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	json.Unmarshal(w.Body.Bytes(), &response)
@@ -220,7 +197,7 @@ func TestRenameLuchador(t *testing.T) {
 		"luchador": luchador.Name,
 	}).Info("luchador before large update")
 
-	w = performRequest(router, "PUT", "/private/luchador", body2, loginResponse.UUID)
+	w = test.PerformRequest(router, "PUT", "/private/luchador", body2, loginResponse.UUID)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	json.Unmarshal(w.Body.Bytes(), &response)
@@ -236,8 +213,8 @@ func TestRenameLuchador(t *testing.T) {
 
 func TestAddScores(t *testing.T) {
 	os.Setenv("GORM_DEBUG", "true")
-	os.Remove(DB_NAME)
-	dataSource = NewDataSource(BuildSQLLiteConfig(DB_NAME))
+	os.Remove(test.DB_NAME)
+	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
 	defer dataSource.db.Close()
 
 	luchador1 := dataSource.createLuchador(&Luchador{Name: "foo"})
@@ -259,7 +236,7 @@ func TestAddScores(t *testing.T) {
 	luchador2ID := fmt.Sprintf("%v", luchador2.ID)
 	luchador3ID := fmt.Sprintf("%v", luchador3.ID)
 
-	plan, _ := ioutil.ReadFile("tests/add-match-scores.json")
+	plan, _ := ioutil.ReadFile("test-data/add-match-scores.json")
 	body := string(plan)
 
 	body = strings.Replace(body, "{{.matchID}}", matchID, -1)
@@ -271,8 +248,8 @@ func TestAddScores(t *testing.T) {
 		"body": body,
 	}).Info("TestAddScores")
 
-	router := createRouter(API_KEY, "true")
-	w := performRequest(router, "POST", "/internal/add-match-scores", body, API_KEY)
+	router := createRouter(test.API_KEY, "true")
+	w := test.PerformRequest(router, "POST", "/internal/add-match-scores", body, test.API_KEY)
 	resultScores := dataSource.getMatchScoresByMatchID(match.ID)
 	assert.Equal(t, 3, len(*resultScores))
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -321,7 +298,7 @@ func elementsMatch(t *testing.T, a []Config, b []Config) {
 
 func getConfigs(t *testing.T, router *gin.Engine, id uint) []Config {
 
-	w := performRequest(router, "POST", "/public/login", `{"email": "foo@bar"}`, "")
+	w := test.PerformRequest(router, "POST", "/public/login", `{"email": "foo@bar"}`, "")
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response LoginResponse
@@ -333,7 +310,7 @@ func getConfigs(t *testing.T, router *gin.Engine, id uint) []Config {
 		"session": response.UUID,
 	}).Info("logged in")
 
-	w = performRequest(router, "GET", fmt.Sprintf("/private/mask-config/%v", id), "", response.UUID)
+	w = test.PerformRequest(router, "GET", fmt.Sprintf("/private/mask-config/%v", id), "", response.UUID)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var configs []Config

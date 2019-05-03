@@ -6,7 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func addTestUsers(dataSource *DataSource) {
+func AddTestUsers(dataSource *DataSource) {
 	apiAddTestUsers := os.Getenv("API_ADD_TEST_USERS")
 
 	log.WithFields(log.Fields{

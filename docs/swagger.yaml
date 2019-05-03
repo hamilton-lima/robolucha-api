@@ -154,6 +154,16 @@ definitions:
           $ref: '#/definitions/main.MatchScore'
         type: array
     type: object
+  main.UpdateLuchadorResponse:
+    properties:
+      errors:
+        items:
+          type: string
+        type: array
+      luchador:
+        $ref: '#/definitions/main.Luchador'
+        type: object
+    type: object
   main.UserSetting:
     properties:
       createdAt:
@@ -374,7 +384,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.Luchador'
+            $ref: '#/definitions/main.UpdateLuchadorResponse'
             type: object
       security:
       - ApiKeyAuth: []
