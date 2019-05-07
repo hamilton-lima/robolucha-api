@@ -96,7 +96,7 @@ func TestLuchadorUpdateLongName(t *testing.T) {
 	defer dataSource.db.Close()
 
 	luchador.Name = "123456789 123456789 123456789 123456789 A"
-	response := UpdateLuchador(t, luchador)
+	response := UpdateLuchador(t, router, session, luchador)
 	assert.Greater(t, len(response.Errors), 0)
 }
 
@@ -106,7 +106,7 @@ func TestLuchadorUpdateEmptyAndSmallNames(t *testing.T) {
 
 	// then try a too large name
 	luchador.Name = "A"
-	response := UpdateLuchador(t, luchador)
+	response := UpdateLuchador(t, router, session, luchador)
 	assert.Greater(t, len(response.Errors), 0)
 }
 
@@ -116,7 +116,7 @@ func TestLuchadorUpdateName(t *testing.T) {
 
 	// first try to change to a valid name
 	luchador.Name = "lucharito"
-	response := UpdateLuchador(t, luchador)
+	response := UpdateLuchador(t, router, session, luchador)
 	assert.Equal(t, "lucharito", response.Luchador.Name)
 	assert.Equal(t, 0, len(response.Errors))
 

@@ -5,13 +5,14 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/robolucha/robolucha-api/test"
 
 	log "github.com/sirupsen/logrus"
 )
 
-func UpdateLuchador(t *testing.T, luchador *Luchador) UpdateLuchadorResponse {
+func UpdateLuchador(t *testing.T, router *gin.Engine, session string, luchador *Luchador) UpdateLuchadorResponse {
 	plan, _ := json.Marshal(luchador)
 	body := string(plan)
 
