@@ -272,22 +272,35 @@ func (ds *DataSource) findLuchadorByIDNoPreload(id uint) *Luchador {
 }
 
 func (ds *DataSource) updateLuchador(luchador *Luchador) *Luchador {
-	var current Luchador
-	if ds.db.First(&current, luchador.ID).RecordNotFound() {
+	current := ds.findLuchadorByID(luchador.ID)
+	if current == nil {
 		return nil
 	}
 
 	current.Name = luchador.Name
+	current.Configs = applyConfigChanges(current.Configs, luchador.Configs)
 	current.Codes = luchador.Codes
-	current.Configs = luchador.Configs
 
-	ds.db.Save(&current)
+	ds.db.Save(current)
 
 	log.WithFields(log.Fields{
 		"luchador": current,
-	}).Info("updateLuchador")
+	}).Info("after updateLuchador")
 
-	return &current
+	return current
+}
+
+func applyConfigChanges(original []Config, updated []Config) []Config {
+	for i, configOriginal := range original {
+		for _, configUpdated := range updated {
+			if configOriginal.Key == configUpdated.Key {
+				// NOTE that range make COPIES of the values!!
+				original[i].Value = configUpdated.Value
+				break
+			}
+		}
+	}
+	return original
 }
 
 func (ds *DataSource) findActiveMatches() *[]Match {
@@ -364,6 +377,18 @@ func (ds *DataSource) findLuchadorByName(name string) *Luchador {
 	}).Info("findLuchadorByName")
 
 	return &luchador
+}
+
+func (ds *DataSource) NameExist(ID uint, name string) bool {
+	var luchador Luchador
+	result := !ds.db.Where("id <> ? AND name = ?", ID, name).First(&luchador).RecordNotFound()
+
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+		"result":   result,
+	}).Debug("NameExist")
+
+	return result
 }
 
 func (ds *DataSource) addMatchParticipant(mp *MatchParticipant) *MatchParticipant {

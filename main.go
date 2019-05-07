@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/gin-contrib/cors"
 	log "github.com/sirupsen/logrus"
@@ -38,8 +39,8 @@ type LoginResponse struct {
 
 //UpdateLuchadorResponse data structure
 type UpdateLuchadorResponse struct {
-	Errors   []string `json:"errors"`
-	Luchador Luchador `json:"luchador"`
+	Errors   []string  `json:"errors"`
+	Luchador *Luchador `json:"luchador"`
 }
 
 var dataSource *DataSource
@@ -55,7 +56,7 @@ func main() {
 	dataSource = NewDataSource(BuildMysqlConfig())
 	defer dataSource.db.Close()
 
-	publisher = RedisPublisher{}
+	publisher = &RedisPublisher{}
 
 	AddTestUsers(dataSource)
 	go dataSource.KeepAlive()
@@ -321,7 +322,7 @@ func getLuchador(c *gin.Context) {
 	luchador = dataSource.findLuchador(user)
 	log.WithFields(log.Fields{
 		"luchador": luchador,
-		"user":     user,
+		"user.id":  user.ID,
 	}).Info("after find luchador on getLuchador")
 
 	if luchador == nil {
@@ -368,8 +369,8 @@ func getLuchador(c *gin.Context) {
 func updateLuchador(c *gin.Context) {
 	val, _ := c.Get("user")
 	user := val.(*User)
+	response := UpdateLuchadorResponse{Errors: []string{}}
 
-	response := UpdateLuchadorResponse{}
 	var luchador *Luchador
 	err := c.BindJSON(&luchador)
 	if err != nil {
@@ -378,15 +379,30 @@ func updateLuchador(c *gin.Context) {
 		return
 	}
 
-	if len(luchador.Name) > 30 {
-		log.Info("Luchador name length above maximum permitted (30)")
-		response.Errors = append(response.Errors, "Luchador name length above maximum permitted (30)")
+	luchador.Name = cleanName(luchador.Name)
+
+	if len(luchador.Name) < 3 {
+		response.Errors = append(response.Errors, "Luchador name length should be at least 3 characters")
 	}
 
-	luchadorSameName := dataSource.findLuchadorByName(luchador.Name)
-	if luchadorSameName != nil {
-		log.Info("Luchador with this name already exists")
+	if len(luchador.Name) > 40 {
+		response.Errors = append(response.Errors, "Luchador name length should be less or equal to 40 characters")
+	}
+
+	if dataSource.NameExist(luchador.ID, luchador.Name) {
 		response.Errors = append(response.Errors, "Luchador with this name already exists")
+	}
+
+	if len(response.Errors) > 0 {
+		response.Luchador = luchador
+
+		log.WithFields(log.Fields{
+			"luchador": luchador,
+			"response": response,
+		}).Debug("updateLuchador")
+
+		c.JSON(http.StatusOK, response)
+		return
 	}
 
 	log.WithFields(log.Fields{
@@ -398,20 +414,25 @@ func updateLuchador(c *gin.Context) {
 	currentLuchador := dataSource.findLuchador(user)
 	log.WithFields(log.Fields{
 		"luchador": luchador,
-		"user":     user,
+		"user.ID":  user.ID,
 	}).Info("find luchador for current user")
+
 	if luchador.ID != currentLuchador.ID {
 		log.Info("Invalid Luchador.ID on updateLuchador")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
-	luchador = dataSource.updateLuchador(luchador)
-	response.Luchador = *luchador
+	response.Luchador = dataSource.updateLuchador(luchador)
 
-	if luchador == nil {
+	if response.Luchador == nil {
 		log.Info("Invalid Luchador when saving, missing ID?")
 		response.Errors = append(response.Errors, "Invalid Luchador when saving, missing ID?")
+	} else {
+		channel := fmt.Sprintf("luchador.%v.update", response.Luchador.ID)
+		luchadorUpdateJSON, _ := json.Marshal(response.Luchador)
+		message := string(luchadorUpdateJSON)
+		publisher.Publish(channel, message)
 	}
 
 	log.WithFields(log.Fields{
@@ -420,14 +441,12 @@ func updateLuchador(c *gin.Context) {
 		"errors":   response.Errors,
 	}).Info("updateLuchador")
 
-	if len(response.Errors) == 0 {
-		channel := fmt.Sprintf("luchador.%v.update", luchador.ID)
-		luchadorUpdateJSON, _ := json.Marshal(luchador)
-		message := string(luchadorUpdateJSON)
-		publisher.Publish(channel, message)
-	}
-
 	c.JSON(http.StatusOK, response)
+}
+
+func cleanName(name string) string {
+	name = strings.TrimSpace(name)
+	return name
 }
 
 // getMaskConfig godoc

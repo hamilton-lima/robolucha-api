@@ -46,7 +46,7 @@ func connect() redis.Conn {
 }
 
 // Publish message to REDIS
-func (redis RedisPublisher) Publish(channel string, message string) {
+func (redis *RedisPublisher) Publish(channel string, message string) {
 	conn := connect()
 	_, err := conn.Do("PUBLISH", channel, message)
 
