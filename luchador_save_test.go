@@ -159,8 +159,9 @@ func TestLuchadorUpdateRandomMask(t *testing.T) {
 	luchador := Setup(t)
 	defer dataSource.db.Close()
 	originalConfigs := luchador.Configs
+
+	// assign new random Configs to update the luchador
 	randomConfigs := randomConfig()
-	// first try to change to a valid name
 	luchador.Configs = randomConfigs
 
 	plan2, _ := json.Marshal(luchador)
@@ -176,14 +177,31 @@ func TestLuchadorUpdateRandomMask(t *testing.T) {
 	json.Unmarshal(w.Body.Bytes(), &response)
 
 	log.WithFields(log.Fields{
-		"response":          response.Luchador.Name,
-		"response.luchador": response.Luchador,
+		"response.Errors":   response.Errors,
+		"response.Luchador": response.Luchador,
 	}).Info("after luchador update")
 
-	// no errors
+	// check if no errors exist in the response
 	assert.Equal(t, 0, len(response.Errors))
 
-	// publish event after update
+	// check if configs are updated in the response
+	assert.Equal(t, len(randomConfigs), len(response.Luchador.Configs))
+	AssertConfigMatch(t, randomConfigs, response.Luchador.Configs)
+	changed := CountChangesConfigMatch(t, originalConfigs, response.Luchador.Configs)
+	assert.Greater(t, changed, 0)
+
+	log.WithFields(log.Fields{
+		"changed": changed,
+	}).Info("comparing response.Configs with original.Configs")
+
+	// check if configs are updated in the subsequent GET of luchador
+	afterUpdateLuchador := GetLuchador(t, session)
+	assert.Equal(t, len(randomConfigs), len(afterUpdateLuchador.Configs))
+	AssertConfigMatch(t, randomConfigs, afterUpdateLuchador.Configs)
+	changed = CountChangesConfigMatch(t, afterUpdateLuchador.Configs, originalConfigs)
+	assert.Greater(t, changed, 0)
+
+	// check if after update the correct event is published
 	channel := fmt.Sprintf("luchador.%v.update", luchador.ID)
 
 	log.WithFields(log.Fields{
@@ -191,20 +209,5 @@ func TestLuchadorUpdateRandomMask(t *testing.T) {
 		"publishedChannel": mockPublisher.LastChannel,
 	}).Info("publish event")
 	assert.True(t, mockPublisher.LastChannel == channel)
-
-	assert.Equal(t, len(randomConfigs), len(response.Luchador.Configs))
-	AssertConfigMatch(t, randomConfigs, response.Luchador.Configs)
-	changed := CountChangesConfigMatch(t, response.Luchador.Configs, originalConfigs)
-	assert.Greater(t, changed, 0)
-
-	log.WithFields(log.Fields{
-		"changed": changed,
-	}).Info("comparing response.Configs with original.Configs")
-
-	afterUpdateLuchador := GetLuchador(t, session)
-	assert.Equal(t, len(randomConfigs), len(afterUpdateLuchador.Configs))
-	AssertConfigMatch(t, randomConfigs, afterUpdateLuchador.Configs)
-	changed = CountChangesConfigMatch(t, afterUpdateLuchador.Configs, originalConfigs)
-	assert.Greater(t, changed, 0)
 
 }

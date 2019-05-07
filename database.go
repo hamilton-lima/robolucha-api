@@ -272,22 +272,33 @@ func (ds *DataSource) findLuchadorByIDNoPreload(id uint) *Luchador {
 }
 
 func (ds *DataSource) updateLuchador(luchador *Luchador) *Luchador {
-	var current Luchador
-	if ds.db.First(&current, luchador.ID).RecordNotFound() {
+	current := ds.findLuchadorByID(luchador.ID)
+	if current == nil {
 		return nil
 	}
 
 	current.Name = luchador.Name
+	applyConfigChanges(&current.Configs, &luchador.Configs)
 	current.Codes = luchador.Codes
-	current.Configs = luchador.Configs
 
-	ds.db.Save(&current)
+	ds.db.Save(current)
 
 	log.WithFields(log.Fields{
 		"luchador": current,
 	}).Info("updateLuchador")
 
-	return &current
+	return current
+}
+
+func applyConfigChanges(original *[]Config, updated *[]Config) {
+	for _, configOriginal := range *original {
+		for _, configUpdated := range *updated {
+			if configOriginal.Key == configUpdated.Key {
+				configOriginal.Value = configUpdated.Value
+				break
+			}
+		}
+	}
 }
 
 func (ds *DataSource) findActiveMatches() *[]Match {

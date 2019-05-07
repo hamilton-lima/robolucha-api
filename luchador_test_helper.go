@@ -21,6 +21,7 @@ func AssertConfigMatch(t *testing.T, a []Config, b []Config) {
 		assert.True(t, found)
 		log.WithFields(log.Fields{
 			"config": configA,
+			"found":  found,
 		}).Info("match found for config")
 	}
 }
@@ -31,7 +32,7 @@ func CountChangesConfigMatch(t *testing.T, a []Config, b []Config) int {
 		found := false
 		for _, configB := range b {
 
-			if configA.Key == configB.Key && configA.Value == configB.Value {
+			if configA.Key == configB.Key && configA.Value != configB.Value {
 				found = true
 				break
 			}
