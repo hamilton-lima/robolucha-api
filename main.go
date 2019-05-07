@@ -321,7 +321,7 @@ func getLuchador(c *gin.Context) {
 	luchador = dataSource.findLuchador(user)
 	log.WithFields(log.Fields{
 		"luchador": luchador,
-		"user":     user,
+		"user.id":  user.id,
 	}).Info("after find luchador on getLuchador")
 
 	if luchador == nil {
