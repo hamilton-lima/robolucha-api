@@ -435,7 +435,7 @@ func updateLuchador(c *gin.Context) {
 	log.WithFields(log.Fields{
 		"response": response,
 		"action":   "after save",
-		"errors=========================================": response.Errors,
+		"errors":   response.Errors,
 	}).Info("updateLuchador")
 
 	c.JSON(http.StatusOK, response)
