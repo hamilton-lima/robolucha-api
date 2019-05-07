@@ -21,9 +21,14 @@ func PerformRequest(r http.Handler, method, path string, body string, authorizat
 }
 
 type MockPublisher struct {
+	LastMessage string
+	LastChannel string
 }
 
-func (redis MockPublisher) Publish(channel string, message string) {
+func (mock *MockPublisher) Publish(channel string, message string) {
+	mock.LastChannel = channel
+	mock.LastMessage = message
+
 	log.WithFields(log.Fields{
 		"channel": channel,
 		"message": message,

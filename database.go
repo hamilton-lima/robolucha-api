@@ -366,6 +366,18 @@ func (ds *DataSource) findLuchadorByName(name string) *Luchador {
 	return &luchador
 }
 
+func (ds *DataSource) NameExist(ID uint, name string) bool {
+	var luchador Luchador
+	result := !ds.db.Where("id <> ? AND name = ?", ID, name).First(&luchador).RecordNotFound()
+
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+		"result":   result,
+	}).Debug("NameExist")
+
+	return result
+}
+
 func (ds *DataSource) addMatchParticipant(mp *MatchParticipant) *MatchParticipant {
 
 	var match *Match
