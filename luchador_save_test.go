@@ -53,12 +53,15 @@ func Setup(t *testing.T) *Luchador {
 	router = createRouter(test.API_KEY, "true")
 	session = Login(router)
 
+	luchador := GetLuchador(t, session)
+	return &luchador
+}
+
+func GetLuchador(t *testing.T, session string) Luchador {
 	getLuchador := test.PerformRequest(router, "GET", "/private/luchador", "", session)
-	assert.Equal(t, http.StatusOK, getLuchador.Code)
 	var luchador Luchador
 	json.Unmarshal(getLuchador.Body.Bytes(), &luchador)
-
-	return &luchador
+	return luchador
 }
 
 func TestLuchadorUpdateDuplicatedNameSameUser(t *testing.T) {
@@ -189,6 +192,7 @@ func TestLuchadorUpdateRandomMask(t *testing.T) {
 	}).Info("publish event")
 	assert.True(t, mockPublisher.LastChannel == channel)
 
+	assert.Equal(t, len(randomConfigs), len(response.Luchador.Configs))
 	AssertConfigMatch(t, randomConfigs, response.Luchador.Configs)
 	changed := CountChangesConfigMatch(t, response.Luchador.Configs, originalConfigs)
 	assert.Greater(t, changed, 0)
@@ -196,5 +200,11 @@ func TestLuchadorUpdateRandomMask(t *testing.T) {
 	log.WithFields(log.Fields{
 		"changed": changed,
 	}).Info("comparing response.Configs with original.Configs")
+
+	afterUpdateLuchador := GetLuchador(t, session)
+	assert.Equal(t, len(randomConfigs), len(afterUpdateLuchador.Configs))
+	AssertConfigMatch(t, randomConfigs, afterUpdateLuchador.Configs)
+	changed = CountChangesConfigMatch(t, afterUpdateLuchador.Configs, originalConfigs)
+	assert.Greater(t, changed, 0)
 
 }
