@@ -103,7 +103,7 @@ func TestCreateGameComponent(t *testing.T) {
 
 	getConfigs(t, router, luchador2.ID)
 	configsFromDB := getConfigs(t, router, luchador2.ID)
-	elementsMatch(t, luchadorFromDB.Configs, configsFromDB)
+	AssertConfigMatch(t, luchadorFromDB.Configs, configsFromDB)
 }
 
 func TestAddScores(t *testing.T) {
@@ -172,23 +172,6 @@ func TestAddScores(t *testing.T) {
 		}).Info("TestAddScores")
 	}
 
-}
-
-func elementsMatch(t *testing.T, a []Config, b []Config) {
-	for _, configA := range a {
-		found := false
-		for _, configB := range b {
-
-			if configA.Key == configB.Key && configA.Value == configB.Value {
-				found = true
-				break
-			}
-		}
-		assert.True(t, found)
-		log.WithFields(log.Fields{
-			"config": configA,
-		}).Info("match found for config")
-	}
 }
 
 func getConfigs(t *testing.T, router *gin.Engine, id uint) []Config {

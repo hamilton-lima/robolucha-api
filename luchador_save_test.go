@@ -152,12 +152,49 @@ func TestLuchadorUpdateName(t *testing.T) {
 	assert.True(t, mockPublisher.LastChannel == channel)
 
 }
+func TestLuchadorUpdateRandomMask(t *testing.T) {
+	luchador := Setup(t)
+	defer dataSource.db.Close()
+	originalConfigs := luchador.Configs
+	randomConfigs := randomConfig()
+	// first try to change to a valid name
+	luchador.Configs = randomConfigs
 
-func getConfig(configs []Config, key string) Config {
-	for _, config := range configs {
-		if config.Key == key {
-			return config
-		}
-	}
-	return Config{}
+	plan2, _ := json.Marshal(luchador)
+	body2 := string(plan2)
+	log.WithFields(log.Fields{
+		"luchador": luchador.Name,
+	}).Info("luchador before update")
+
+	w := test.PerformRequest(router, "PUT", "/private/luchador", body2, session)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response UpdateLuchadorResponse
+	json.Unmarshal(w.Body.Bytes(), &response)
+
+	log.WithFields(log.Fields{
+		"response":          response.Luchador.Name,
+		"response.luchador": response.Luchador,
+	}).Info("after luchador update")
+
+	// no errors
+	assert.Equal(t, 0, len(response.Errors))
+
+	// publish event after update
+	channel := fmt.Sprintf("luchador.%v.update", luchador.ID)
+
+	log.WithFields(log.Fields{
+		"expected":         channel,
+		"publishedChannel": mockPublisher.LastChannel,
+	}).Info("publish event")
+	assert.True(t, mockPublisher.LastChannel == channel)
+
+	AssertConfigMatch(t, randomConfigs, response.Luchador.Configs)
+	changed := CountChangesConfigMatch(t, response.Luchador.Configs, originalConfigs)
+	assert.Greater(t, changed, 0)
+
+	log.WithFields(log.Fields{
+		"changed": changed,
+	}).Info("comparing response.Configs with original.Configs")
+
 }
