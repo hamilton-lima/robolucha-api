@@ -278,27 +278,29 @@ func (ds *DataSource) updateLuchador(luchador *Luchador) *Luchador {
 	}
 
 	current.Name = luchador.Name
-	applyConfigChanges(&current.Configs, &luchador.Configs)
+	current.Configs = applyConfigChanges(current.Configs, luchador.Configs)
 	current.Codes = luchador.Codes
 
 	ds.db.Save(current)
 
 	log.WithFields(log.Fields{
 		"luchador": current,
-	}).Info("updateLuchador")
+	}).Info("after updateLuchador")
 
 	return current
 }
 
-func applyConfigChanges(original *[]Config, updated *[]Config) {
-	for _, configOriginal := range *original {
-		for _, configUpdated := range *updated {
+func applyConfigChanges(original []Config, updated []Config) []Config {
+	for i, configOriginal := range original {
+		for _, configUpdated := range updated {
 			if configOriginal.Key == configUpdated.Key {
-				configOriginal.Value = configUpdated.Value
+				// NOTE that range make COPIES of the values!!
+				original[i].Value = configUpdated.Value
 				break
 			}
 		}
 	}
+	return original
 }
 
 func (ds *DataSource) findActiveMatches() *[]Match {

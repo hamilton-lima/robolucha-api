@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/gin-contrib/cors"
 	log "github.com/sirupsen/logrus"
@@ -378,12 +379,14 @@ func updateLuchador(c *gin.Context) {
 		return
 	}
 
+	luchador.Name = cleanName(luchador.Name)
+
 	if len(luchador.Name) < 3 {
 		response.Errors = append(response.Errors, "Luchador name length should be at least 3 characters")
 	}
 
-	if len(luchador.Name) > 30 {
-		response.Errors = append(response.Errors, "Luchador name length should be less or equal to 30 characters")
+	if len(luchador.Name) > 40 {
+		response.Errors = append(response.Errors, "Luchador name length should be less or equal to 40 characters")
 	}
 
 	if dataSource.NameExist(luchador.ID, luchador.Name) {
@@ -411,7 +414,7 @@ func updateLuchador(c *gin.Context) {
 	currentLuchador := dataSource.findLuchador(user)
 	log.WithFields(log.Fields{
 		"luchador": luchador,
-		"user":     user,
+		"user.ID":  user.ID,
 	}).Info("find luchador for current user")
 
 	if luchador.ID != currentLuchador.ID {
@@ -439,6 +442,11 @@ func updateLuchador(c *gin.Context) {
 	}).Info("updateLuchador")
 
 	c.JSON(http.StatusOK, response)
+}
+
+func cleanName(name string) string {
+	name = strings.TrimSpace(name)
+	return name
 }
 
 // getMaskConfig godoc

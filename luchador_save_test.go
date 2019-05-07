@@ -95,28 +95,18 @@ func TestLuchadorUpdateLongName(t *testing.T) {
 	luchador := Setup(t)
 	defer dataSource.db.Close()
 
+	luchador.Name = "123456789 123456789 123456789 123456789 A"
+	response := UpdateLuchador(t, luchador)
+	assert.Greater(t, len(response.Errors), 0)
+}
+
+func TestLuchadorUpdateEmptyAndSmallNames(t *testing.T) {
+	luchador := Setup(t)
+	defer dataSource.db.Close()
+
 	// then try a too large name
-	luchador.Name = "123456789012345678901234567890aaaaaa"
-
-	plan2, _ := json.Marshal(luchador)
-	body2 := string(plan2)
-
-	log.WithFields(log.Fields{
-		"luchador": luchador.Name,
-	}).Info("luchador before large update")
-
-	w := test.PerformRequest(router, "PUT", "/private/luchador", body2, session)
-	assert.Equal(t, http.StatusOK, w.Code)
-
-	var response UpdateLuchadorResponse
-	json.Unmarshal(w.Body.Bytes(), &response)
-
-	log.WithFields(log.Fields{
-		"response":        response.Luchador.Name,
-		"response.errors": response.Errors,
-	}).Info("after luchador update")
-
-	t.Log(response.Errors)
+	luchador.Name = "A"
+	response := UpdateLuchador(t, luchador)
 	assert.Greater(t, len(response.Errors), 0)
 }
 
@@ -126,23 +116,7 @@ func TestLuchadorUpdateName(t *testing.T) {
 
 	// first try to change to a valid name
 	luchador.Name = "lucharito"
-	plan2, _ := json.Marshal(luchador)
-	body2 := string(plan2)
-	log.WithFields(log.Fields{
-		"luchador": luchador.Name,
-	}).Info("luchador before update")
-
-	w := test.PerformRequest(router, "PUT", "/private/luchador", body2, session)
-	assert.Equal(t, http.StatusOK, w.Code)
-
-	var response UpdateLuchadorResponse
-	json.Unmarshal(w.Body.Bytes(), &response)
-
-	log.WithFields(log.Fields{
-		"response":          response.Luchador.Name,
-		"response.luchador": response.Luchador,
-	}).Info("after luchador update")
-
+	response := UpdateLuchador(t, luchador)
 	assert.Equal(t, "lucharito", response.Luchador.Name)
 	assert.Equal(t, 0, len(response.Errors))
 
@@ -158,10 +132,10 @@ func TestLuchadorUpdateName(t *testing.T) {
 func TestLuchadorUpdateRandomMask(t *testing.T) {
 	luchador := Setup(t)
 	defer dataSource.db.Close()
-	originalConfigs := luchador.Configs
 
 	// assign new random Configs to update the luchador
-	randomConfigs := randomConfig()
+	var originalConfigs []Config = luchador.Configs
+	var randomConfigs []Config = randomConfig()
 	luchador.Configs = randomConfigs
 
 	plan2, _ := json.Marshal(luchador)

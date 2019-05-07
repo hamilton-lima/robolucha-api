@@ -1,12 +1,36 @@
 package main
 
 import (
+	"encoding/json"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/robolucha/robolucha-api/test"
 
 	log "github.com/sirupsen/logrus"
 )
+
+func UpdateLuchador(t *testing.T, luchador *Luchador) UpdateLuchadorResponse {
+	plan, _ := json.Marshal(luchador)
+	body := string(plan)
+
+	log.WithFields(log.Fields{
+		"luchador": luchador.Name,
+	}).Info("luchador before update")
+
+	w := test.PerformRequest(router, "PUT", "/private/luchador", body, session)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response UpdateLuchadorResponse
+	json.Unmarshal(w.Body.Bytes(), &response)
+
+	log.WithFields(log.Fields{
+		"response": response,
+	}).Info("after luchador update")
+
+	return response
+}
 
 func AssertConfigMatch(t *testing.T, a []Config, b []Config) {
 	for _, configA := range a {
