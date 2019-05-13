@@ -45,7 +45,6 @@ func Setup(t *testing.T) *Luchador {
 		}).Info("error removing TEST database")
 	}
 	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
-	AddTestUsers(dataSource)
 
 	mockPublisher = &test.MockPublisher{}
 	publisher = mockPublisher

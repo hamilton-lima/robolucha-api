@@ -46,8 +46,6 @@ func main() {
 	defer dataSource.db.Close()
 
 	publisher = &RedisPublisher{}
-
-	AddTestUsers(dataSource)
 	go dataSource.KeepAlive()
 
 	port := os.Getenv("API_PORT")
