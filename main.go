@@ -26,18 +26,6 @@ import (
 	_ "gitlab.com/robolucha/robolucha-api/docs"
 )
 
-// LoginRequest data structure
-type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-// LoginResponse data structure
-type LoginResponse struct {
-	Error bool   `json:"error"`
-	UUID  string `json:"uuid"`
-}
-
 //UpdateLuchadorResponse data structure
 type UpdateLuchadorResponse struct {
 	Errors   []string  `json:"errors"`
