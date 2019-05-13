@@ -12,7 +12,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	try "gopkg.in/matryer/try.v1"
 )
@@ -172,14 +171,13 @@ func (ds *DataSource) updateUserSetting(settings *UserSetting) *UserSetting {
 	return &current
 }
 
-func (ds *DataSource) createUser(u *User) *User {
-	user := User{Email: u.Email, Password: ds.createHash(u.Password)}
-	ds.db.Where(&User{Email: u.Email}).FirstOrCreate(&user)
+func (ds *DataSource) createUser(u User) *User {
+	user := User{Username: u.Username}
+	ds.db.Where(&User{Username: u.Username}).FirstOrCreate(&user)
 
 	log.WithFields(log.Fields{
 		"id":       user.ID,
-		"email":    user.Email,
-		"password": user.Password,
+		"username": user.Username,
 	}).Debug("createUser")
 
 	return &user
@@ -191,23 +189,23 @@ func (ds *DataSource) createHash(key string) string {
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-func (ds *DataSource) createSession(user *User) *Session {
-	uuid, err := uuid.NewV4()
-	if err != nil {
-		log.Errorf("Error creating session UUID: %v", err)
-		return nil
-	}
+// func (ds *DataSource) createSession(user *User) *Session {
+// 	uuid, err := uuid.NewV4()
+// 	if err != nil {
+// 		log.Errorf("Error creating session UUID: %v", err)
+// 		return nil
+// 	}
 
-	session := Session{UserID: user.ID, UUID: uuid.String()}
-	ds.db.Create(&session)
+// 	session := Session{UserID: user.ID, UUID: uuid.String()}
+// 	ds.db.Create(&session)
 
-	log.WithFields(log.Fields{
-		"user": session.UserID,
-		"uuid": session.UUID,
-	}).Info("Session created")
+// 	log.WithFields(log.Fields{
+// 		"user": session.UserID,
+// 		"uuid": session.UUID,
+// 	}).Info("Session created")
 
-	return &session
-}
+// 	return &session
+// }
 
 func (ds *DataSource) createMatch(m *Match) *Match {
 	match := Match{

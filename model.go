@@ -8,8 +8,7 @@ type User struct {
 	CreatedAt time.Time  `json:"createdAt"`
 	UpdatedAt time.Time  `json:"updatedAt"`
 	DeletedAt *time.Time `json:"deletedAt"`
-	Email     string     `json:"email"`
-	Password  string     `json:"password"`
+	Username  string     `json:"username"`
 }
 
 // Session definition
