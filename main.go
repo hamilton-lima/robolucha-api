@@ -2,7 +2,7 @@
 // @version 1.0
 // @description Robolucha API
 // @host localhost:8080
-// @BasePath /
+// @BasePath /api
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
@@ -135,20 +135,34 @@ func SessionIsValid() gin.HandlerFunc {
 
 		cookieName := "kc-access"
 
-		authorization := c.Request.Cookie(cookieName)
-		if authorization == "" {
+		authorization, err := c.Request.Cookie(cookieName)
+		if err != nil {
+			log.Debug("Error reading authorization cookie")
+			c.AbortWithStatus(http.StatusForbidden)
+			return
+		}
+		if authorization.Value == "" {
 			log.Debug("No Authorization cookie")
 			c.AbortWithStatus(http.StatusForbidden)
+			return
 		}
 
 		key := os.Getenv("GATEKEEPER_ENCRYPTION_KEY")
-		user := auth.GetUser(authorization, key)
-		if user == nil {
+		user, err := auth.GetUser(authorization.Value, key)
+		if err != nil {
+			log.Debug("Error reading user from authorization cookie")
+			c.AbortWithStatus(http.StatusForbidden)
+			return
+		}
+
+		if user.Username == "" {
 			log.WithFields(log.Fields{
 				"authorization": authorization,
 				"cookie-name":   cookieName,
+				"user":          user,
 			}).Info("Invalid Session")
 			c.AbortWithStatus(http.StatusForbidden)
+			return
 		} else {
 			log.WithFields(log.Fields{
 				"user": user,
@@ -327,7 +341,7 @@ func createMatch(c *gin.Context) {
 // @Router /private/get-user [get]
 func getUser(c *gin.Context) {
 	val, _ := c.Get("user")
-	user := val.(*auth.JWTUser)
+	user := val.(auth.JWTUser)
 	c.JSON(http.StatusOK, user)
 }
 
