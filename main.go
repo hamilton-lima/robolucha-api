@@ -2,7 +2,7 @@
 // @version 1.0
 // @description Robolucha API
 // @host localhost:8080
-// @BasePath /
+// @BasePath /api
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
@@ -22,6 +22,7 @@ import (
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
+	"gitlab.com/robolucha/robolucha-api/auth"
 	_ "gitlab.com/robolucha/robolucha-api/docs"
 )
 
@@ -113,6 +114,7 @@ func createRouter(internalAPIKey string, logRequestBody string) *gin.Engine {
 	privateAPI := router.Group("/private")
 	privateAPI.Use(SessionIsValid())
 	{
+		privateAPI.GET("/get-user", getUser)
 		privateAPI.GET("/luchador", getLuchador)
 		privateAPI.PUT("/luchador", updateLuchador)
 		privateAPI.GET("/mask-config/:id", getMaskConfig)
@@ -130,18 +132,41 @@ func createRouter(internalAPIKey string, logRequestBody string) *gin.Engine {
 // SessionIsValid check if Authoraization header is valid
 func SessionIsValid() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authorization := c.Request.Header.Get("Authorization")
-		if authorization == "" {
-			log.Debug("No Authorization header")
+
+		cookieName := "kc-access"
+
+		authorization, err := c.Request.Cookie(cookieName)
+		if err != nil {
+			log.Debug("Error reading authorization cookie")
 			c.AbortWithStatus(http.StatusForbidden)
+			return
+		}
+		if authorization.Value == "" {
+			log.Debug("No Authorization cookie")
+			c.AbortWithStatus(http.StatusForbidden)
+			return
 		}
 
-		user := dataSource.findUserBySession(authorization)
-		if user == nil {
-			log.WithFields(log.Fields{
-				"UUID": authorization,
-			}).Info("Invalid Session UUID")
+		key := os.Getenv("GATEKEEPER_ENCRYPTION_KEY")
+		user, err := auth.GetUser(authorization.Value, key)
+		if err != nil {
+			log.Debug("Error reading user from authorization cookie")
 			c.AbortWithStatus(http.StatusForbidden)
+			return
+		}
+
+		if user.Username == "" {
+			log.WithFields(log.Fields{
+				"authorization": authorization,
+				"cookie-name":   cookieName,
+				"user":          user,
+			}).Info("Invalid Session")
+			c.AbortWithStatus(http.StatusForbidden)
+			return
+		} else {
+			log.WithFields(log.Fields{
+				"user": user,
+			}).Info("User Authorized")
 		}
 
 		c.Set("user", user)
@@ -305,6 +330,19 @@ func createMatch(c *gin.Context) {
 	}).Info("created match")
 
 	c.JSON(http.StatusOK, match)
+}
+
+// getUser godoc
+// @Summary find The current user information
+// @Accept json
+// @Produce json
+// @Success 200 {object} auth.JWTUser
+// @Security ApiKeyAuth
+// @Router /private/get-user [get]
+func getUser(c *gin.Context) {
+	val, _ := c.Get("user")
+	user := val.(auth.JWTUser)
+	c.JSON(http.StatusOK, user)
 }
 
 // getLuchador godoc
