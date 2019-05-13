@@ -1,4 +1,4 @@
-basePath: /
+basePath: /api
 definitions:
   main.Code:
     properties:
@@ -42,20 +42,6 @@ definitions:
         type: integer
       matchID:
         type: integer
-    type: object
-  main.LoginRequest:
-    properties:
-      email:
-        type: string
-      password:
-        type: string
-    type: object
-  main.LoginResponse:
-    properties:
-      error:
-        type: boolean
-      uuid:
-        type: string
     type: object
   main.Luchador:
     properties:
@@ -163,6 +149,19 @@ definitions:
       luchador:
         $ref: '#/definitions/main.Luchador'
         type: object
+    type: object
+  main.User:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        type: integer
+      updatedAt:
+        type: string
+      username:
+        type: string
     type: object
   main.UserSetting:
     properties:
@@ -329,6 +328,21 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: returns application health check information
+  /private/get-user:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.User'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: find The current user information
   /private/join-match:
     post:
       consumes:
@@ -501,27 +515,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Updates user userSetting
-  /public/login:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: LoginRequest
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/main.LoginRequest'
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/main.LoginResponse'
-            type: object
-      summary: Logs the user
 securityDefinitions:
   ApiKeyAuth:
     in: header
