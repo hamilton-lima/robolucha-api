@@ -291,7 +291,7 @@ func createMatch(c *gin.Context) {
 // @Router /private/get-user [get]
 func getUser(c *gin.Context) {
 	val, _ := c.Get("user")
-	user := val.(User)
+	user := val.(*User)
 	c.JSON(http.StatusOK, user)
 }
 
