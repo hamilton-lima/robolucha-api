@@ -39,7 +39,6 @@ func TestCreateGameComponent(t *testing.T) {
 	os.Remove(test.DB_NAME)
 	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
 	defer dataSource.db.Close()
-	AddTestUsers(dataSource)
 
 	plan, _ := ioutil.ReadFile("test-data/create-gamecomponent1.json")
 	body := string(plan)

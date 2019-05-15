@@ -2,7 +2,7 @@
 // @version 1.0
 // @description Robolucha API
 // @host localhost:8080
-// @BasePath /api
+// @BasePath /
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
@@ -26,18 +26,6 @@ import (
 	_ "gitlab.com/robolucha/robolucha-api/docs"
 )
 
-// LoginRequest data structure
-type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-// LoginResponse data structure
-type LoginResponse struct {
-	Error bool   `json:"error"`
-	UUID  string `json:"uuid"`
-}
-
 //UpdateLuchadorResponse data structure
 type UpdateLuchadorResponse struct {
 	Errors   []string  `json:"errors"`
@@ -58,8 +46,6 @@ func main() {
 	defer dataSource.db.Close()
 
 	publisher = &RedisPublisher{}
-
-	AddTestUsers(dataSource)
 	go dataSource.KeepAlive()
 
 	port := os.Getenv("API_PORT")
@@ -95,7 +81,6 @@ func createRouter(internalAPIKey string, logRequestBody string) *gin.Engine {
 
 	publicAPI := router.Group("/public")
 	{
-		publicAPI.POST("/login", handleLogin)
 		publicAPI.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 
@@ -148,27 +133,28 @@ func SessionIsValid() gin.HandlerFunc {
 		}
 
 		key := os.Getenv("GATEKEEPER_ENCRYPTION_KEY")
-		user, err := auth.GetUser(authorization.Value, key)
+		sessionUser, err := auth.GetUser(authorization.Value, key)
 		if err != nil {
 			log.Debug("Error reading user from authorization cookie")
 			c.AbortWithStatus(http.StatusForbidden)
 			return
 		}
 
-		if user.Username == "" {
+		if sessionUser.Username == "" {
 			log.WithFields(log.Fields{
 				"authorization": authorization,
 				"cookie-name":   cookieName,
-				"user":          user,
+				"sessionUser":   sessionUser,
 			}).Info("Invalid Session")
 			c.AbortWithStatus(http.StatusForbidden)
 			return
 		} else {
 			log.WithFields(log.Fields{
-				"user": user,
+				"sessionUser": sessionUser,
 			}).Info("User Authorized")
 		}
 
+		user := dataSource.createUser(User{Username: sessionUser.Username})
 		c.Set("user", user)
 	}
 }
@@ -193,42 +179,6 @@ func KeyIsValid(key string) gin.HandlerFunc {
 			"Authorization": authorization,
 		}).Info(">> Authorization key")
 	}
-}
-
-// handleLogin godoc
-// @Summary Logs the user
-// @Accept  json
-// @Produce  json
-// @Param request body main.LoginRequest true "LoginRequest"
-// @Success 200 {object} main.LoginResponse
-// @Router /public/login [post]
-func handleLogin(c *gin.Context) {
-
-	var json LoginRequest
-	err := c.BindJSON(&json)
-	if err != nil {
-		log.Info("Invalid body content on Login")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
-
-	log.WithFields(log.Fields{
-		"email": json.Email,
-	}).Info("Login Attempt")
-
-	response := LoginResponse{Error: true}
-	user := dataSource.findUserByEmail(json.Email)
-	log.WithFields(log.Fields{
-		"user": user,
-	}).Debug("User found after login")
-
-	if user != nil {
-		session := dataSource.createSession(user)
-		response.Error = false
-		response.UUID = session.UUID
-	}
-
-	c.JSON(http.StatusOK, response)
 }
 
 // findUserSetting godoc
@@ -336,12 +286,12 @@ func createMatch(c *gin.Context) {
 // @Summary find The current user information
 // @Accept json
 // @Produce json
-// @Success 200 {object} auth.JWTUser
+// @Success 200 {object} main.User
 // @Security ApiKeyAuth
 // @Router /private/get-user [get]
 func getUser(c *gin.Context) {
 	val, _ := c.Get("user")
-	user := val.(auth.JWTUser)
+	user := val.(*User)
 	c.JSON(http.StatusOK, user)
 }
 
