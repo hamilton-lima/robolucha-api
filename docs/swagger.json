@@ -8,7 +8,7 @@
         "version": "1.0"
     },
     "host": "localhost:8080",
-    "basePath": "/api",
+    "basePath": "/",
     "paths": {
         "/internal/add-match-scores": {
             "post": {

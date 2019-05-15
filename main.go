@@ -2,7 +2,7 @@
 // @version 1.0
 // @description Robolucha API
 // @host localhost:8080
-// @BasePath /api
+// @BasePath /
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
