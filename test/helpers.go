@@ -20,6 +20,14 @@ func PerformRequest(r http.Handler, method, path string, body string, authorizat
 	return w
 }
 
+func PerformRequestNoAuth(r http.Handler, method, path string, body string) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest(method, path, bytes.NewBufferString(body))
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	return w
+}
+
 type MockPublisher struct {
 	LastMessage string
 	LastChannel string

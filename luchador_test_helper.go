@@ -12,7 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func UpdateLuchador(t *testing.T, router *gin.Engine, session string, luchador *Luchador) UpdateLuchadorResponse {
+func UpdateLuchador(t *testing.T, router *gin.Engine, luchador *Luchador) UpdateLuchadorResponse {
 	plan, _ := json.Marshal(luchador)
 	body := string(plan)
 
@@ -20,7 +20,7 @@ func UpdateLuchador(t *testing.T, router *gin.Engine, session string, luchador *
 		"luchador": luchador.Name,
 	}).Info("luchador before update")
 
-	w := test.PerformRequest(router, "PUT", "/private/luchador", body, session)
+	w := test.PerformRequestNoAuth(router, "PUT", "/private/luchador", body)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response UpdateLuchadorResponse

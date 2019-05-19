@@ -59,7 +59,7 @@ func main() {
 
 	internalAPIKey := os.Getenv("INTERNAL_API_KEY")
 	logRequestBody := os.Getenv("GIM_LOG_REQUEST_BODY")
-	router := createRouter(internalAPIKey, logRequestBody)
+	router := createRouter(internalAPIKey, logRequestBody, SessionIsValid)
 	router.Run(":" + port)
 
 	log.WithFields(log.Fields{
@@ -67,7 +67,9 @@ func main() {
 	}).Debug("Server is ready")
 }
 
-func createRouter(internalAPIKey string, logRequestBody string) *gin.Engine {
+func createRouter(internalAPIKey string, logRequestBody string,
+	factory SessionValidatorFactory) *gin.Engine {
+
 	router := gin.Default()
 
 	config := cors.DefaultConfig()
@@ -97,7 +99,7 @@ func createRouter(internalAPIKey string, logRequestBody string) *gin.Engine {
 	}
 
 	privateAPI := router.Group("/private")
-	privateAPI.Use(SessionIsValid())
+	privateAPI.Use(factory())
 	{
 		privateAPI.GET("/get-user", getUser)
 		privateAPI.GET("/luchador", getLuchador)
@@ -113,6 +115,8 @@ func createRouter(internalAPIKey string, logRequestBody string) *gin.Engine {
 
 	return router
 }
+
+type SessionValidatorFactory func() gin.HandlerFunc
 
 // SessionIsValid check if Authoraization header is valid
 func SessionIsValid() gin.HandlerFunc {

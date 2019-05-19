@@ -17,6 +17,8 @@ import (
 	"gitlab.com/robolucha/robolucha-api/test"
 )
 
+const TEST_USERNAME = "foo"
+
 func TestCreateMatch(t *testing.T) {
 	os.Setenv("GORM_DEBUG", "true")
 	os.Remove(test.DB_NAME)
@@ -27,7 +29,7 @@ func TestCreateMatch(t *testing.T) {
 	body := string(plan)
 	fmt.Println(body)
 
-	router := createRouter(test.API_KEY, "true")
+	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
 	w := test.PerformRequest(router, "POST", "/internal/match", body, test.API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
 }
@@ -43,7 +45,7 @@ func TestCreateGameComponent(t *testing.T) {
 	body := string(plan)
 	fmt.Println(body)
 
-	router := createRouter(test.API_KEY, "true")
+	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
 	w := test.PerformRequest(router, "POST", "/internal/game-component", body, test.API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
 
@@ -141,7 +143,7 @@ func TestAddScores(t *testing.T) {
 		"body": body,
 	}).Info("TestAddScores")
 
-	router := createRouter(test.API_KEY, "true")
+	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
 	w := test.PerformRequest(router, "POST", "/internal/add-match-scores", body, test.API_KEY)
 	resultScores := dataSource.getMatchScoresByMatchID(match.ID)
 	assert.Equal(t, 3, len(*resultScores))
@@ -174,23 +176,18 @@ func TestAddScores(t *testing.T) {
 
 func getConfigs(t *testing.T, router *gin.Engine, id uint) []Config {
 
-	w := test.PerformRequest(router, "POST", "/public/login", `{"email": "foo@bar"}`, "")
-	assert.Equal(t, http.StatusOK, w.Code)
-
-	var response LoginResponse
-	json.Unmarshal(w.Body.Bytes(), &response)
-	assert.False(t, response.Error)
-	assert.Greater(t, len(response.UUID), 0)
-
-	log.WithFields(log.Fields{
-		"session": response.UUID,
-	}).Info("logged in")
-
-	w = test.PerformRequest(router, "GET", fmt.Sprintf("/private/mask-config/%v", id), "", response.UUID)
+	w := test.PerformRequestNoAuth(router, "GET", fmt.Sprintf("/private/mask-config/%v", id), "")
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var configs []Config
 	json.Unmarshal(w.Body.Bytes(), &configs)
 
 	return configs
+}
+
+func SessionAllwaysValid() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user := dataSource.createUser(User{Username: TEST_USERNAME})
+		c.Set("user", user)
+	}
 }
