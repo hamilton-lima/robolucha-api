@@ -19,14 +19,24 @@ import (
 
 const TEST_USERNAME = "foo"
 
+func SetupMain(t *testing.T) {
+	log.SetFormatter(&log.JSONFormatter{})
+	log.SetOutput(os.Stdout)
+	log.SetLevel(log.WarnLevel)
+	os.Setenv("GIN_MODE", "release")
+}
+
 func TestCreateMatch(t *testing.T) {
+	SetupMain(t)
 	os.Remove(test.DB_NAME)
 	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
 	defer dataSource.db.Close()
 
 	plan, _ := ioutil.ReadFile("test-data/create-match.json")
 	body := string(plan)
-	fmt.Println(body)
+	log.WithFields(log.Fields{
+		"body": body,
+	}).Debug("After Create Match")
 
 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
 	w := test.PerformRequest(router, "POST", "/internal/match", body, test.API_KEY)
@@ -34,13 +44,16 @@ func TestCreateMatch(t *testing.T) {
 }
 
 func TestCreateGameComponent(t *testing.T) {
+	SetupMain(t)
 	os.Remove(test.DB_NAME)
 	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
 	defer dataSource.db.Close()
 
 	plan, _ := ioutil.ReadFile("test-data/create-gamecomponent1.json")
 	body := string(plan)
-	fmt.Println(body)
+	log.WithFields(log.Fields{
+		"body": body,
+	}).Debug("After Create Game component")
 
 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
 	w := test.PerformRequest(router, "POST", "/internal/game-component", body, test.API_KEY)
@@ -51,7 +64,7 @@ func TestCreateGameComponent(t *testing.T) {
 	assert.True(t, luchador.ID > 0)
 	log.WithFields(log.Fields{
 		"luchador.ID": luchador.ID,
-	}).Info("First call to create game component")
+	}).Debug("First call to create game component")
 
 	// retry to check for duplicate
 	w = test.PerformRequest(router, "POST", "/internal/game-component", body, test.API_KEY)
@@ -62,12 +75,12 @@ func TestCreateGameComponent(t *testing.T) {
 	assert.True(t, luchador.ID == luchador2.ID)
 	log.WithFields(log.Fields{
 		"luchador.ID": luchador2.ID,
-	}).Info("Second call to create game component")
+	}).Debug("Second call to create game component")
 
 	luchadorFromDB := dataSource.findLuchadorByID(luchador2.ID)
 	log.WithFields(log.Fields{
 		"luchador.configs": luchadorFromDB.Configs,
-	}).Info("configs from luchador")
+	}).Debug("configs from luchador")
 
 	// all the Mask config items should be present
 	for _, color := range maskColors {
@@ -81,7 +94,7 @@ func TestCreateGameComponent(t *testing.T) {
 		assert.True(t, found)
 		log.WithFields(log.Fields{
 			"color": color,
-		}).Info("Color found in luchador config")
+		}).Debug("Color found in luchador config")
 	}
 
 	for shape, _ := range maskShapes {
@@ -95,7 +108,7 @@ func TestCreateGameComponent(t *testing.T) {
 		assert.True(t, found)
 		log.WithFields(log.Fields{
 			"shape": shape,
-		}).Info("Shape found in luchador config")
+		}).Debug("Shape found in luchador config")
 	}
 
 	getConfigs(t, router, luchador2.ID)
@@ -104,6 +117,7 @@ func TestCreateGameComponent(t *testing.T) {
 }
 
 func TestAddScores(t *testing.T) {
+	SetupMain(t)
 	os.Remove(test.DB_NAME)
 	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
 	defer dataSource.db.Close()
@@ -137,7 +151,7 @@ func TestAddScores(t *testing.T) {
 
 	log.WithFields(log.Fields{
 		"body": body,
-	}).Info("TestAddScores")
+	}).Debug("TestAddScores")
 
 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
 	w := test.PerformRequest(router, "POST", "/internal/add-match-scores", body, test.API_KEY)
@@ -165,7 +179,7 @@ func TestAddScores(t *testing.T) {
 		assert.True(t, found)
 		log.WithFields(log.Fields{
 			"score-from-body": scoreFromBody,
-		}).Info("TestAddScores")
+		}).Debug("TestAddScores")
 	}
 
 }

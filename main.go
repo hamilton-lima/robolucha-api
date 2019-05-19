@@ -38,7 +38,7 @@ var publisher Publisher
 func main() {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stdout)
-	log.SetLevel(log.DebugLevel)
+	log.SetLevel(log.InfoLevel)
 
 	log.Info("Robolucha API, start.")
 

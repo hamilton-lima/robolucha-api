@@ -20,13 +20,14 @@ var mockPublisher *test.MockPublisher
 func Setup(t *testing.T) *Luchador {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stdout)
-	log.SetLevel(log.DebugLevel)
+	log.SetLevel(log.WarnLevel)
+	os.Setenv("GIN_MODE", "release")
 
 	err := os.Remove(test.DB_NAME)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"error": err,
-		}).Info("error removing TEST database")
+		}).Error("error removing TEST database")
 	}
 	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
 
@@ -55,7 +56,7 @@ func TestLuchadorUpdateDuplicatedNameSameUser(t *testing.T) {
 
 	log.WithFields(log.Fields{
 		"luchador": luchador.Name,
-	}).Info("luchador before same name update")
+	}).Debug("luchador before same name update")
 
 	w := test.PerformRequestNoAuth(router, "PUT", "/private/luchador", body2)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -66,7 +67,7 @@ func TestLuchadorUpdateDuplicatedNameSameUser(t *testing.T) {
 	log.WithFields(log.Fields{
 		"response":        response.Luchador.Name,
 		"response.errors": response.Errors,
-	}).Info("after luchador update")
+	}).Debug("after luchador update")
 
 	t.Log(response.Errors)
 	assert.Equal(t, len(response.Errors), 0)
@@ -107,7 +108,7 @@ func TestLuchadorUpdateName(t *testing.T) {
 	log.WithFields(log.Fields{
 		"expected":         channel,
 		"publishedChannel": mockPublisher.LastChannel,
-	}).Info("publish event")
+	}).Debug("publish event")
 	assert.True(t, mockPublisher.LastChannel == channel)
 
 }
@@ -124,7 +125,7 @@ func TestLuchadorUpdateRandomMask(t *testing.T) {
 	body2 := string(plan2)
 	log.WithFields(log.Fields{
 		"luchador": luchador.Name,
-	}).Info("luchador before update")
+	}).Debug("luchador before update")
 
 	w := test.PerformRequestNoAuth(router, "PUT", "/private/luchador", body2)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -135,7 +136,7 @@ func TestLuchadorUpdateRandomMask(t *testing.T) {
 	log.WithFields(log.Fields{
 		"response.Errors":   response.Errors,
 		"response.Luchador": response.Luchador,
-	}).Info("after luchador update")
+	}).Debug("after luchador update")
 
 	// check if no errors exist in the response
 	assert.Equal(t, 0, len(response.Errors))
@@ -148,7 +149,7 @@ func TestLuchadorUpdateRandomMask(t *testing.T) {
 
 	log.WithFields(log.Fields{
 		"changed": changed,
-	}).Info("comparing response.Configs with original.Configs")
+	}).Debug("comparing response.Configs with original.Configs")
 
 	// check if configs are updated in the subsequent GET of luchador
 	afterUpdateLuchador := GetLuchador(t)
@@ -163,7 +164,7 @@ func TestLuchadorUpdateRandomMask(t *testing.T) {
 	log.WithFields(log.Fields{
 		"expected":         channel,
 		"publishedChannel": mockPublisher.LastChannel,
-	}).Info("publish event")
+	}).Debug("publish event")
 	assert.True(t, mockPublisher.LastChannel == channel)
 
 }
