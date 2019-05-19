@@ -110,6 +110,8 @@ func NewDataSource(config *DBconfig) *DataSource {
 	db.AutoMigrate(&Code{})
 	db.AutoMigrate(&Config{})
 	db.AutoMigrate(&MatchScore{})
+	db.AutoMigrate(&SceneComponent{})
+	db.AutoMigrate(&GameDefinition{})
 
 	secret := os.Getenv("API_SECRET")
 

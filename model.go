@@ -52,6 +52,49 @@ type Match struct {
 	BuletSpeed      uint       `json:"buletSpeed"`
 }
 
+type GameDefinition struct {
+	ID                     uint             `gorm:"primary_key" json:"id"`
+	CreatedAt              time.Time        `json:"createdAt"`
+	UpdatedAt              time.Time        `json:"updatedAt"`
+	DeletedAt              *time.Time       `json:"deletedAt"`
+	Duration               uint64           `json:"duration"`
+	MinParticipants        uint             `json:"minParticipants"`
+	MaxParticipants        uint             `json:"maxParticipants"`
+	ArenaWidth             uint             `json:"arenaWidth"`
+	ArenaHeight            uint             `json:"arenaHeight"`
+	BulletSize             uint             `json:"bulletSize"`
+	LuchadorSize           uint             `json:"luchadorSize"`
+	Fps                    uint             `json:"fps"`
+	BuletSpeed             uint             `json:"buletSpeed"`
+	Name                   string           `gorm:"not null;unique_index" json:"name"`
+	Description            string           `json:"description"`
+	Type                   string           `json:"type"`
+	SortOrder              uint             `json:"sortOrder"`
+	Participants           []Luchador       `gorm:"many2many:match_participants" json:"participants"`
+	SceneComponents        []SceneComponent `gorm:"many2many:scene_components" json:"scene_components"`
+	Codes                  []Code           `json:"codes"`
+	LuchadorSuggestedCodes []Code           `json:"suggestedCodes"`
+}
+
+// Luchador definition
+type SceneComponent struct {
+	ID            uint       `gorm:"primary_key" json:"id"`
+	CreatedAt     time.Time  `json:"createdAt"`
+	UpdatedAt     time.Time  `json:"updatedAt"`
+	DeletedAt     *time.Time `json:"deletedAt"`
+	X             uint       `json:"x"`
+	Y             uint       `json:"y"`
+	Width         uint       `json:"width"`
+	Height        uint       `json:"height"`
+	Rotation      uint       `json:"rotation"`
+	Respawn       bool       `json:"respawn"`
+	Colider       bool       `json:"colider"`
+	ShowInRadar   bool       `json:"showInRadar"`
+	BlockMovement bool       `json:"blockMovement"`
+	Type          string     `json:"name"`
+	Codes         []Code     `json:"codes"`
+}
+
 // Luchador definition
 type Luchador struct {
 	ID        uint       `gorm:"primary_key" json:"id"`
