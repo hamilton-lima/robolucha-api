@@ -2,11 +2,11 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"io/ioutil"
 
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 // From
@@ -16,7 +16,9 @@ func RequestLogger() gin.HandlerFunc {
 		rdr1 := ioutil.NopCloser(bytes.NewBuffer(buf))
 		rdr2 := ioutil.NopCloser(bytes.NewBuffer(buf)) //We have to create a new Buffer, because rdr1 will be read.
 
-		fmt.Println(readBody(rdr1)) // Print request body
+		log.WithFields(log.Fields{
+			"body": readBody(rdr1),
+		}).Debug("request body")
 
 		c.Request.Body = rdr2
 		c.Next()

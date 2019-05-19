@@ -14,7 +14,6 @@ export API_PORT=8080
 export GIN_MODE=debug
 export GORM_DEBUG=true
 export API_SECRET=343434343
-export API_ADD_TEST_USERS=true
 
 echo "--- BUILD api"
 go build -v -o $HOME/go/bin/robolucha-api
