@@ -22,8 +22,6 @@ func Setup(t *testing.T) *Luchador {
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.DebugLevel)
 
-	os.Setenv("GORM_DEBUG", "false")
-
 	err := os.Remove(test.DB_NAME)
 	if err != nil {
 		log.WithFields(log.Fields{

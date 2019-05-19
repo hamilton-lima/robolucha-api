@@ -20,7 +20,6 @@ import (
 const TEST_USERNAME = "foo"
 
 func TestCreateMatch(t *testing.T) {
-	os.Setenv("GORM_DEBUG", "true")
 	os.Remove(test.DB_NAME)
 	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
 	defer dataSource.db.Close()
@@ -35,8 +34,6 @@ func TestCreateMatch(t *testing.T) {
 }
 
 func TestCreateGameComponent(t *testing.T) {
-	os.Setenv("GORM_DEBUG", "true")
-
 	os.Remove(test.DB_NAME)
 	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
 	defer dataSource.db.Close()
@@ -107,7 +104,6 @@ func TestCreateGameComponent(t *testing.T) {
 }
 
 func TestAddScores(t *testing.T) {
-	os.Setenv("GORM_DEBUG", "true")
 	os.Remove(test.DB_NAME)
 	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
 	defer dataSource.db.Close()
