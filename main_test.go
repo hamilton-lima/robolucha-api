@@ -34,7 +34,6 @@ func TestCreateMatch(t *testing.T) {
 
 func TestCreateGameComponent(t *testing.T) {
 	os.Setenv("GORM_DEBUG", "true")
-	os.Setenv("API_ADD_TEST_USERS", "true")
 
 	os.Remove(test.DB_NAME)
 	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))

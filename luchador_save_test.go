@@ -36,7 +36,6 @@ func Setup(t *testing.T) *Luchador {
 	log.SetLevel(log.DebugLevel)
 
 	os.Setenv("GORM_DEBUG", "false")
-	os.Setenv("API_ADD_TEST_USERS", "true")
 
 	err := os.Remove(test.DB_NAME)
 	if err != nil {
