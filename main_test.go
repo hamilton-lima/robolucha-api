@@ -298,10 +298,11 @@ func compareGameDefinition(t *testing.T, a, b GameDefinition) {
 
 	assert.Assert(t, a.Name == b.Name)
 
-	assert.Assert(t, len(a.Codes) == len(b.Codes))
-	assert.Assert(t, len(a.Participants) == len(b.Participants))
-	assert.Assert(t, len(a.Participants[0].Codes) == len(b.Participants[0].Codes))
-	assert.Assert(t, len(a.Participants[0].Configs) == len(b.Participants[0].Configs))
+	assert.Equal(t, len(a.Codes), len(b.Codes))
+	assert.Equal(t, len(a.Participants), len(b.Participants))
+
+	assert.Equal(t, len(a.Participants[0].Codes), len(b.Participants[0].Codes))
+	assert.Equal(t, len(a.Participants[0].Configs), len(b.Participants[0].Configs))
 }
 
 func fakeGameDefinition(t *testing.T, typeName string, sortOrder uint) (GameDefinition, string, error) {
@@ -330,11 +331,13 @@ func fakeGameDefinition(t *testing.T, typeName string, sortOrder uint) (GameDefi
 		gameDefinition.Participants[i].Codes = make([]Code, 2)
 		for n, _ := range gameDefinition.Participants[i].Codes {
 			faker.FakeData(&gameDefinition.Participants[i].Codes[n])
+			gameDefinition.Participants[i].Codes[n].ID = 0
 		}
 
 		gameDefinition.Participants[i].Configs = make([]Config, 2)
 		for n, _ := range gameDefinition.Participants[i].Configs {
 			faker.FakeData(&gameDefinition.Participants[i].Configs[n])
+			gameDefinition.Participants[i].Configs[n].ID = 0
 		}
 	}
 
@@ -344,15 +347,18 @@ func fakeGameDefinition(t *testing.T, typeName string, sortOrder uint) (GameDefi
 		gameDefinition.SceneComponents[i].Codes = make([]ServerCode, 2)
 		for n, _ := range gameDefinition.SceneComponents[i].Codes {
 			faker.FakeData(&gameDefinition.SceneComponents[i].Codes[n])
+			gameDefinition.SceneComponents[i].Codes[n].ID = 0
 		}
 	}
 
 	for i, _ := range gameDefinition.Codes {
 		faker.FakeData(&gameDefinition.Codes[i])
+		gameDefinition.Codes[i].ID = 0
 	}
 
 	for i, _ := range gameDefinition.LuchadorSuggestedCodes {
 		faker.FakeData(&gameDefinition.LuchadorSuggestedCodes[i])
+		gameDefinition.LuchadorSuggestedCodes[i].ID = 0
 	}
 
 	foo, _ := json.Marshal(gameDefinition)
@@ -361,15 +367,15 @@ func fakeGameDefinition(t *testing.T, typeName string, sortOrder uint) (GameDefi
 	// removes dates from generated records
 	json.Unmarshal([]byte(result), &gameDefinition)
 
-	assert.Assert(t, len(gameDefinition.Codes) > 0)
-	assert.Assert(t, len(gameDefinition.LuchadorSuggestedCodes) > 0)
+	assert.Assert(t, len(gameDefinition.Codes) == 2)
+	assert.Assert(t, len(gameDefinition.LuchadorSuggestedCodes) == 2)
 
-	assert.Assert(t, len(gameDefinition.Participants) > 0)
-	assert.Assert(t, len(gameDefinition.Participants[0].Codes) > 0)
-	assert.Assert(t, len(gameDefinition.Participants[0].Configs) > 0)
+	assert.Assert(t, len(gameDefinition.Participants) == 2)
+	assert.Assert(t, len(gameDefinition.Participants[0].Codes) == 2)
+	assert.Assert(t, len(gameDefinition.Participants[0].Configs) == 2)
 
-	assert.Assert(t, len(gameDefinition.SceneComponents) > 0)
-	assert.Assert(t, len(gameDefinition.SceneComponents[0].Codes) > 0)
+	assert.Assert(t, len(gameDefinition.SceneComponents) == 2)
+	assert.Assert(t, len(gameDefinition.SceneComponents[0].Codes) == 2)
 
 	return gameDefinition, result, nil
 }
