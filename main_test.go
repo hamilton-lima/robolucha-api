@@ -211,7 +211,7 @@ func TestCreateGameDefinition(t *testing.T) {
 	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
 	defer dataSource.db.Close()
 
-	resultFake, body, err := fakeGameDefinition()
+	resultFake, body, err := fakeGameDefinition(t, faker.Word(), 0)
 	assert.Assert(t, err == nil)
 
 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
@@ -229,8 +229,8 @@ func TestGETGameDefinition(t *testing.T) {
 	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
 	defer dataSource.db.Close()
 
-	definition1 := createTestGameDefinition(t)
-	definition2 := createTestGameDefinition(t)
+	definition1 := createTestGameDefinition(t, faker.Word(), 0)
+	definition2 := createTestGameDefinition(t, faker.Word(), 0)
 
 	url := fmt.Sprintf("/internal/game-definition/%v", definition1.Name)
 
@@ -245,8 +245,33 @@ func TestGETGameDefinition(t *testing.T) {
 	assert.Assert(t, definition1.ID != definition2.ID)
 }
 
-func createTestGameDefinition(t *testing.T) GameDefinition {
-	_, body, err := fakeGameDefinition()
+func TestFindTutorialGameDefinition(t *testing.T) {
+	SetupMain(t)
+
+	os.Remove(test.DB_NAME)
+	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
+	defer dataSource.db.Close()
+
+	definition1 := createTestGameDefinition(t, GAMEDEFINITION_TYPE_TUTORIAL, 20)
+	definition2 := createTestGameDefinition(t, GAMEDEFINITION_TYPE_TUTORIAL, 10)
+	definition3 := createTestGameDefinition(t, faker.Word(), 1)
+
+	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
+	w := test.PerformRequestNoAuth(router, "GET", "/private/tutorial", "")
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var resultGameDefinition []GameDefinition
+	json.Unmarshal(w.Body.Bytes(), &resultGameDefinition)
+
+	// fmt.Printf(">>>>%v", string(w.Body.Bytes()))
+	assert.Assert(t, definition3.ID > 0)
+	assert.Assert(t, len(resultGameDefinition) == 2)
+	compareGameDefinition(t, definition2, resultGameDefinition[0])
+	compareGameDefinition(t, definition1, resultGameDefinition[1])
+}
+
+func createTestGameDefinition(t *testing.T, typeName string, sortOrder uint) GameDefinition {
+	_, body, err := fakeGameDefinition(t, typeName, sortOrder)
 	assert.Assert(t, err == nil)
 
 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
@@ -261,11 +286,25 @@ func createTestGameDefinition(t *testing.T) GameDefinition {
 
 // assert.DeepEqual is checking not exported fields
 func compareGameDefinition(t *testing.T, a, b GameDefinition) {
+	assert.Assert(t, len(a.Codes) > 0)
+	assert.Assert(t, len(a.LuchadorSuggestedCodes) > 0)
+
+	assert.Assert(t, len(a.Participants) > 0)
+	assert.Assert(t, len(a.Participants[0].Codes) > 0)
+	assert.Assert(t, len(a.Participants[0].Configs) > 0)
+
+	assert.Assert(t, len(a.SceneComponents) > 0)
+	assert.Assert(t, len(a.SceneComponents[0].Codes) > 0)
+
 	assert.Assert(t, a.Name == b.Name)
+
 	assert.Assert(t, len(a.Codes) == len(b.Codes))
+	assert.Assert(t, len(a.Participants) == len(b.Participants))
+	assert.Assert(t, len(a.Participants[0].Codes) == len(b.Participants[0].Codes))
+	assert.Assert(t, len(a.Participants[0].Configs) == len(b.Participants[0].Configs))
 }
 
-func fakeGameDefinition() (GameDefinition, string, error) {
+func fakeGameDefinition(t *testing.T, typeName string, sortOrder uint) (GameDefinition, string, error) {
 	gameDefinition := GameDefinition{}
 
 	err := faker.FakeData(&gameDefinition)
@@ -277,6 +316,8 @@ func fakeGameDefinition() (GameDefinition, string, error) {
 	}
 
 	gameDefinition.ID = 0
+	gameDefinition.Type = typeName
+	gameDefinition.SortOrder = sortOrder
 
 	gameDefinition.Participants = make([]Luchador, 2)
 	gameDefinition.SceneComponents = make([]SceneComponent, 2)
@@ -285,10 +326,25 @@ func fakeGameDefinition() (GameDefinition, string, error) {
 
 	for i, _ := range gameDefinition.Participants {
 		faker.FakeData(&gameDefinition.Participants[i])
+
+		gameDefinition.Participants[i].Codes = make([]Code, 2)
+		for n, _ := range gameDefinition.Participants[i].Codes {
+			faker.FakeData(&gameDefinition.Participants[i].Codes[n])
+		}
+
+		gameDefinition.Participants[i].Configs = make([]Config, 2)
+		for n, _ := range gameDefinition.Participants[i].Configs {
+			faker.FakeData(&gameDefinition.Participants[i].Configs[n])
+		}
 	}
 
 	for i, _ := range gameDefinition.SceneComponents {
 		faker.FakeData(&gameDefinition.SceneComponents[i])
+
+		gameDefinition.SceneComponents[i].Codes = make([]ServerCode, 2)
+		for n, _ := range gameDefinition.SceneComponents[i].Codes {
+			faker.FakeData(&gameDefinition.SceneComponents[i].Codes[n])
+		}
 	}
 
 	for i, _ := range gameDefinition.Codes {
@@ -304,6 +360,16 @@ func fakeGameDefinition() (GameDefinition, string, error) {
 
 	// removes dates from generated records
 	json.Unmarshal([]byte(result), &gameDefinition)
+
+	assert.Assert(t, len(gameDefinition.Codes) > 0)
+	assert.Assert(t, len(gameDefinition.LuchadorSuggestedCodes) > 0)
+
+	assert.Assert(t, len(gameDefinition.Participants) > 0)
+	assert.Assert(t, len(gameDefinition.Participants[0].Codes) > 0)
+	assert.Assert(t, len(gameDefinition.Participants[0].Configs) > 0)
+
+	assert.Assert(t, len(gameDefinition.SceneComponents) > 0)
+	assert.Assert(t, len(gameDefinition.SceneComponents[0].Codes) > 0)
 
 	return gameDefinition, result, nil
 }
