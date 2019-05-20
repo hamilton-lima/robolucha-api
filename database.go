@@ -566,7 +566,10 @@ func (ds *DataSource) findGameDefinition(id uint) *GameDefinition {
 
 	if ds.db.
 		Preload("Participants").
+		Preload("Participants.Codes").
+		Preload("Participants.Configs").
 		Preload("SceneComponents").
+		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
 		Where(&GameDefinition{ID: id}).
@@ -600,7 +603,10 @@ func (ds *DataSource) findGameDefinitionByName(name string) *GameDefinition {
 
 	if ds.db.
 		Preload("Participants").
+		Preload("Participants.Codes").
+		Preload("Participants.Configs").
 		Preload("SceneComponents").
+		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
 		Where(&GameDefinition{Name: name}).
@@ -634,7 +640,10 @@ func (ds *DataSource) findTutorialGameDefinition() *[]GameDefinition {
 
 	ds.db.
 		Preload("Participants").
+		Preload("Participants.Codes").
+		Preload("Participants.Configs").
 		Preload("SceneComponents").
+		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
 		Where(&GameDefinition{Type: GAMEDEFINITION_TYPE_TUTORIAL}).
