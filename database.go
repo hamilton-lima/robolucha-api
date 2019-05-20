@@ -111,6 +111,7 @@ func NewDataSource(config *DBconfig) *DataSource {
 	db.AutoMigrate(&Code{})
 	db.AutoMigrate(&Config{})
 	db.AutoMigrate(&MatchScore{})
+	db.AutoMigrate(&ServerCode{})
 	db.AutoMigrate(&SceneComponent{})
 	db.AutoMigrate(&GameDefinition{})
 
@@ -558,7 +559,7 @@ func (ds *DataSource) createGameDefinition(g *GameDefinition) *GameDefinition {
 	return &gameDefinition
 }
 
-func (ds *DataSource) findGameDefinition(ID uint) *GameDefinition {
+func (ds *DataSource) findGameDefinition(id uint) *GameDefinition {
 	var gameDefinition GameDefinition
 
 	if ds.db.
@@ -566,15 +567,40 @@ func (ds *DataSource) findGameDefinition(ID uint) *GameDefinition {
 		Preload("SceneComponents").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
-		Where(&GameDefinition{ID: ID}).
+		Where(&GameDefinition{ID: id}).
 		First(&gameDefinition).
 		RecordNotFound() {
+
+		log.WithFields(log.Fields{
+			"ID": id,
+		}).Info("findGameDefinition not found")
 
 		return nil
 	}
 
 	log.WithFields(log.Fields{
-		"ID":             ID,
+		"ID":             id,
+		"gameDefinition": gameDefinition,
+	}).Info("findGameDefinition before array checks")
+
+	if gameDefinition.Participants == nil {
+		gameDefinition.Participants = make([]Luchador, 0)
+	}
+
+	if gameDefinition.SceneComponents == nil {
+		gameDefinition.SceneComponents = make([]SceneComponent, 0)
+	}
+
+	if gameDefinition.Codes == nil {
+		gameDefinition.Codes = make([]ServerCode, 0)
+	}
+
+	if gameDefinition.LuchadorSuggestedCodes == nil {
+		gameDefinition.LuchadorSuggestedCodes = make([]ServerCode, 0)
+	}
+
+	log.WithFields(log.Fields{
+		"ID":             id,
 		"gameDefinition": gameDefinition,
 	}).Info("findGameDefinition")
 

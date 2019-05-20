@@ -282,6 +282,7 @@ func createGameDefinition(c *gin.Context) {
 
 	log.WithFields(log.Fields{
 		"gameDefinition": result,
+		"ID":             createResult.ID,
 	}).Info("createGameDefinition after create")
 
 	c.JSON(http.StatusOK, result)
