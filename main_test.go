@@ -14,8 +14,9 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/bxcodec/faker"
-	"github.com/stretchr/testify/assert"
+	// "github.com/stretchr/testify/assert"
 	"gitlab.com/robolucha/robolucha-api/test"
+	"gotest.tools/assert"
 )
 
 const TEST_USERNAME = "foo"
@@ -62,7 +63,7 @@ func TestCreateGameComponent(t *testing.T) {
 
 	var luchador Luchador
 	json.Unmarshal(w.Body.Bytes(), &luchador)
-	assert.True(t, luchador.ID > 0)
+	assert.Assert(t, luchador.ID > 0)
 	log.WithFields(log.Fields{
 		"luchador.ID": luchador.ID,
 	}).Debug("First call to create game component")
@@ -73,7 +74,7 @@ func TestCreateGameComponent(t *testing.T) {
 
 	var luchador2 Luchador
 	json.Unmarshal(w.Body.Bytes(), &luchador2)
-	assert.True(t, luchador.ID == luchador2.ID)
+	assert.Assert(t, luchador.ID == luchador2.ID)
 	log.WithFields(log.Fields{
 		"luchador.ID": luchador2.ID,
 	}).Debug("Second call to create game component")
@@ -92,7 +93,7 @@ func TestCreateGameComponent(t *testing.T) {
 				break
 			}
 		}
-		assert.True(t, found)
+		assert.Assert(t, found)
 		log.WithFields(log.Fields{
 			"color": color,
 		}).Debug("Color found in luchador config")
@@ -106,7 +107,7 @@ func TestCreateGameComponent(t *testing.T) {
 				break
 			}
 		}
-		assert.True(t, found)
+		assert.Assert(t, found)
 		log.WithFields(log.Fields{
 			"shape": shape,
 		}).Debug("Shape found in luchador config")
@@ -177,7 +178,7 @@ func TestAddScores(t *testing.T) {
 				break
 			}
 		}
-		assert.True(t, found)
+		assert.Assert(t, found)
 		log.WithFields(log.Fields{
 			"score-from-body": scoreFromBody,
 		}).Debug("TestAddScores")
@@ -209,28 +210,35 @@ func TestGameDefinition(t *testing.T) {
 	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
 	defer dataSource.db.Close()
 
-	result, body := fakeGameDefinition()
-	assert.NotEqual(t, result, nil)
+	result, body, err := fakeGameDefinition()
+	assert.Assert(t, err == nil)
 
 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
 	w := test.PerformRequest(router, "POST", "/internal/game-definition", body, test.API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
+
+	resultGameDefinition := GameDefinition{}
+	json.Unmarshal(w.Body.Bytes(), &resultGameDefinition)
+
+	// everything was saved
+	assert.DeepEqual(t, result, resultGameDefinition)
 }
 
-func fakeGameDefinition() (GameDefinition, string) {
+func fakeGameDefinition() (GameDefinition, string, error) {
 	gameDefinition := GameDefinition{}
 	faker.SetRandomMapAndSliceSize(5)
 
+	// TODO: use faker to generate arrays ALLWAYS with data
 	err := faker.FakeData(&gameDefinition)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"error": err,
 		}).Error("Error generation fake game definition")
-		return GameDefinition{}, ""
+		return GameDefinition{}, "", err
 	}
 
 	foo, _ := json.Marshal(gameDefinition)
 	result := string(foo)
 
-	return gameDefinition, result
+	return gameDefinition, result, nil
 }
