@@ -89,6 +89,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 	internalAPI := router.Group("/internal")
 	internalAPI.Use(KeyIsValid(internalAPIKey))
 	{
+		internalAPI.GET("/game-definition/:id", getGameDefinition)
 		internalAPI.POST("/game-definition", createGameDefinition)
 		internalAPI.POST("/match", createMatch)
 		internalAPI.POST("/game-component", createGameComponent)
@@ -514,6 +515,31 @@ func getMaskConfig(c *gin.Context) {
 	}).Info("getMaskConfig")
 
 	c.JSON(http.StatusOK, configs)
+}
+
+// getGameDefinition godoc
+// @Summary find a game definition
+// @Accept json
+// @Produce json
+// @Param name path string true "GameDefinition name"
+// @Success 200 200 {array} main.GameDefinition
+// @Security ApiKeyAuth
+// @Router /internal/game-definition/{name} [get]
+func getGameDefinition(c *gin.Context) {
+
+	name := c.Param("name")
+
+	log.WithFields(log.Fields{
+		"name": name,
+	}).Info("getGameDefinition")
+
+	gameDefinition := dataSource.findGameDefinitionByName(name)
+
+	log.WithFields(log.Fields{
+		"gameDefinition": gameDefinition,
+	}).Info("getGameDefinition")
+
+	c.JSON(http.StatusOK, gameDefinition)
 }
 
 // getRandomMaskConfig godoc

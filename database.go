@@ -581,8 +581,53 @@ func (ds *DataSource) findGameDefinition(id uint) *GameDefinition {
 	log.WithFields(log.Fields{
 		"ID":             id,
 		"gameDefinition": gameDefinition,
-	}).Info("findGameDefinition before array checks")
+	}).Debug("findGameDefinition before array checks")
 
+	resetGameDefinitionArrays(&gameDefinition)
+
+	log.WithFields(log.Fields{
+		"ID":             id,
+		"gameDefinition": gameDefinition,
+	}).Info("findGameDefinition")
+
+	return &gameDefinition
+}
+
+func (ds *DataSource) findGameDefinitionByName(name string) *GameDefinition {
+	var gameDefinition GameDefinition
+
+	if ds.db.
+		Preload("Participants").
+		Preload("SceneComponents").
+		Preload("Codes").
+		Preload("LuchadorSuggestedCodes").
+		Where(&GameDefinition{Name: name}).
+		First(&gameDefinition).
+		RecordNotFound() {
+
+		log.WithFields(log.Fields{
+			"Name": name,
+		}).Info("findGameDefinition not found")
+
+		return nil
+	}
+
+	log.WithFields(log.Fields{
+		"Name":           name,
+		"gameDefinition": gameDefinition,
+	}).Debug("findGameDefinition before array checks")
+
+	resetGameDefinitionArrays(&gameDefinition)
+
+	log.WithFields(log.Fields{
+		"Name":           name,
+		"gameDefinition": gameDefinition,
+	}).Info("findGameDefinition")
+
+	return &gameDefinition
+}
+
+func resetGameDefinitionArrays(gameDefinition *GameDefinition) {
 	if gameDefinition.Participants == nil {
 		gameDefinition.Participants = make([]Luchador, 0)
 	}
@@ -598,11 +643,4 @@ func (ds *DataSource) findGameDefinition(id uint) *GameDefinition {
 	if gameDefinition.LuchadorSuggestedCodes == nil {
 		gameDefinition.LuchadorSuggestedCodes = make([]ServerCode, 0)
 	}
-
-	log.WithFields(log.Fields{
-		"ID":             id,
-		"gameDefinition": gameDefinition,
-	}).Info("findGameDefinition")
-
-	return &gameDefinition
 }

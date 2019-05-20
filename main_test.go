@@ -204,9 +204,8 @@ func SessionAllwaysValid() gin.HandlerFunc {
 	}
 }
 
-func TestGameDefinition(t *testing.T) {
+func TestCreateGameDefinition(t *testing.T) {
 	SetupMain(t)
-	// os.Setenv("GORM_DEBUG", "true")
 
 	os.Remove(test.DB_NAME)
 	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
@@ -221,11 +220,49 @@ func TestGameDefinition(t *testing.T) {
 
 	resultGameDefinition := GameDefinition{}
 	json.Unmarshal(w.Body.Bytes(), &resultGameDefinition)
+	compareGameDefinition(t, resultFake, resultGameDefinition)
+}
+func TestGETGameDefinition(t *testing.T) {
+	SetupMain(t)
 
-	// everything was saved
-	// asser.DeepEqual is checking not exported fields
-	assert.Assert(t, len(resultFake.Codes) == len(resultGameDefinition.Codes))
-	assert.Assert(t, true)
+	os.Remove(test.DB_NAME)
+	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
+	defer dataSource.db.Close()
+
+	definition1 := createTestGameDefinition(t)
+	definition2 := createTestGameDefinition(t)
+
+	url := fmt.Sprintf("/internal/game-definition/%v", definition1.Name)
+
+	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
+	w := test.PerformRequest(router, "GET", url, "", test.API_KEY)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	resultGameDefinition := GameDefinition{}
+	json.Unmarshal(w.Body.Bytes(), &resultGameDefinition)
+
+	compareGameDefinition(t, definition1, resultGameDefinition)
+	assert.Assert(t, definition1.ID != definition2.ID)
+}
+
+func createTestGameDefinition(t *testing.T) GameDefinition {
+	_, body, err := fakeGameDefinition()
+	assert.Assert(t, err == nil)
+
+	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
+	w := test.PerformRequest(router, "POST", "/internal/game-definition", body, test.API_KEY)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	resultGameDefinition := GameDefinition{}
+	json.Unmarshal(w.Body.Bytes(), &resultGameDefinition)
+
+	return resultGameDefinition
+}
+
+// assert.DeepEqual is checking not exported fields
+func compareGameDefinition(t *testing.T, a, b GameDefinition) {
+	assert.Assert(t, a.Name == b.Name)
+	assert.Assert(t, len(a.Codes) == len(b.Codes))
 }
 
 func fakeGameDefinition() (GameDefinition, string, error) {
