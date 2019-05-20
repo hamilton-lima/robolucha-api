@@ -5,18 +5,18 @@ import "time"
 // User definition
 type User struct {
 	ID        uint       `gorm:"primary_key" json:"id"`
-	CreatedAt time.Time  `json:"createdAt"`
-	UpdatedAt time.Time  `json:"updatedAt"`
-	DeletedAt *time.Time `json:"deletedAt"`
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
+	DeletedAt *time.Time `json:"-"`
 	Username  string     `json:"username"`
 }
 
 // Session definition
 type Session struct {
 	ID        uint       `gorm:"primary_key" json:"id"`
-	CreatedAt time.Time  `json:"createdAt"`
-	UpdatedAt time.Time  `json:"updatedAt"`
-	DeletedAt *time.Time `json:"deletedAt"`
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
+	DeletedAt *time.Time `json:"-"`
 	UUID      string     `json:"UUID"`
 	UserID    uint       `json:"userID"`
 }
@@ -24,9 +24,9 @@ type Session struct {
 // UserSetting definition
 type UserSetting struct {
 	ID         uint       `gorm:"primary_key" json:"id"`
-	CreatedAt  time.Time  `json:"createdAt"`
-	UpdatedAt  time.Time  `json:"updatedAt"`
-	DeletedAt  *time.Time `json:"deletedAt"`
+	CreatedAt  time.Time  `json:"-"`
+	UpdatedAt  time.Time  `json:"-"`
+	DeletedAt  *time.Time `json:"-"`
 	UserID     uint       `json:"userID"`
 	LastOption string     `json:"lastOption"`
 }
@@ -34,9 +34,9 @@ type UserSetting struct {
 // Match definition
 type Match struct {
 	ID              uint       `gorm:"primary_key" json:"id"`
-	CreatedAt       time.Time  `json:"createdAt"`
-	UpdatedAt       time.Time  `json:"updatedAt"`
-	DeletedAt       *time.Time `json:"deletedAt"`
+	CreatedAt       time.Time  `json:"-"`
+	UpdatedAt       time.Time  `json:"-"`
+	DeletedAt       *time.Time `json:"-"`
 	TimeStart       time.Time  `json:"timeStart"`
 	TimeEnd         time.Time  `json:"timeEnd"`
 	LastTimeAlive   time.Time  `json:"lastTimeAlive"`
@@ -54,9 +54,9 @@ type Match struct {
 
 type GameDefinition struct {
 	ID                     uint             `gorm:"primary_key" json:"id"`
-	CreatedAt              time.Time        `json:"createdAt"`
-	UpdatedAt              time.Time        `json:"updatedAt"`
-	DeletedAt              *time.Time       `json:"deletedAt"`
+	CreatedAt              time.Time        `json:"-"`
+	UpdatedAt              time.Time        `json:"-"`
+	DeletedAt              *time.Time       `json:"-"`
 	Duration               uint64           `json:"duration"`
 	MinParticipants        uint             `json:"minParticipants"`
 	MaxParticipants        uint             `json:"maxParticipants"`
@@ -79,9 +79,9 @@ type GameDefinition struct {
 // Luchador definition
 type SceneComponent struct {
 	ID            uint       `gorm:"primary_key" json:"id"`
-	CreatedAt     time.Time  `json:"createdAt"`
-	UpdatedAt     time.Time  `json:"updatedAt"`
-	DeletedAt     *time.Time `json:"deletedAt"`
+	CreatedAt     time.Time  `json:"-"`
+	UpdatedAt     time.Time  `json:"-"`
+	DeletedAt     *time.Time `json:"-"`
 	X             uint       `json:"x"`
 	Y             uint       `json:"y"`
 	Width         uint       `json:"width"`
@@ -98,9 +98,9 @@ type SceneComponent struct {
 // Luchador definition
 type Luchador struct {
 	ID        uint       `gorm:"primary_key" json:"id"`
-	CreatedAt time.Time  `json:"createdAt"`
-	UpdatedAt time.Time  `json:"updatedAt"`
-	DeletedAt *time.Time `json:"deletedAt"`
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
+	DeletedAt *time.Time `json:"-"`
 	UserID    uint       `json:"userID"`
 	Name      string     `gorm:"not null;unique_index" json:"name"`
 	Codes     []Code     `json:"codes"`
@@ -110,9 +110,9 @@ type Luchador struct {
 // Code definition
 type Code struct {
 	ID         uint       `gorm:"primary_key" json:"id,omitempty"`
-	CreatedAt  time.Time  `json:"createdAt,omitempty"`
-	UpdatedAt  time.Time  `json:"updatedAt,omitempty"`
-	DeletedAt  *time.Time `json:"deletedAt,omitempty"`
+	CreatedAt  time.Time  `json:"-"`
+	UpdatedAt  time.Time  `json:"-"`
+	DeletedAt  *time.Time `json:"-"`
 	LuchadorID uint       `json:"luchadorID,omitempty"`
 	Event      string     `json:"event"`
 	Script     string     `json:"script"`
@@ -122,9 +122,9 @@ type Code struct {
 // Config definition
 type Config struct {
 	ID         uint       `gorm:"primary_key" json:"id,omitempty"`
-	CreatedAt  time.Time  `json:"createdAt,omitempty"`
-	UpdatedAt  time.Time  `json:"updatedAt,omitempty"`
-	DeletedAt  *time.Time `json:"deletedAt,omitempty"`
+	CreatedAt  time.Time  `json:"-"`
+	UpdatedAt  time.Time  `json:"-"`
+	DeletedAt  *time.Time `json:"-"`
 	LuchadorID uint       `json:"luchadorID,omitempty"`
 	Key        string     `json:"key"`
 	Value      string     `json:"value"`
@@ -150,9 +150,9 @@ type MatchParticipant struct {
 // MatchScore definition
 type MatchScore struct {
 	ID         uint       `gorm:"primary_key" json:"id,omitempty"`
-	CreatedAt  time.Time  `json:"createdAt,omitempty"`
-	UpdatedAt  time.Time  `json:"updatedAt,omitempty"`
-	DeletedAt  *time.Time `json:"deletedAt,omitempty"`
+	CreatedAt  time.Time  `json:"-"`
+	UpdatedAt  time.Time  `json:"-"`
+	DeletedAt  *time.Time `json:"-"`
 	LuchadorID uint       `json:"luchadorID"`
 	MatchID    uint       `json:"matchID"`
 	Kills      int        `json:"kills"`
