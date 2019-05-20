@@ -70,6 +70,11 @@ func main() {
 func createRouter(internalAPIKey string, logRequestBody string,
 	factory SessionValidatorFactory) *gin.Engine {
 
+	ginMode := os.Getenv("GIN_MODE")
+	if ginMode == "release" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	router := gin.Default()
 
 	config := cors.DefaultConfig()
