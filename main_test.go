@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/bxcodec/faker"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/robolucha/robolucha-api/test"
 )
@@ -200,4 +201,36 @@ func SessionAllwaysValid() gin.HandlerFunc {
 		user := dataSource.createUser(User{Username: TEST_USERNAME})
 		c.Set("user", user)
 	}
+}
+
+func TestGameDefinition(t *testing.T) {
+	SetupMain(t)
+	os.Remove(test.DB_NAME)
+	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
+	defer dataSource.db.Close()
+
+	result, body := fakeGameDefinition()
+	assert.NotEqual(t, result, nil)
+
+	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
+	w := test.PerformRequest(router, "POST", "/internal/game-definition", body, test.API_KEY)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func fakeGameDefinition() (GameDefinition, string) {
+	gameDefinition := GameDefinition{}
+	faker.SetRandomMapAndSliceSize(5)
+
+	err := faker.FakeData(&gameDefinition)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Error("Error generation fake game definition")
+		return GameDefinition{}, ""
+	}
+
+	foo, _ := json.Marshal(gameDefinition)
+	result := string(foo)
+
+	return gameDefinition, result
 }

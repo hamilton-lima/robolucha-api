@@ -89,6 +89,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 	internalAPI := router.Group("/internal")
 	internalAPI.Use(KeyIsValid(internalAPIKey))
 	{
+		internalAPI.POST("/game-definition", createGameDefinition)
 		internalAPI.POST("/match", createMatch)
 		internalAPI.POST("/game-component", createGameComponent)
 		internalAPI.GET("/luchador", getLuchadorByID)
@@ -242,6 +243,48 @@ func updateUserSetting(c *gin.Context) {
 	}).Info("Updated userSetting")
 
 	c.JSON(http.StatusOK, userSetting)
+}
+
+// createGameDefinition godoc
+// @Summary create Game definition
+// @Accept json
+// @Produce json
+// @Param request body main.GameDefinition true "GameDefinition"
+// @Success 200 {object} main.GameDefinition
+// @Security ApiKeyAuth
+// @Router /internal/game-definition [post]
+func createGameDefinition(c *gin.Context) {
+
+	var gameDefinition *GameDefinition
+	err := c.BindJSON(&gameDefinition)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Error("Invalid body content on createGameDefinition")
+
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"gameDefinition": gameDefinition,
+	}).Info("createGameDefinition")
+
+	createResult := dataSource.createGameDefinition(gameDefinition)
+	if createResult == nil {
+		log.Error("Invalid GameDefinition when saving")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	// load all the fields
+	result := dataSource.findGameDefinition(createResult.ID)
+
+	log.WithFields(log.Fields{
+		"gameDefinition": result,
+	}).Info("createGameDefinition after create")
+
+	c.JSON(http.StatusOK, result)
 }
 
 // createMatch godoc

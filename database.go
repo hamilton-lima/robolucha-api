@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/jinzhu/copier"
 	"github.com/jinzhu/gorm"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -542,4 +543,40 @@ func (ds *DataSource) addMatchScores(ms *ScoreList) *ScoreList {
 	}
 
 	return ms
+}
+
+func (ds *DataSource) createGameDefinition(g *GameDefinition) *GameDefinition {
+
+	gameDefinition := GameDefinition{}
+	copier.Copy(&gameDefinition, &g)
+	ds.db.Create(&gameDefinition)
+
+	log.WithFields(log.Fields{
+		"gameDefinition": gameDefinition,
+	}).Info("createGameDefinition")
+
+	return &gameDefinition
+}
+
+func (ds *DataSource) findGameDefinition(ID uint) *GameDefinition {
+	var gameDefinition GameDefinition
+
+	if ds.db.
+		Preload("Participants").
+		Preload("SceneComponents").
+		Preload("Codes").
+		Preload("LuchadorSuggestedCodes").
+		Where(&GameDefinition{ID: ID}).
+		First(&gameDefinition).
+		RecordNotFound() {
+
+		return nil
+	}
+
+	log.WithFields(log.Fields{
+		"ID":             ID,
+		"gameDefinition": gameDefinition,
+	}).Info("findGameDefinition")
+
+	return &gameDefinition
 }
