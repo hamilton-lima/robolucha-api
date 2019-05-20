@@ -103,6 +103,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 	privateAPI := router.Group("/private")
 	privateAPI.Use(factory())
 	{
+		privateAPI.GET("/tutorial", getTutorialGameDefinition)
 		privateAPI.GET("/get-user", getUser)
 		privateAPI.GET("/luchador", getLuchador)
 		privateAPI.PUT("/luchador", updateLuchador)
@@ -484,6 +485,24 @@ func updateLuchador(c *gin.Context) {
 func cleanName(name string) string {
 	name = strings.TrimSpace(name)
 	return name
+}
+
+// getTutorialGameDefinition godoc
+// @Summary find tutorial GameDefinition
+// @Accept json
+// @Produce json
+// @Success 200 200 {array} main.GameDefinition
+// @Security ApiKeyAuth
+// @Router /private/tutorial [get]
+func getTutorialGameDefinition(c *gin.Context) {
+
+	tutorials := dataSource.findTutorialGameDefinition()
+
+	log.WithFields(log.Fields{
+		"tutorials": tutorials,
+	}).Info("getTutorialGameDefinition")
+
+	c.JSON(http.StatusOK, tutorials)
 }
 
 // getMaskConfig godoc

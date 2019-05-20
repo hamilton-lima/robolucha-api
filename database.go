@@ -33,6 +33,8 @@ type DataSource struct {
 	secret string
 }
 
+const GAMEDEFINITION_TYPE_TUTORIAL = "tutorial"
+
 // BuildMysqlConfig creates a DBconfig for Mysql based on environment variables
 func BuildMysqlConfig() *DBconfig {
 	user := os.Getenv("MYSQL_USER")
@@ -625,6 +627,33 @@ func (ds *DataSource) findGameDefinitionByName(name string) *GameDefinition {
 	}).Info("findGameDefinition")
 
 	return &gameDefinition
+}
+
+func (ds *DataSource) findTutorialGameDefinition() *[]GameDefinition {
+	var gameDefinitions []GameDefinition
+
+	ds.db.
+		Preload("Participants").
+		Preload("SceneComponents").
+		Preload("Codes").
+		Preload("LuchadorSuggestedCodes").
+		Where(&GameDefinition{Type: GAMEDEFINITION_TYPE_TUTORIAL}).
+		Order("sort_order").
+		Find(&gameDefinitions)
+
+	log.WithFields(log.Fields{
+		"gameDefinitions": gameDefinitions,
+	}).Debug("findTutorialGameDefinition before array checks")
+
+	for i, _ := range gameDefinitions {
+		resetGameDefinitionArrays(&gameDefinitions[i])
+	}
+
+	log.WithFields(log.Fields{
+		"gameDefinitions": gameDefinitions,
+	}).Debug("findTutorialGameDefinition")
+
+	return &gameDefinitions
 }
 
 func resetGameDefinitionArrays(gameDefinition *GameDefinition) {
