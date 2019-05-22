@@ -53,27 +53,48 @@ type Match struct {
 }
 
 type GameDefinition struct {
-	ID                     uint             `gorm:"primary_key" json:"id"`
-	CreatedAt              time.Time        `json:"-"`
-	UpdatedAt              time.Time        `json:"-"`
-	DeletedAt              *time.Time       `json:"-"`
-	Duration               uint64           `json:"duration"`
-	MinParticipants        uint             `json:"minParticipants"`
-	MaxParticipants        uint             `json:"maxParticipants"`
-	ArenaWidth             uint             `json:"arenaWidth"`
-	ArenaHeight            uint             `json:"arenaHeight"`
-	BulletSize             uint             `json:"bulletSize"`
-	LuchadorSize           uint             `json:"luchadorSize"`
-	Fps                    uint             `json:"fps"`
-	BuletSpeed             uint             `json:"buletSpeed"`
-	Name                   string           `gorm:"not null;unique_index" json:"name"`
-	Description            string           `json:"description"`
-	Type                   string           `json:"type"`
-	SortOrder              uint             `json:"sortOrder"`
-	Participants           []Luchador       `gorm:"many2many:gamedefinition_participants" json:"participants"`
-	SceneComponents        []SceneComponent `json:"sceneComponents"`
-	Codes                  []ServerCode     `gorm:"many2many:gamedefinition_codes" json:"codes"`
-	LuchadorSuggestedCodes []ServerCode     `gorm:"many2many:gamedefinition_suggestedcodes" json:"suggestedCodes"`
+	ID                            uint             `gorm:"primary_key" json:"id"`
+	CreatedAt                     time.Time        `json:"-"`
+	UpdatedAt                     time.Time        `json:"-"`
+	DeletedAt                     *time.Time       `json:"-"`
+	Duration                      uint64           `json:"duration"`
+	MinParticipants               uint             `json:"minParticipants"`
+	MaxParticipants               uint             `json:"maxParticipants"`
+	ArenaWidth                    uint             `json:"arenaWidth"`
+	ArenaHeight                   uint             `json:"arenaHeight"`
+	BulletSize                    uint             `json:"bulletSize"`
+	LuchadorSize                  uint             `json:"luchadorSize"`
+	Fps                           uint             `json:"fps"`
+	BuletSpeed                    uint             `json:"buletSpeed"`
+	Name                          string           `gorm:"not null;unique_index" json:"name"`
+	Description                   string           `json:"description"`
+	Type                          string           `json:"type"`
+	SortOrder                     uint             `json:"sortOrder"`
+	RadarAngle                    uint             `json:"radarAngle"`
+	RadarRadius                   uint             `json:"radarRadius"`
+	PunchAngle                    uint             `json:"punchAngle"`
+	Life                          uint             `json:"life"`
+	Energy                        uint             `json:"energy"`
+	PunchDamage                   uint             `json:"punchDamage"`
+	PunchCoolDown                 uint             `json:"punchCoolDown"`
+	MoveSpeed                     uint             `json:"moveSpeed"`
+	TurnSpeed                     uint             `json:"turnSpeed"`
+	TurnGunSpeed                  uint             `json:"turnGunSpeed"`
+	RespawnCooldown               uint             `json:"respawnCooldown"`
+	MaxFireCooldown               uint             `json:"maxFireCooldown"`
+	MinFireDamage                 uint             `json:"minFireDamage"`
+	MaxFireDamage                 uint             `json:"maxFireDamage"`
+	MinFireAmount                 uint             `json:"minFireAmount"`
+	MaxFireAmount                 uint             `json:"maxFireAmount"`
+	RestoreEnergyperSecond        uint             `json:"restoreEnergyperSecond"`
+	RecycledLuchadorEnergyRestore uint             `json:"recycledLuchadorEnergyRestore"`
+	IncreaseSpeedEnergyCost       uint             `json:"increaseSpeedEnergyCost"`
+	IncreaseSpeedPercentage       uint             `json:"increaseSpeedPercentage"`
+	FireEnergyCost                uint             `json:"fireEnergyCost"`
+	Participants                  []Luchador       `gorm:"many2many:gamedefinition_participants" json:"participants"`
+	SceneComponents               []SceneComponent `json:"sceneComponents"`
+	Codes                         []ServerCode     `gorm:"many2many:gamedefinition_codes" json:"codes"`
+	LuchadorSuggestedCodes        []ServerCode     `gorm:"many2many:gamedefinition_suggestedcodes" json:"suggestedCodes"`
 }
 
 type SceneComponent struct {
