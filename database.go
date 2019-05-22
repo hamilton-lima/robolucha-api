@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/jinzhu/copier"
 	"github.com/jinzhu/gorm"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -31,6 +32,8 @@ type DataSource struct {
 	db     *gorm.DB
 	secret string
 }
+
+const GAMEDEFINITION_TYPE_TUTORIAL = "tutorial"
 
 // BuildMysqlConfig creates a DBconfig for Mysql based on environment variables
 func BuildMysqlConfig() *DBconfig {
@@ -110,6 +113,9 @@ func NewDataSource(config *DBconfig) *DataSource {
 	db.AutoMigrate(&Code{})
 	db.AutoMigrate(&Config{})
 	db.AutoMigrate(&MatchScore{})
+	db.AutoMigrate(&ServerCode{})
+	db.AutoMigrate(&SceneComponent{})
+	db.AutoMigrate(&GameDefinition{})
 
 	secret := os.Getenv("API_SECRET")
 
@@ -540,4 +546,139 @@ func (ds *DataSource) addMatchScores(ms *ScoreList) *ScoreList {
 	}
 
 	return ms
+}
+
+func (ds *DataSource) createGameDefinition(g *GameDefinition) *GameDefinition {
+
+	gameDefinition := GameDefinition{}
+	copier.Copy(&gameDefinition, &g)
+	ds.db.Create(&gameDefinition)
+
+	log.WithFields(log.Fields{
+		"gameDefinition": gameDefinition,
+	}).Info("createGameDefinition")
+
+	return &gameDefinition
+}
+
+func (ds *DataSource) findGameDefinition(id uint) *GameDefinition {
+	var gameDefinition GameDefinition
+
+	if ds.db.
+		Preload("Participants").
+		Preload("Participants.Codes").
+		Preload("Participants.Configs").
+		Preload("SceneComponents").
+		Preload("SceneComponents.Codes").
+		Preload("Codes").
+		Preload("LuchadorSuggestedCodes").
+		Where(&GameDefinition{ID: id}).
+		First(&gameDefinition).
+		RecordNotFound() {
+
+		log.WithFields(log.Fields{
+			"ID": id,
+		}).Info("findGameDefinition not found")
+
+		return nil
+	}
+
+	log.WithFields(log.Fields{
+		"ID":             id,
+		"gameDefinition": gameDefinition,
+	}).Debug("findGameDefinition before array checks")
+
+	resetGameDefinitionArrays(&gameDefinition)
+
+	log.WithFields(log.Fields{
+		"ID":             id,
+		"gameDefinition": gameDefinition,
+	}).Info("findGameDefinition")
+
+	return &gameDefinition
+}
+
+func (ds *DataSource) findGameDefinitionByName(name string) *GameDefinition {
+	var gameDefinition GameDefinition
+
+	if ds.db.
+		Preload("Participants").
+		Preload("Participants.Codes").
+		Preload("Participants.Configs").
+		Preload("SceneComponents").
+		Preload("SceneComponents.Codes").
+		Preload("Codes").
+		Preload("LuchadorSuggestedCodes").
+		Where(&GameDefinition{Name: name}).
+		First(&gameDefinition).
+		RecordNotFound() {
+
+		log.WithFields(log.Fields{
+			"Name": name,
+		}).Info("findGameDefinition not found")
+
+		return nil
+	}
+
+	log.WithFields(log.Fields{
+		"Name":           name,
+		"gameDefinition": gameDefinition,
+	}).Debug("findGameDefinition before array checks")
+
+	resetGameDefinitionArrays(&gameDefinition)
+
+	log.WithFields(log.Fields{
+		"Name":           name,
+		"gameDefinition": gameDefinition,
+	}).Info("findGameDefinition")
+
+	return &gameDefinition
+}
+
+func (ds *DataSource) findTutorialGameDefinition() *[]GameDefinition {
+	var gameDefinitions []GameDefinition
+
+	ds.db.
+		Preload("Participants").
+		Preload("Participants.Codes").
+		Preload("Participants.Configs").
+		Preload("SceneComponents").
+		Preload("SceneComponents.Codes").
+		Preload("Codes").
+		Preload("LuchadorSuggestedCodes").
+		Where(&GameDefinition{Type: GAMEDEFINITION_TYPE_TUTORIAL}).
+		Order("sort_order").
+		Find(&gameDefinitions)
+
+	log.WithFields(log.Fields{
+		"gameDefinitions": gameDefinitions,
+	}).Debug("findTutorialGameDefinition before array checks")
+
+	for i, _ := range gameDefinitions {
+		resetGameDefinitionArrays(&gameDefinitions[i])
+	}
+
+	log.WithFields(log.Fields{
+		"gameDefinitions": gameDefinitions,
+	}).Debug("findTutorialGameDefinition")
+
+	return &gameDefinitions
+}
+
+func resetGameDefinitionArrays(gameDefinition *GameDefinition) {
+	if gameDefinition.Participants == nil {
+		gameDefinition.Participants = make([]Luchador, 0)
+	}
+
+	if gameDefinition.SceneComponents == nil {
+		gameDefinition.SceneComponents = make([]SceneComponent, 0)
+	}
+
+	if gameDefinition.Codes == nil {
+		gameDefinition.Codes = make([]ServerCode, 0)
+	}
+
+	if gameDefinition.LuchadorSuggestedCodes == nil {
+		gameDefinition.LuchadorSuggestedCodes = make([]ServerCode, 0)
+	}
 }

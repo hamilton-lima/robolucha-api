@@ -13,8 +13,10 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/bxcodec/faker"
+	// "github.com/stretchr/testify/assert"
 	"gitlab.com/robolucha/robolucha-api/test"
+	"gotest.tools/assert"
 )
 
 const TEST_USERNAME = "foo"
@@ -61,7 +63,7 @@ func TestCreateGameComponent(t *testing.T) {
 
 	var luchador Luchador
 	json.Unmarshal(w.Body.Bytes(), &luchador)
-	assert.True(t, luchador.ID > 0)
+	assert.Assert(t, luchador.ID > 0)
 	log.WithFields(log.Fields{
 		"luchador.ID": luchador.ID,
 	}).Debug("First call to create game component")
@@ -72,7 +74,7 @@ func TestCreateGameComponent(t *testing.T) {
 
 	var luchador2 Luchador
 	json.Unmarshal(w.Body.Bytes(), &luchador2)
-	assert.True(t, luchador.ID == luchador2.ID)
+	assert.Assert(t, luchador.ID == luchador2.ID)
 	log.WithFields(log.Fields{
 		"luchador.ID": luchador2.ID,
 	}).Debug("Second call to create game component")
@@ -91,7 +93,7 @@ func TestCreateGameComponent(t *testing.T) {
 				break
 			}
 		}
-		assert.True(t, found)
+		assert.Assert(t, found)
 		log.WithFields(log.Fields{
 			"color": color,
 		}).Debug("Color found in luchador config")
@@ -105,7 +107,7 @@ func TestCreateGameComponent(t *testing.T) {
 				break
 			}
 		}
-		assert.True(t, found)
+		assert.Assert(t, found)
 		log.WithFields(log.Fields{
 			"shape": shape,
 		}).Debug("Shape found in luchador config")
@@ -176,7 +178,7 @@ func TestAddScores(t *testing.T) {
 				break
 			}
 		}
-		assert.True(t, found)
+		assert.Assert(t, found)
 		log.WithFields(log.Fields{
 			"score-from-body": scoreFromBody,
 		}).Debug("TestAddScores")
@@ -200,4 +202,180 @@ func SessionAllwaysValid() gin.HandlerFunc {
 		user := dataSource.createUser(User{Username: TEST_USERNAME})
 		c.Set("user", user)
 	}
+}
+
+func TestCreateGameDefinition(t *testing.T) {
+	SetupMain(t)
+
+	os.Remove(test.DB_NAME)
+	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
+	defer dataSource.db.Close()
+
+	resultFake, body, err := fakeGameDefinition(t, faker.Word(), 0)
+	assert.Assert(t, err == nil)
+
+	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
+	w := test.PerformRequest(router, "POST", "/internal/game-definition", body, test.API_KEY)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	resultGameDefinition := GameDefinition{}
+	json.Unmarshal(w.Body.Bytes(), &resultGameDefinition)
+	compareGameDefinition(t, resultFake, resultGameDefinition)
+}
+func TestGETGameDefinition(t *testing.T) {
+	SetupMain(t)
+
+	os.Remove(test.DB_NAME)
+	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
+	defer dataSource.db.Close()
+
+	definition1 := createTestGameDefinition(t, faker.Word(), 0)
+	definition2 := createTestGameDefinition(t, faker.Word(), 0)
+
+	url := fmt.Sprintf("/internal/game-definition/%v", definition1.Name)
+
+	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
+	w := test.PerformRequest(router, "GET", url, "", test.API_KEY)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	resultGameDefinition := GameDefinition{}
+	json.Unmarshal(w.Body.Bytes(), &resultGameDefinition)
+
+	compareGameDefinition(t, definition1, resultGameDefinition)
+	assert.Assert(t, definition1.ID != definition2.ID)
+}
+
+func TestFindTutorialGameDefinition(t *testing.T) {
+	SetupMain(t)
+
+	os.Remove(test.DB_NAME)
+	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
+	defer dataSource.db.Close()
+
+	definition1 := createTestGameDefinition(t, GAMEDEFINITION_TYPE_TUTORIAL, 20)
+	definition2 := createTestGameDefinition(t, GAMEDEFINITION_TYPE_TUTORIAL, 10)
+	definition3 := createTestGameDefinition(t, faker.Word(), 1)
+
+	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
+	w := test.PerformRequestNoAuth(router, "GET", "/private/tutorial", "")
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var resultGameDefinition []GameDefinition
+	json.Unmarshal(w.Body.Bytes(), &resultGameDefinition)
+
+	// fmt.Printf(">>>>%v", string(w.Body.Bytes()))
+	assert.Assert(t, definition3.ID > 0)
+	assert.Assert(t, len(resultGameDefinition) == 2)
+	compareGameDefinition(t, definition2, resultGameDefinition[0])
+	compareGameDefinition(t, definition1, resultGameDefinition[1])
+}
+
+func createTestGameDefinition(t *testing.T, typeName string, sortOrder uint) GameDefinition {
+	_, body, err := fakeGameDefinition(t, typeName, sortOrder)
+	assert.Assert(t, err == nil)
+
+	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
+	w := test.PerformRequest(router, "POST", "/internal/game-definition", body, test.API_KEY)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	resultGameDefinition := GameDefinition{}
+	json.Unmarshal(w.Body.Bytes(), &resultGameDefinition)
+
+	return resultGameDefinition
+}
+
+// assert.DeepEqual is checking not exported fields
+func compareGameDefinition(t *testing.T, a, b GameDefinition) {
+	assert.Assert(t, len(a.Codes) > 0)
+	assert.Assert(t, len(a.LuchadorSuggestedCodes) > 0)
+
+	assert.Assert(t, len(a.Participants) > 0)
+	assert.Assert(t, len(a.Participants[0].Codes) > 0)
+	assert.Assert(t, len(a.Participants[0].Configs) > 0)
+
+	assert.Assert(t, len(a.SceneComponents) > 0)
+	assert.Assert(t, len(a.SceneComponents[0].Codes) > 0)
+
+	assert.Assert(t, a.Name == b.Name)
+
+	assert.Equal(t, len(a.Codes), len(b.Codes))
+	assert.Equal(t, len(a.Participants), len(b.Participants))
+
+	assert.Equal(t, len(a.Participants[0].Codes), len(b.Participants[0].Codes))
+	assert.Equal(t, len(a.Participants[0].Configs), len(b.Participants[0].Configs))
+}
+
+func fakeGameDefinition(t *testing.T, typeName string, sortOrder uint) (GameDefinition, string, error) {
+	gameDefinition := GameDefinition{}
+
+	err := faker.FakeData(&gameDefinition)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Error("Error generation fake game definition")
+		return GameDefinition{}, "", err
+	}
+
+	gameDefinition.ID = 0
+	gameDefinition.Type = typeName
+	gameDefinition.SortOrder = sortOrder
+
+	gameDefinition.Participants = make([]Luchador, 2)
+	gameDefinition.SceneComponents = make([]SceneComponent, 2)
+	gameDefinition.Codes = make([]ServerCode, 2)
+	gameDefinition.LuchadorSuggestedCodes = make([]ServerCode, 2)
+
+	for i, _ := range gameDefinition.Participants {
+		faker.FakeData(&gameDefinition.Participants[i])
+
+		gameDefinition.Participants[i].Codes = make([]Code, 2)
+		for n, _ := range gameDefinition.Participants[i].Codes {
+			faker.FakeData(&gameDefinition.Participants[i].Codes[n])
+			gameDefinition.Participants[i].Codes[n].ID = 0
+		}
+
+		gameDefinition.Participants[i].Configs = make([]Config, 2)
+		for n, _ := range gameDefinition.Participants[i].Configs {
+			faker.FakeData(&gameDefinition.Participants[i].Configs[n])
+			gameDefinition.Participants[i].Configs[n].ID = 0
+		}
+	}
+
+	for i, _ := range gameDefinition.SceneComponents {
+		faker.FakeData(&gameDefinition.SceneComponents[i])
+
+		gameDefinition.SceneComponents[i].Codes = make([]ServerCode, 2)
+		for n, _ := range gameDefinition.SceneComponents[i].Codes {
+			faker.FakeData(&gameDefinition.SceneComponents[i].Codes[n])
+			gameDefinition.SceneComponents[i].Codes[n].ID = 0
+		}
+	}
+
+	for i, _ := range gameDefinition.Codes {
+		faker.FakeData(&gameDefinition.Codes[i])
+		gameDefinition.Codes[i].ID = 0
+	}
+
+	for i, _ := range gameDefinition.LuchadorSuggestedCodes {
+		faker.FakeData(&gameDefinition.LuchadorSuggestedCodes[i])
+		gameDefinition.LuchadorSuggestedCodes[i].ID = 0
+	}
+
+	foo, _ := json.Marshal(gameDefinition)
+	result := string(foo)
+
+	// removes dates from generated records
+	json.Unmarshal([]byte(result), &gameDefinition)
+
+	assert.Assert(t, len(gameDefinition.Codes) == 2)
+	assert.Assert(t, len(gameDefinition.LuchadorSuggestedCodes) == 2)
+
+	assert.Assert(t, len(gameDefinition.Participants) == 2)
+	assert.Assert(t, len(gameDefinition.Participants[0].Codes) == 2)
+	assert.Assert(t, len(gameDefinition.Participants[0].Configs) == 2)
+
+	assert.Assert(t, len(gameDefinition.SceneComponents) == 2)
+	assert.Assert(t, len(gameDefinition.SceneComponents[0].Codes) == 2)
+
+	return gameDefinition, result, nil
 }

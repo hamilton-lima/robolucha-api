@@ -70,6 +70,11 @@ func main() {
 func createRouter(internalAPIKey string, logRequestBody string,
 	factory SessionValidatorFactory) *gin.Engine {
 
+	ginMode := os.Getenv("GIN_MODE")
+	if ginMode == "release" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	router := gin.Default()
 
 	config := cors.DefaultConfig()
@@ -89,6 +94,8 @@ func createRouter(internalAPIKey string, logRequestBody string,
 	internalAPI := router.Group("/internal")
 	internalAPI.Use(KeyIsValid(internalAPIKey))
 	{
+		internalAPI.GET("/game-definition/:id", getGameDefinition)
+		internalAPI.POST("/game-definition", createGameDefinition)
 		internalAPI.POST("/match", createMatch)
 		internalAPI.POST("/game-component", createGameComponent)
 		internalAPI.GET("/luchador", getLuchadorByID)
@@ -101,6 +108,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 	privateAPI := router.Group("/private")
 	privateAPI.Use(factory())
 	{
+		privateAPI.GET("/tutorial", getTutorialGameDefinition)
 		privateAPI.GET("/get-user", getUser)
 		privateAPI.GET("/luchador", getLuchador)
 		privateAPI.PUT("/luchador", updateLuchador)
@@ -242,6 +250,49 @@ func updateUserSetting(c *gin.Context) {
 	}).Info("Updated userSetting")
 
 	c.JSON(http.StatusOK, userSetting)
+}
+
+// createGameDefinition godoc
+// @Summary create Game definition
+// @Accept json
+// @Produce json
+// @Param request body main.GameDefinition true "GameDefinition"
+// @Success 200 {object} main.GameDefinition
+// @Security ApiKeyAuth
+// @Router /internal/game-definition [post]
+func createGameDefinition(c *gin.Context) {
+
+	var gameDefinition *GameDefinition
+	err := c.BindJSON(&gameDefinition)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Error("Invalid body content on createGameDefinition")
+
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"gameDefinition": gameDefinition,
+	}).Info("createGameDefinition")
+
+	createResult := dataSource.createGameDefinition(gameDefinition)
+	if createResult == nil {
+		log.Error("Invalid GameDefinition when saving")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	// load all the fields
+	result := dataSource.findGameDefinition(createResult.ID)
+
+	log.WithFields(log.Fields{
+		"gameDefinition": result,
+		"ID":             createResult.ID,
+	}).Info("createGameDefinition after create")
+
+	c.JSON(http.StatusOK, result)
 }
 
 // createMatch godoc
@@ -441,6 +492,24 @@ func cleanName(name string) string {
 	return name
 }
 
+// getTutorialGameDefinition godoc
+// @Summary find tutorial GameDefinition
+// @Accept json
+// @Produce json
+// @Success 200 200 {array} main.GameDefinition
+// @Security ApiKeyAuth
+// @Router /private/tutorial [get]
+func getTutorialGameDefinition(c *gin.Context) {
+
+	tutorials := dataSource.findTutorialGameDefinition()
+
+	log.WithFields(log.Fields{
+		"tutorials": tutorials,
+	}).Info("getTutorialGameDefinition")
+
+	c.JSON(http.StatusOK, tutorials)
+}
+
 // getMaskConfig godoc
 // @Summary find maskConfig for a luchador
 // @Accept json
@@ -470,6 +539,31 @@ func getMaskConfig(c *gin.Context) {
 	}).Info("getMaskConfig")
 
 	c.JSON(http.StatusOK, configs)
+}
+
+// getGameDefinition godoc
+// @Summary find a game definition
+// @Accept json
+// @Produce json
+// @Param name path string true "GameDefinition name"
+// @Success 200 200 {array} main.GameDefinition
+// @Security ApiKeyAuth
+// @Router /internal/game-definition/{name} [get]
+func getGameDefinition(c *gin.Context) {
+
+	name := c.Param("name")
+
+	log.WithFields(log.Fields{
+		"name": name,
+	}).Info("getGameDefinition")
+
+	gameDefinition := dataSource.findGameDefinitionByName(name)
+
+	log.WithFields(log.Fields{
+		"gameDefinition": gameDefinition,
+	}).Info("getGameDefinition")
+
+	c.JSON(http.StatusOK, gameDefinition)
 }
 
 // getRandomMaskConfig godoc
