@@ -48,6 +48,14 @@ func main() {
 	publisher = &RedisPublisher{}
 	go dataSource.KeepAlive()
 
+	if len(os.Args) < 2 {
+		log.Error("Missing gamedefinition folder parameter")
+		os.Exit(2)
+	}
+
+	gameDefinitionFolder := os.Args[1]
+	SetupGameDefinitionFromFolder(gameDefinitionFolder)
+
 	port := os.Getenv("API_PORT")
 	if len(port) == 0 {
 		port = "5000"

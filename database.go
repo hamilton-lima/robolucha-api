@@ -630,7 +630,7 @@ func (ds *DataSource) findGameDefinitionByName(name string) *GameDefinition {
 	log.WithFields(log.Fields{
 		"Name":           name,
 		"gameDefinition": gameDefinition,
-	}).Info("findGameDefinition")
+	}).Debug("findGameDefinition")
 
 	return &gameDefinition
 }
