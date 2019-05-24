@@ -67,6 +67,7 @@ type GameDefinition struct {
 	Fps                           uint             `json:"fps"`
 	BuletSpeed                    uint             `json:"buletSpeed"`
 	Name                          string           `gorm:"not null;unique_index" json:"name"`
+	Label                         string           `json:"label"`
 	Description                   string           `json:"description"`
 	Type                          string           `json:"type"`
 	SortOrder                     uint             `json:"sortOrder"`

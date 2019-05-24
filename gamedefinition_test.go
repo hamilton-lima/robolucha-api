@@ -15,7 +15,8 @@ func TestGenerateSampleGameDefinition(t *testing.T) {
 
 	gd := BuildDefaultGameDefinition()
 
-	gd.Name = "All against all"
+	gd.Name = "ALL-AGAINST-ALL"
+	gd.Label = "All against all"
 	gd.Type = "multiplayer"
 	gd.SortOrder = 0
 
