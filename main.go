@@ -102,9 +102,10 @@ func createRouter(internalAPIKey string, logRequestBody string,
 	internalAPI := router.Group("/internal")
 	internalAPI.Use(KeyIsValid(internalAPIKey))
 	{
-		internalAPI.GET("/game-definition/:id", getGameDefinition)
+		internalAPI.GET("/game-definition/:name", getGameDefinition)
+		internalAPI.GET("/game-definition-id/:id", getGameDefinitionByID)
 		internalAPI.POST("/game-definition", createGameDefinition)
-		internalAPI.POST("/match", createMatch)
+		internalAPI.POST("/start-match/:name", startMatch)
 		internalAPI.POST("/game-component", createGameComponent)
 		internalAPI.GET("/luchador", getLuchadorByID)
 		internalAPI.POST("/match-participant", addMatchPartipant)
@@ -303,32 +304,30 @@ func createGameDefinition(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-// createMatch godoc
+// startMatch godoc
 // @Summary create Match
 // @Accept json
 // @Produce json
-// @Param request body main.Match true "Match"
+// @Param name path string true "GameDefinition name"
 // @Success 200 {object} main.Match
 // @Security ApiKeyAuth
-// @Router /internal/match [post]
-func createMatch(c *gin.Context) {
+// @Router /internal/start-match/{name} [post]
+func startMatch(c *gin.Context) {
 
-	var match *Match
-	err := c.BindJSON(&match)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"error": err,
-		}).Error("Invalid body content on createMatch")
+	name := c.Param("name")
 
+	log.WithFields(log.Fields{
+		"name": name,
+	}).Info("startMatch")
+
+	gameDefinition := dataSource.findGameDefinitionByName(name)
+	if gameDefinition == nil {
+		log.Info("Invalid gamedefinition name")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
-	log.WithFields(log.Fields{
-		"createMatch": match,
-	}).Info("creating match")
-
-	match = dataSource.createMatch(match)
+	match := dataSource.createMatch(gameDefinition.ID)
 	if match == nil {
 		log.Error("Invalid Match when saving")
 		c.AbortWithStatus(http.StatusBadRequest)
@@ -566,6 +565,37 @@ func getGameDefinition(c *gin.Context) {
 	}).Info("getGameDefinition")
 
 	gameDefinition := dataSource.findGameDefinitionByName(name)
+
+	log.WithFields(log.Fields{
+		"gameDefinition": gameDefinition,
+	}).Info("getGameDefinition")
+
+	c.JSON(http.StatusOK, gameDefinition)
+}
+
+// getGameDefinitionByID godoc
+// @Summary find a game definition
+// @Accept json
+// @Produce json
+// @Param id path int true "GameDefinition id"
+// @Success 200 200 {array} main.GameDefinition
+// @Security ApiKeyAuth
+// @Router /internal/game-definition-id/{id} [get]
+func getGameDefinitionByID(c *gin.Context) {
+
+	id := c.Param("id")
+	aid, err := strconv.Atoi(id)
+	if err != nil {
+		log.Info("Invalid ID")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"id": aid,
+	}).Info("getGameDefinitionByID")
+
+	gameDefinition := dataSource.findGameDefinition(uint(aid))
 
 	log.WithFields(log.Fields{
 		"gameDefinition": gameDefinition,

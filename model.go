@@ -33,23 +33,15 @@ type UserSetting struct {
 
 // Match definition
 type Match struct {
-	ID              uint       `gorm:"primary_key" json:"id"`
-	CreatedAt       time.Time  `json:"-"`
-	UpdatedAt       time.Time  `json:"-"`
-	DeletedAt       *time.Time `json:"-"`
-	TimeStart       time.Time  `json:"timeStart"`
-	TimeEnd         time.Time  `json:"timeEnd"`
-	LastTimeAlive   time.Time  `json:"lastTimeAlive"`
-	Duration        uint64     `json:"duration"`
-	Participants    []Luchador `gorm:"many2many:match_participants" json:"participants"`
-	MinParticipants uint       `json:"minParticipants"`
-	MaxParticipants uint       `json:"maxParticipants"`
-	ArenaWidth      uint       `json:"arenaWidth"`
-	ArenaHeight     uint       `json:"arenaHeight"`
-	BulletSize      uint       `json:"bulletSize"`
-	LuchadorSize    uint       `json:"luchadorSize"`
-	Fps             uint       `json:"fps"`
-	BuletSpeed      uint       `json:"buletSpeed"`
+	ID               uint       `gorm:"primary_key" json:"id"`
+	CreatedAt        time.Time  `json:"-"`
+	UpdatedAt        time.Time  `json:"-"`
+	DeletedAt        *time.Time `json:"-"`
+	TimeStart        time.Time  `json:"timeStart"`
+	TimeEnd          time.Time  `json:"timeEnd"`
+	LastTimeAlive    time.Time  `json:"lastTimeAlive"`
+	GameDefinitionID uint       `json:"gameDefinitionID"`
+	Participants     []Luchador `gorm:"many2many:match_participants" json:"participants"`
 }
 
 type GameDefinition struct {

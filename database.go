@@ -195,38 +195,17 @@ func (ds *DataSource) createHash(key string) string {
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-// func (ds *DataSource) createSession(user *User) *Session {
-// 	uuid, err := uuid.NewV4()
-// 	if err != nil {
-// 		log.Errorf("Error creating session UUID: %v", err)
-// 		return nil
-// 	}
-
-// 	session := Session{UserID: user.ID, UUID: uuid.String()}
-// 	ds.db.Create(&session)
-
-// 	log.WithFields(log.Fields{
-// 		"user": session.UserID,
-// 		"uuid": session.UUID,
-// 	}).Info("Session created")
-
-// 	return &session
-// }
-
-func (ds *DataSource) createMatch(m *Match) *Match {
+func (ds *DataSource) createMatch(gameDefinitionID uint) *Match {
 	match := Match{
-		TimeStart:     m.TimeStart,
-		TimeEnd:       m.TimeEnd,
-		LastTimeAlive: m.LastTimeAlive,
-		Duration:      m.Duration,
-		Participants:  m.Participants,
+		TimeStart:        time.Now(),
+		GameDefinitionID: gameDefinitionID,
 	}
 
 	ds.db.Create(&match)
 
 	log.WithFields(log.Fields{
-		"match.id": match.ID,
-		"duration": match.Duration,
+		"match.id":         match.ID,
+		"gameDefinitionID": gameDefinitionID,
 	}).Info("Match created")
 
 	return &match

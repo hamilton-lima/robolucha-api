@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -34,15 +33,16 @@ func TestCreateMatch(t *testing.T) {
 	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
 	defer dataSource.db.Close()
 
-	plan, _ := ioutil.ReadFile("test-data/create-match.json")
-	body := string(plan)
-	log.WithFields(log.Fields{
-		"body": body,
-	}).Debug("After Create Match")
+	gd := BuildDefaultGameDefinition()
+	gd.Name = "FOOBAR"
+	dataSource.createGameDefinition(&gd)
+
+	url := fmt.Sprintf("/internal/start-match/%v", gd.Name)
 
 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
-	w := test.PerformRequest(router, "POST", "/internal/match", body, test.API_KEY)
+	w := test.PerformRequest(router, "POST", url, "", test.API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
+
 }
 
 func TestCreateGameComponent(t *testing.T) {
@@ -128,15 +128,13 @@ func TestAddScores(t *testing.T) {
 	luchador2 := dataSource.createLuchador(&Luchador{Name: "bar"})
 	luchador3 := dataSource.createLuchador(&Luchador{Name: "dee"})
 
-	matchData := Match{
-		Duration:        600000,
-		MinParticipants: 1,
-		MaxParticipants: 10,
-		TimeStart:       time.Now(),
-		Participants:    []Luchador{*luchador1, *luchador2, *luchador3},
-	}
+	gd := BuildDefaultGameDefinition()
+	dataSource.createGameDefinition(&gd)
 
-	match := dataSource.createMatch(&matchData)
+	match := dataSource.createMatch(gd.ID)
+	dataSource.addMatchParticipant(&MatchParticipant{LuchadorID: luchador1.ID, MatchID: match.ID})
+	dataSource.addMatchParticipant(&MatchParticipant{LuchadorID: luchador2.ID, MatchID: match.ID})
+	dataSource.addMatchParticipant(&MatchParticipant{LuchadorID: luchador3.ID, MatchID: match.ID})
 
 	matchID := fmt.Sprintf("%v", match.ID)
 	luchador1ID := fmt.Sprintf("%v", luchador1.ID)
