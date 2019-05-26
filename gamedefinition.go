@@ -35,7 +35,7 @@ func BuildDefaultGameDefinition() GameDefinition {
 	gd.IncreaseSpeedPercentage = 20
 	gd.FireEnergyCost = 2
 
-	gd.Participants = make([]Luchador, 0)
+	gd.GameComponents = make([]GameComponent, 0)
 	gd.SceneComponents = make([]SceneComponent, 0)
 	gd.Codes = make([]ServerCode, 0)
 	gd.LuchadorSuggestedCodes = make([]ServerCode, 0)

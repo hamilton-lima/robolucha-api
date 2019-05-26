@@ -2,7 +2,6 @@ package main
 
 import (
 	"math/rand"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -170,7 +169,5 @@ func randomColor() NMSColor {
 }
 
 func random(max int) int {
-	source := rand.NewSource(time.Now().UnixNano())
-	randomizer := rand.New(source)
-	return randomizer.Intn(max)
+	return rand.Intn(max)
 }

@@ -11,10 +11,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	log "github.com/sirupsen/logrus"
@@ -39,6 +41,7 @@ func main() {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.InfoLevel)
+	rand.Seed(time.Now().UTC().UnixNano())
 
 	log.Info("Robolucha API, start.")
 
@@ -553,7 +556,7 @@ func getMaskConfig(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param name path string true "GameDefinition name"
-// @Success 200 200 {array} main.GameDefinition
+// @Success 200 200 {object} main.GameDefinition
 // @Security ApiKeyAuth
 // @Router /internal/game-definition/{name} [get]
 func getGameDefinition(c *gin.Context) {
@@ -578,7 +581,7 @@ func getGameDefinition(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "GameDefinition id"
-// @Success 200 200 {array} main.GameDefinition
+// @Success 200 200 {object} main.GameDefinition
 // @Security ApiKeyAuth
 // @Router /internal/game-definition-id/{id} [get]
 func getGameDefinitionByID(c *gin.Context) {

@@ -84,7 +84,7 @@ type GameDefinition struct {
 	IncreaseSpeedEnergyCost       uint             `json:"increaseSpeedEnergyCost"`
 	IncreaseSpeedPercentage       uint             `json:"increaseSpeedPercentage"`
 	FireEnergyCost                uint             `json:"fireEnergyCost"`
-	Participants                  []Luchador       `gorm:"many2many:gamedefinition_participants" json:"participants"`
+	GameComponents                []GameComponent  `json:"gameComponents"`
 	SceneComponents               []SceneComponent `json:"sceneComponents"`
 	Codes                         []ServerCode     `gorm:"many2many:gamedefinition_codes" json:"codes"`
 	LuchadorSuggestedCodes        []ServerCode     `gorm:"many2many:gamedefinition_suggestedcodes" json:"suggestedCodes"`
@@ -109,6 +109,17 @@ type SceneComponent struct {
 	Codes            []ServerCode `gorm:"many2many:scenecomponent_codes" json:"codes"`
 }
 
+type GameComponent struct {
+	ID               uint           `gorm:"primary_key" json:"id"`
+	CreatedAt        time.Time      `json:"-"`
+	UpdatedAt        time.Time      `json:"-"`
+	DeletedAt        *time.Time     `json:"-"`
+	GameDefinitionID uint           `json:"gameDefinition,omitempty"`
+	Name             string         `json:"name"`
+	Codes            []ServerCode   `gorm:"many2many:gamecomponent_codes" json:"codes"`
+	Configs          []ServerConfig `gorm:"many2many:gamecomponent_configs" json:"configs"`
+}
+
 type ServerCode struct {
 	ID        uint       `gorm:"primary_key" json:"id,omitempty"`
 	CreatedAt time.Time  `json:"-"`
@@ -117,6 +128,16 @@ type ServerCode struct {
 	Event     string     `json:"event"`
 	Script    string     `json:"script"`
 	Exception string     `json:"exception"`
+}
+
+// Config definition
+type ServerConfig struct {
+	ID        uint       `gorm:"primary_key" json:"id,omitempty"`
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
+	DeletedAt *time.Time `json:"-"`
+	Key       string     `json:"key"`
+	Value     string     `json:"value"`
 }
 
 // Luchador definition

@@ -121,6 +121,111 @@
                 }
             }
         },
+        "/internal/game-definition": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "create Game definition",
+                "parameters": [
+                    {
+                        "description": "GameDefinition",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.GameDefinition"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.GameDefinition"
+                        }
+                    }
+                }
+            }
+        },
+        "/internal/game-definition-id/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find a game definition",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "GameDefinition id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.GameDefinition"
+                        }
+                    }
+                }
+            }
+        },
+        "/internal/game-definition/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find a game definition",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "GameDefinition name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.GameDefinition"
+                        }
+                    }
+                }
+            }
+        },
         "/internal/luchador": {
             "get": {
                 "security": [
@@ -149,43 +254,6 @@
                         "schema": {
                             "type": "object",
                             "$ref": "#/definitions/main.Luchador"
-                        }
-                    }
-                }
-            }
-        },
-        "/internal/match": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "create Match",
-                "parameters": [
-                    {
-                        "description": "Match",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/main.Match"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/main.Match"
                         }
                     }
                 }
@@ -238,6 +306,40 @@
                 "summary": "returns application health check information",
                 "responses": {
                     "200": {}
+                }
+            }
+        },
+        "/internal/start-match/{name}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "create Match",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "GameDefinition name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.Match"
+                        }
+                    }
                 }
             }
         },
@@ -488,6 +590,33 @@
                 }
             }
         },
+        "/private/tutorial": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find tutorial GameDefinition",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.GameDefinition"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/private/user/setting": {
             "get": {
                 "security": [
@@ -553,12 +682,6 @@
         "main.Code": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "deletedAt": {
-                    "type": "string"
-                },
                 "event": {
                     "type": "string"
                 },
@@ -573,21 +696,12 @@
                 },
                 "script": {
                     "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
                 }
             }
         },
         "main.Config": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "deletedAt": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "integer"
                 },
@@ -597,10 +711,170 @@
                 "luchadorID": {
                     "type": "integer"
                 },
-                "updatedAt": {
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "main.GameComponent": {
+            "type": "object",
+            "properties": {
+                "codes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/main.ServerCode"
+                    }
+                },
+                "configs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/main.ServerConfig"
+                    }
+                },
+                "gameDefinition": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "main.GameDefinition": {
+            "type": "object",
+            "properties": {
+                "arenaHeight": {
+                    "type": "integer"
+                },
+                "arenaWidth": {
+                    "type": "integer"
+                },
+                "buletSpeed": {
+                    "type": "integer"
+                },
+                "bulletSize": {
+                    "type": "integer"
+                },
+                "codes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/main.ServerCode"
+                    }
+                },
+                "description": {
                     "type": "string"
                 },
-                "value": {
+                "duration": {
+                    "type": "integer"
+                },
+                "energy": {
+                    "type": "integer"
+                },
+                "fireEnergyCost": {
+                    "type": "integer"
+                },
+                "fps": {
+                    "type": "integer"
+                },
+                "gameComponents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/main.GameComponent"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "increaseSpeedEnergyCost": {
+                    "type": "integer"
+                },
+                "increaseSpeedPercentage": {
+                    "type": "integer"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "life": {
+                    "type": "integer"
+                },
+                "luchadorSize": {
+                    "type": "integer"
+                },
+                "maxFireAmount": {
+                    "type": "integer"
+                },
+                "maxFireCooldown": {
+                    "type": "integer"
+                },
+                "maxFireDamage": {
+                    "type": "integer"
+                },
+                "maxParticipants": {
+                    "type": "integer"
+                },
+                "minFireAmount": {
+                    "type": "integer"
+                },
+                "minFireDamage": {
+                    "type": "integer"
+                },
+                "minParticipants": {
+                    "type": "integer"
+                },
+                "moveSpeed": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "punchAngle": {
+                    "type": "integer"
+                },
+                "punchCoolDown": {
+                    "type": "integer"
+                },
+                "punchDamage": {
+                    "type": "integer"
+                },
+                "radarAngle": {
+                    "type": "integer"
+                },
+                "radarRadius": {
+                    "type": "integer"
+                },
+                "recycledLuchadorEnergyRestore": {
+                    "type": "integer"
+                },
+                "respawnCooldown": {
+                    "type": "integer"
+                },
+                "restoreEnergyperSecond": {
+                    "type": "integer"
+                },
+                "sceneComponents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/main.SceneComponent"
+                    }
+                },
+                "sortOrder": {
+                    "type": "integer"
+                },
+                "suggestedCodes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/main.ServerCode"
+                    }
+                },
+                "turnGunSpeed": {
+                    "type": "integer"
+                },
+                "turnSpeed": {
+                    "type": "integer"
+                },
+                "type": {
                     "type": "string"
                 }
             }
@@ -631,19 +905,10 @@
                         "$ref": "#/definitions/main.Config"
                     }
                 },
-                "createdAt": {
-                    "type": "string"
-                },
-                "deletedAt": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "integer"
                 },
                 "name": {
-                    "type": "string"
-                },
-                "updatedAt": {
                     "type": "string"
                 },
                 "userID": {
@@ -654,28 +919,7 @@
         "main.Match": {
             "type": "object",
             "properties": {
-                "arenaHeight": {
-                    "type": "integer"
-                },
-                "arenaWidth": {
-                    "type": "integer"
-                },
-                "buletSpeed": {
-                    "type": "integer"
-                },
-                "bulletSize": {
-                    "type": "integer"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "deletedAt": {
-                    "type": "string"
-                },
-                "duration": {
-                    "type": "integer"
-                },
-                "fps": {
+                "gameDefinitionID": {
                     "type": "integer"
                 },
                 "id": {
@@ -683,15 +927,6 @@
                 },
                 "lastTimeAlive": {
                     "type": "string"
-                },
-                "luchadorSize": {
-                    "type": "integer"
-                },
-                "maxParticipants": {
-                    "type": "integer"
-                },
-                "minParticipants": {
-                    "type": "integer"
                 },
                 "participants": {
                     "type": "array",
@@ -703,9 +938,6 @@
                     "type": "string"
                 },
                 "timeStart": {
-                    "type": "string"
-                },
-                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -724,14 +956,8 @@
         "main.MatchScore": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
                 "deaths": {
                     "type": "integer"
-                },
-                "deletedAt": {
-                    "type": "string"
                 },
                 "id": {
                     "type": "integer"
@@ -747,9 +973,53 @@
                 },
                 "score": {
                     "type": "integer"
+                }
+            }
+        },
+        "main.SceneComponent": {
+            "type": "object",
+            "properties": {
+                "blockMovement": {
+                    "type": "boolean"
                 },
-                "updatedAt": {
+                "codes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/main.ServerCode"
+                    }
+                },
+                "colider": {
+                    "type": "boolean"
+                },
+                "gameDefinition": {
+                    "type": "integer"
+                },
+                "height": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
+                },
+                "respawn": {
+                    "type": "boolean"
+                },
+                "rotation": {
+                    "type": "integer"
+                },
+                "showInRadar": {
+                    "type": "boolean"
+                },
+                "width": {
+                    "type": "integer"
+                },
+                "x": {
+                    "type": "integer"
+                },
+                "y": {
+                    "type": "integer"
                 }
             }
         },
@@ -761,6 +1031,37 @@
                     "items": {
                         "$ref": "#/definitions/main.MatchScore"
                     }
+                }
+            }
+        },
+        "main.ServerCode": {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "type": "string"
+                },
+                "exception": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "script": {
+                    "type": "string"
+                }
+            }
+        },
+        "main.ServerConfig": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
                 }
             }
         },
@@ -782,17 +1083,8 @@
         "main.User": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "deletedAt": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "integer"
-                },
-                "updatedAt": {
-                    "type": "string"
                 },
                 "username": {
                     "type": "string"
@@ -802,19 +1094,10 @@
         "main.UserSetting": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "deletedAt": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "integer"
                 },
                 "lastOption": {
-                    "type": "string"
-                },
-                "updatedAt": {
                     "type": "string"
                 },
                 "userID": {

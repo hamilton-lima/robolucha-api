@@ -35,10 +35,9 @@
   "increaseSpeedEnergyCost": 10,
   "increaseSpeedPercentage": 20,
   "fireEnergyCost": 2,
-  "participants": [
+  "gameComponents": [
     {
       "id": 0,
-      "userID": 0,
       "name": "otto",
       "codes": [
         { "event": "onStart", "script": "turnGun(90)", "exception": "" },
@@ -53,7 +52,6 @@
     },
     {
       "id": 0,
-      "userID": 0,
       "name": "farol",
       "codes": [
         {

@@ -114,7 +114,9 @@ func NewDataSource(config *DBconfig) *DataSource {
 	db.AutoMigrate(&Config{})
 	db.AutoMigrate(&MatchScore{})
 	db.AutoMigrate(&ServerCode{})
+	db.AutoMigrate(&ServerConfig{})
 	db.AutoMigrate(&SceneComponent{})
+	db.AutoMigrate(&GameComponent{})
 	db.AutoMigrate(&GameDefinition{})
 
 	secret := os.Getenv("API_SECRET")
@@ -544,9 +546,9 @@ func (ds *DataSource) findGameDefinition(id uint) *GameDefinition {
 	var gameDefinition GameDefinition
 
 	if ds.db.
-		Preload("Participants").
-		Preload("Participants.Codes").
-		Preload("Participants.Configs").
+		Preload("GameComponents").
+		Preload("GameComponents.Codes").
+		Preload("GameComponents.Configs").
 		Preload("SceneComponents").
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
@@ -581,9 +583,9 @@ func (ds *DataSource) findGameDefinitionByName(name string) *GameDefinition {
 	var gameDefinition GameDefinition
 
 	if ds.db.
-		Preload("Participants").
-		Preload("Participants.Codes").
-		Preload("Participants.Configs").
+		Preload("GameComponents").
+		Preload("GameComponents.Codes").
+		Preload("GameComponents.Configs").
 		Preload("SceneComponents").
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
@@ -618,9 +620,9 @@ func (ds *DataSource) findTutorialGameDefinition() *[]GameDefinition {
 	var gameDefinitions []GameDefinition
 
 	ds.db.
-		Preload("Participants").
-		Preload("Participants.Codes").
-		Preload("Participants.Configs").
+		Preload("GameComponents").
+		Preload("GameComponents.Codes").
+		Preload("GameComponents.Configs").
 		Preload("SceneComponents").
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
@@ -645,8 +647,8 @@ func (ds *DataSource) findTutorialGameDefinition() *[]GameDefinition {
 }
 
 func resetGameDefinitionArrays(gameDefinition *GameDefinition) {
-	if gameDefinition.Participants == nil {
-		gameDefinition.Participants = make([]Luchador, 0)
+	if gameDefinition.GameComponents == nil {
+		gameDefinition.GameComponents = make([]GameComponent, 0)
 	}
 
 	if gameDefinition.SceneComponents == nil {

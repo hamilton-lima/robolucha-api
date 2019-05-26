@@ -2,10 +2,6 @@ basePath: /
 definitions:
   main.Code:
     properties:
-      createdAt:
-        type: string
-      deletedAt:
-        type: string
       event:
         type: string
       exception:
@@ -16,24 +12,124 @@ definitions:
         type: integer
       script:
         type: string
-      updatedAt:
-        type: string
     type: object
   main.Config:
     properties:
-      createdAt:
-        type: string
-      deletedAt:
-        type: string
       id:
         type: integer
       key:
         type: string
       luchadorID:
         type: integer
-      updatedAt:
-        type: string
       value:
+        type: string
+    type: object
+  main.GameComponent:
+    properties:
+      codes:
+        items:
+          $ref: '#/definitions/main.ServerCode'
+        type: array
+      configs:
+        items:
+          $ref: '#/definitions/main.ServerConfig'
+        type: array
+      gameDefinition:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  main.GameDefinition:
+    properties:
+      arenaHeight:
+        type: integer
+      arenaWidth:
+        type: integer
+      buletSpeed:
+        type: integer
+      bulletSize:
+        type: integer
+      codes:
+        items:
+          $ref: '#/definitions/main.ServerCode'
+        type: array
+      description:
+        type: string
+      duration:
+        type: integer
+      energy:
+        type: integer
+      fireEnergyCost:
+        type: integer
+      fps:
+        type: integer
+      gameComponents:
+        items:
+          $ref: '#/definitions/main.GameComponent'
+        type: array
+      id:
+        type: integer
+      increaseSpeedEnergyCost:
+        type: integer
+      increaseSpeedPercentage:
+        type: integer
+      label:
+        type: string
+      life:
+        type: integer
+      luchadorSize:
+        type: integer
+      maxFireAmount:
+        type: integer
+      maxFireCooldown:
+        type: integer
+      maxFireDamage:
+        type: integer
+      maxParticipants:
+        type: integer
+      minFireAmount:
+        type: integer
+      minFireDamage:
+        type: integer
+      minParticipants:
+        type: integer
+      moveSpeed:
+        type: integer
+      name:
+        type: string
+      punchAngle:
+        type: integer
+      punchCoolDown:
+        type: integer
+      punchDamage:
+        type: integer
+      radarAngle:
+        type: integer
+      radarRadius:
+        type: integer
+      recycledLuchadorEnergyRestore:
+        type: integer
+      respawnCooldown:
+        type: integer
+      restoreEnergyperSecond:
+        type: integer
+      sceneComponents:
+        items:
+          $ref: '#/definitions/main.SceneComponent'
+        type: array
+      sortOrder:
+        type: integer
+      suggestedCodes:
+        items:
+          $ref: '#/definitions/main.ServerCode'
+        type: array
+      turnGunSpeed:
+        type: integer
+      turnSpeed:
+        type: integer
+      type:
         type: string
     type: object
   main.JoinMatch:
@@ -53,47 +149,21 @@ definitions:
         items:
           $ref: '#/definitions/main.Config'
         type: array
-      createdAt:
-        type: string
-      deletedAt:
-        type: string
       id:
         type: integer
       name:
-        type: string
-      updatedAt:
         type: string
       userID:
         type: integer
     type: object
   main.Match:
     properties:
-      arenaHeight:
-        type: integer
-      arenaWidth:
-        type: integer
-      buletSpeed:
-        type: integer
-      bulletSize:
-        type: integer
-      createdAt:
-        type: string
-      deletedAt:
-        type: string
-      duration:
-        type: integer
-      fps:
+      gameDefinitionID:
         type: integer
       id:
         type: integer
       lastTimeAlive:
         type: string
-      luchadorSize:
-        type: integer
-      maxParticipants:
-        type: integer
-      minParticipants:
-        type: integer
       participants:
         items:
           $ref: '#/definitions/main.Luchador'
@@ -101,8 +171,6 @@ definitions:
       timeEnd:
         type: string
       timeStart:
-        type: string
-      updatedAt:
         type: string
     type: object
   main.MatchParticipant:
@@ -114,12 +182,8 @@ definitions:
     type: object
   main.MatchScore:
     properties:
-      createdAt:
-        type: string
       deaths:
         type: integer
-      deletedAt:
-        type: string
       id:
         type: integer
       kills:
@@ -130,8 +194,37 @@ definitions:
         type: integer
       score:
         type: integer
-      updatedAt:
+    type: object
+  main.SceneComponent:
+    properties:
+      blockMovement:
+        type: boolean
+      codes:
+        items:
+          $ref: '#/definitions/main.ServerCode'
+        type: array
+      colider:
+        type: boolean
+      gameDefinition:
+        type: integer
+      height:
+        type: integer
+      id:
+        type: integer
+      name:
         type: string
+      respawn:
+        type: boolean
+      rotation:
+        type: integer
+      showInRadar:
+        type: boolean
+      width:
+        type: integer
+      x:
+        type: integer
+      "y":
+        type: integer
     type: object
   main.ScoreList:
     properties:
@@ -139,6 +232,26 @@ definitions:
         items:
           $ref: '#/definitions/main.MatchScore'
         type: array
+    type: object
+  main.ServerCode:
+    properties:
+      event:
+        type: string
+      exception:
+        type: string
+      id:
+        type: integer
+      script:
+        type: string
+    type: object
+  main.ServerConfig:
+    properties:
+      id:
+        type: integer
+      key:
+        type: string
+      value:
+        type: string
     type: object
   main.UpdateLuchadorResponse:
     properties:
@@ -152,28 +265,16 @@ definitions:
     type: object
   main.User:
     properties:
-      createdAt:
-        type: string
-      deletedAt:
-        type: string
       id:
         type: integer
-      updatedAt:
-        type: string
       username:
         type: string
     type: object
   main.UserSetting:
     properties:
-      createdAt:
-        type: string
-      deletedAt:
-        type: string
       id:
         type: integer
       lastOption:
-        type: string
-      updatedAt:
         type: string
       userID:
         type: integer
@@ -255,6 +356,71 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Create Gamecomponent as Luchador
+  /internal/game-definition:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: GameDefinition
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.GameDefinition'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.GameDefinition'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: create Game definition
+  /internal/game-definition-id/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: GameDefinition id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.GameDefinition'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: find a game definition
+  /internal/game-definition/{name}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: GameDefinition name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.GameDefinition'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: find a game definition
   /internal/luchador:
     get:
       consumes:
@@ -275,29 +441,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: find Luchador by ID
-  /internal/match:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Match
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/main.Match'
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/main.Match'
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: create Match
   /internal/match-participant:
     post:
       consumes:
@@ -328,6 +471,27 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: returns application health check information
+  /internal/start-match/{name}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: GameDefinition name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Match'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: create Match
   /private/get-user:
     get:
       consumes:
@@ -478,6 +642,22 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: return luchador configs for current match
+  /private/tutorial:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.GameDefinition'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: find tutorial GameDefinition
   /private/user/setting:
     get:
       consumes:
