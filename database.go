@@ -538,6 +538,10 @@ func (ds *DataSource) createGameDefinition(g *GameDefinition) *GameDefinition {
 
 	gameDefinition := GameDefinition{}
 	copier.Copy(&gameDefinition, &g)
+	for n, _ := range g.GameComponents {
+		g.GameComponents[n].Configs = randomConfig()
+	}
+
 	ds.db.Create(&gameDefinition)
 
 	log.WithFields(log.Fields{

@@ -332,11 +332,7 @@ func fakeGameDefinition(t *testing.T, typeName string, sortOrder uint) (GameDefi
 			gameDefinition.GameComponents[i].Codes[n].ID = 0
 		}
 
-		gameDefinition.GameComponents[i].Configs = make([]Config, 2)
-		for n, _ := range gameDefinition.GameComponents[i].Configs {
-			faker.FakeData(&gameDefinition.GameComponents[i].Configs[n])
-			gameDefinition.GameComponents[i].Configs[n].ID = 0
-		}
+		gameDefinition.GameComponents[i].Configs = randomConfig()
 	}
 
 	for i, _ := range gameDefinition.SceneComponents {
@@ -370,7 +366,7 @@ func fakeGameDefinition(t *testing.T, typeName string, sortOrder uint) (GameDefi
 
 	assert.Assert(t, len(gameDefinition.GameComponents) == 2)
 	assert.Assert(t, len(gameDefinition.GameComponents[0].Codes) == 2)
-	assert.Assert(t, len(gameDefinition.GameComponents[0].Configs) == 2)
+	assert.Assert(t, len(gameDefinition.GameComponents[0].Configs) > 0)
 
 	assert.Assert(t, len(gameDefinition.SceneComponents) == 2)
 	assert.Assert(t, len(gameDefinition.SceneComponents[0].Codes) == 2)
