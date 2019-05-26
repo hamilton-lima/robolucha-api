@@ -8,8 +8,6 @@ definitions:
         type: string
       id:
         type: integer
-      luchadorID:
-        type: integer
       script:
         type: string
     type: object
@@ -19,8 +17,6 @@ definitions:
         type: integer
       key:
         type: string
-      luchadorID:
-        type: integer
       value:
         type: string
     type: object
@@ -28,11 +24,11 @@ definitions:
     properties:
       codes:
         items:
-          $ref: '#/definitions/main.ServerCode'
+          $ref: '#/definitions/main.Code'
         type: array
       configs:
         items:
-          $ref: '#/definitions/main.ServerConfig'
+          $ref: '#/definitions/main.Config'
         type: array
       gameDefinition:
         type: integer
@@ -53,7 +49,7 @@ definitions:
         type: integer
       codes:
         items:
-          $ref: '#/definitions/main.ServerCode'
+          $ref: '#/definitions/main.Code'
         type: array
       description:
         type: string
@@ -123,7 +119,7 @@ definitions:
         type: integer
       suggestedCodes:
         items:
-          $ref: '#/definitions/main.ServerCode'
+          $ref: '#/definitions/main.Code'
         type: array
       turnGunSpeed:
         type: integer
@@ -201,7 +197,7 @@ definitions:
         type: boolean
       codes:
         items:
-          $ref: '#/definitions/main.ServerCode'
+          $ref: '#/definitions/main.Code'
         type: array
       colider:
         type: boolean
@@ -232,26 +228,6 @@ definitions:
         items:
           $ref: '#/definitions/main.MatchScore'
         type: array
-    type: object
-  main.ServerCode:
-    properties:
-      event:
-        type: string
-      exception:
-        type: string
-      id:
-        type: integer
-      script:
-        type: string
-    type: object
-  main.ServerConfig:
-    properties:
-      id:
-        type: integer
-      key:
-        type: string
-      value:
-        type: string
     type: object
   main.UpdateLuchadorResponse:
     properties:

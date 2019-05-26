@@ -86,58 +86,38 @@ type GameDefinition struct {
 	FireEnergyCost                uint             `json:"fireEnergyCost"`
 	GameComponents                []GameComponent  `json:"gameComponents"`
 	SceneComponents               []SceneComponent `json:"sceneComponents"`
-	Codes                         []ServerCode     `gorm:"many2many:gamedefinition_codes" json:"codes"`
-	LuchadorSuggestedCodes        []ServerCode     `gorm:"many2many:gamedefinition_suggestedcodes" json:"suggestedCodes"`
+	Codes                         []Code           `gorm:"many2many:gamedefinition_codes" json:"codes"`
+	LuchadorSuggestedCodes        []Code           `gorm:"many2many:gamedefinition_suggestedcodes" json:"suggestedCodes"`
 }
 
 type SceneComponent struct {
-	ID               uint         `gorm:"primary_key" json:"id"`
-	CreatedAt        time.Time    `json:"-"`
-	UpdatedAt        time.Time    `json:"-"`
-	DeletedAt        *time.Time   `json:"-"`
-	GameDefinitionID uint         `json:"gameDefinition,omitempty"`
-	X                uint         `json:"x"`
-	Y                uint         `json:"y"`
-	Width            uint         `json:"width"`
-	Height           uint         `json:"height"`
-	Rotation         uint         `json:"rotation"`
-	Respawn          bool         `json:"respawn"`
-	Colider          bool         `json:"colider"`
-	ShowInRadar      bool         `json:"showInRadar"`
-	BlockMovement    bool         `json:"blockMovement"`
-	Type             string       `json:"name"`
-	Codes            []ServerCode `gorm:"many2many:scenecomponent_codes" json:"codes"`
+	ID               uint       `gorm:"primary_key" json:"id"`
+	CreatedAt        time.Time  `json:"-"`
+	UpdatedAt        time.Time  `json:"-"`
+	DeletedAt        *time.Time `json:"-"`
+	GameDefinitionID uint       `json:"gameDefinition,omitempty"`
+	X                uint       `json:"x"`
+	Y                uint       `json:"y"`
+	Width            uint       `json:"width"`
+	Height           uint       `json:"height"`
+	Rotation         uint       `json:"rotation"`
+	Respawn          bool       `json:"respawn"`
+	Colider          bool       `json:"colider"`
+	ShowInRadar      bool       `json:"showInRadar"`
+	BlockMovement    bool       `json:"blockMovement"`
+	Type             string     `json:"name"`
+	Codes            []Code     `gorm:"many2many:scenecomponent_codes" json:"codes"`
 }
 
 type GameComponent struct {
-	ID               uint           `gorm:"primary_key" json:"id"`
-	CreatedAt        time.Time      `json:"-"`
-	UpdatedAt        time.Time      `json:"-"`
-	DeletedAt        *time.Time     `json:"-"`
-	GameDefinitionID uint           `json:"gameDefinition,omitempty"`
-	Name             string         `json:"name"`
-	Codes            []ServerCode   `gorm:"many2many:gamecomponent_codes" json:"codes"`
-	Configs          []ServerConfig `gorm:"many2many:gamecomponent_configs" json:"configs"`
-}
-
-type ServerCode struct {
-	ID        uint       `gorm:"primary_key" json:"id,omitempty"`
-	CreatedAt time.Time  `json:"-"`
-	UpdatedAt time.Time  `json:"-"`
-	DeletedAt *time.Time `json:"-"`
-	Event     string     `json:"event"`
-	Script    string     `json:"script"`
-	Exception string     `json:"exception"`
-}
-
-// Config definition
-type ServerConfig struct {
-	ID        uint       `gorm:"primary_key" json:"id,omitempty"`
-	CreatedAt time.Time  `json:"-"`
-	UpdatedAt time.Time  `json:"-"`
-	DeletedAt *time.Time `json:"-"`
-	Key       string     `json:"key"`
-	Value     string     `json:"value"`
+	ID               uint       `gorm:"primary_key" json:"id"`
+	CreatedAt        time.Time  `json:"-"`
+	UpdatedAt        time.Time  `json:"-"`
+	DeletedAt        *time.Time `json:"-"`
+	GameDefinitionID uint       `json:"gameDefinition,omitempty"`
+	Name             string     `json:"name"`
+	Codes            []Code     `gorm:"many2many:gamecomponent_codes" json:"codes"`
+	Configs          []Config   `gorm:"many2many:gamecomponent_configs" json:"configs"`
 }
 
 // Luchador definition
@@ -148,31 +128,29 @@ type Luchador struct {
 	DeletedAt *time.Time `json:"-"`
 	UserID    uint       `json:"userID"`
 	Name      string     `gorm:"not null;unique_index" json:"name"`
-	Codes     []Code     `json:"codes"`
-	Configs   []Config   `json:"configs"`
+	Codes     []Code     `gorm:"many2many:luchador_codes" json:"codes"`
+	Configs   []Config   `gorm:"many2many:luchador_configs" json:"configs"`
 }
 
 // Code definition
 type Code struct {
-	ID         uint       `gorm:"primary_key" json:"id,omitempty"`
-	CreatedAt  time.Time  `json:"-"`
-	UpdatedAt  time.Time  `json:"-"`
-	DeletedAt  *time.Time `json:"-"`
-	LuchadorID uint       `json:"luchadorID,omitempty"`
-	Event      string     `json:"event"`
-	Script     string     `json:"script"`
-	Exception  string     `json:"exception"`
+	ID        uint       `gorm:"primary_key" json:"id,omitempty"`
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
+	DeletedAt *time.Time `json:"-"`
+	Event     string     `json:"event"`
+	Script    string     `json:"script"`
+	Exception string     `json:"exception"`
 }
 
 // Config definition
 type Config struct {
-	ID         uint       `gorm:"primary_key" json:"id,omitempty"`
-	CreatedAt  time.Time  `json:"-"`
-	UpdatedAt  time.Time  `json:"-"`
-	DeletedAt  *time.Time `json:"-"`
-	LuchadorID uint       `json:"luchadorID,omitempty"`
-	Key        string     `json:"key"`
-	Value      string     `json:"value"`
+	ID        uint       `gorm:"primary_key" json:"id,omitempty"`
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
+	DeletedAt *time.Time `json:"-"`
+	Key       string     `json:"key"`
+	Value     string     `json:"value"`
 }
 
 // JoinMatch definition

@@ -320,19 +320,19 @@ func fakeGameDefinition(t *testing.T, typeName string, sortOrder uint) (GameDefi
 
 	gameDefinition.GameComponents = make([]GameComponent, 2)
 	gameDefinition.SceneComponents = make([]SceneComponent, 2)
-	gameDefinition.Codes = make([]ServerCode, 2)
-	gameDefinition.LuchadorSuggestedCodes = make([]ServerCode, 2)
+	gameDefinition.Codes = make([]Code, 2)
+	gameDefinition.LuchadorSuggestedCodes = make([]Code, 2)
 
 	for i, _ := range gameDefinition.GameComponents {
 		faker.FakeData(&gameDefinition.GameComponents[i])
 
-		gameDefinition.GameComponents[i].Codes = make([]ServerCode, 2)
+		gameDefinition.GameComponents[i].Codes = make([]Code, 2)
 		for n, _ := range gameDefinition.GameComponents[i].Codes {
 			faker.FakeData(&gameDefinition.GameComponents[i].Codes[n])
 			gameDefinition.GameComponents[i].Codes[n].ID = 0
 		}
 
-		gameDefinition.GameComponents[i].Configs = make([]ServerConfig, 2)
+		gameDefinition.GameComponents[i].Configs = make([]Config, 2)
 		for n, _ := range gameDefinition.GameComponents[i].Configs {
 			faker.FakeData(&gameDefinition.GameComponents[i].Configs[n])
 			gameDefinition.GameComponents[i].Configs[n].ID = 0
@@ -342,7 +342,7 @@ func fakeGameDefinition(t *testing.T, typeName string, sortOrder uint) (GameDefi
 	for i, _ := range gameDefinition.SceneComponents {
 		faker.FakeData(&gameDefinition.SceneComponents[i])
 
-		gameDefinition.SceneComponents[i].Codes = make([]ServerCode, 2)
+		gameDefinition.SceneComponents[i].Codes = make([]Code, 2)
 		for n, _ := range gameDefinition.SceneComponents[i].Codes {
 			faker.FakeData(&gameDefinition.SceneComponents[i].Codes[n])
 			gameDefinition.SceneComponents[i].Codes[n].ID = 0

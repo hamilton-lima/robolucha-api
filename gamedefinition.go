@@ -37,8 +37,8 @@ func BuildDefaultGameDefinition() GameDefinition {
 
 	gd.GameComponents = make([]GameComponent, 0)
 	gd.SceneComponents = make([]SceneComponent, 0)
-	gd.Codes = make([]ServerCode, 0)
-	gd.LuchadorSuggestedCodes = make([]ServerCode, 0)
+	gd.Codes = make([]Code, 0)
+	gd.LuchadorSuggestedCodes = make([]Code, 0)
 
 	return gd
 

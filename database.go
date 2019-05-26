@@ -113,8 +113,6 @@ func NewDataSource(config *DBconfig) *DataSource {
 	db.AutoMigrate(&Code{})
 	db.AutoMigrate(&Config{})
 	db.AutoMigrate(&MatchScore{})
-	db.AutoMigrate(&ServerCode{})
-	db.AutoMigrate(&ServerConfig{})
 	db.AutoMigrate(&SceneComponent{})
 	db.AutoMigrate(&GameComponent{})
 	db.AutoMigrate(&GameDefinition{})
@@ -302,14 +300,21 @@ func (ds *DataSource) findActiveMatches() *[]Match {
 
 func (ds *DataSource) findMaskConfig(id uint) *[]Config {
 
-	var configs []Config
-	ds.db.Where(&Config{LuchadorID: id}).Find(&configs)
+	var luchador Luchador
+	if ds.db.Preload("Configs").Where(&Luchador{ID: id}).First(&luchador).RecordNotFound() {
+		var configs []Config
+		return &configs
+	}
 
 	log.WithFields(log.Fields{
-		"configs": configs,
+		"luchador": luchador,
+	}).Info("findLuchador")
+
+	log.WithFields(log.Fields{
+		"configs": luchador.Configs,
 	}).Info("findMaskConfig")
 
-	return &configs
+	return &luchador.Configs
 }
 
 func (ds *DataSource) findMatch(id uint) *Match {
@@ -656,10 +661,10 @@ func resetGameDefinitionArrays(gameDefinition *GameDefinition) {
 	}
 
 	if gameDefinition.Codes == nil {
-		gameDefinition.Codes = make([]ServerCode, 0)
+		gameDefinition.Codes = make([]Code, 0)
 	}
 
 	if gameDefinition.LuchadorSuggestedCodes == nil {
-		gameDefinition.LuchadorSuggestedCodes = make([]ServerCode, 0)
+		gameDefinition.LuchadorSuggestedCodes = make([]Code, 0)
 	}
 }

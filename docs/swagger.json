@@ -691,9 +691,6 @@
                 "id": {
                     "type": "integer"
                 },
-                "luchadorID": {
-                    "type": "integer"
-                },
                 "script": {
                     "type": "string"
                 }
@@ -708,9 +705,6 @@
                 "key": {
                     "type": "string"
                 },
-                "luchadorID": {
-                    "type": "integer"
-                },
                 "value": {
                     "type": "string"
                 }
@@ -722,13 +716,13 @@
                 "codes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/main.ServerCode"
+                        "$ref": "#/definitions/main.Code"
                     }
                 },
                 "configs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/main.ServerConfig"
+                        "$ref": "#/definitions/main.Config"
                     }
                 },
                 "gameDefinition": {
@@ -760,7 +754,7 @@
                 "codes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/main.ServerCode"
+                        "$ref": "#/definitions/main.Code"
                     }
                 },
                 "description": {
@@ -865,7 +859,7 @@
                 "suggestedCodes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/main.ServerCode"
+                        "$ref": "#/definitions/main.Code"
                     }
                 },
                 "turnGunSpeed": {
@@ -985,7 +979,7 @@
                 "codes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/main.ServerCode"
+                        "$ref": "#/definitions/main.Code"
                     }
                 },
                 "colider": {
@@ -1031,37 +1025,6 @@
                     "items": {
                         "$ref": "#/definitions/main.MatchScore"
                     }
-                }
-            }
-        },
-        "main.ServerCode": {
-            "type": "object",
-            "properties": {
-                "event": {
-                    "type": "string"
-                },
-                "exception": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "script": {
-                    "type": "string"
-                }
-            }
-        },
-        "main.ServerConfig": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "key": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
                 }
             }
         },
