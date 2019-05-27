@@ -193,15 +193,11 @@ func KeyIsValid(key string) gin.HandlerFunc {
 		}
 
 		if authorization != key {
-			log.WithFields(log.Fields{
-				"Authorization": authorization,
-			}).Info("Invalid Authorization key")
+			log.Info("INVALID Authorization key")
 			c.AbortWithStatus(http.StatusForbidden)
 		}
 
-		log.WithFields(log.Fields{
-			"Authorization": authorization,
-		}).Info(">> Authorization key")
+		log.Info("VALID Authorization key")
 	}
 }
 
