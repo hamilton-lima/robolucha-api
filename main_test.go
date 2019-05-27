@@ -61,7 +61,7 @@ func TestCreateGameComponent(t *testing.T) {
 	w := test.PerformRequest(router, "POST", "/internal/game-component", body, test.API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var luchador Luchador
+	var luchador GameComponent
 	json.Unmarshal(w.Body.Bytes(), &luchador)
 	assert.Assert(t, luchador.ID > 0)
 	log.WithFields(log.Fields{
@@ -72,7 +72,7 @@ func TestCreateGameComponent(t *testing.T) {
 	w = test.PerformRequest(router, "POST", "/internal/game-component", body, test.API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var luchador2 Luchador
+	var luchador2 GameComponent
 	json.Unmarshal(w.Body.Bytes(), &luchador2)
 	assert.Assert(t, luchador.ID == luchador2.ID)
 	log.WithFields(log.Fields{
@@ -124,9 +124,9 @@ func TestAddScores(t *testing.T) {
 	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
 	defer dataSource.db.Close()
 
-	luchador1 := dataSource.createLuchador(&Luchador{Name: "foo"})
-	luchador2 := dataSource.createLuchador(&Luchador{Name: "bar"})
-	luchador3 := dataSource.createLuchador(&Luchador{Name: "dee"})
+	luchador1 := dataSource.createLuchador(&GameComponent{Name: "foo"})
+	luchador2 := dataSource.createLuchador(&GameComponent{Name: "bar"})
+	luchador3 := dataSource.createLuchador(&GameComponent{Name: "dee"})
 
 	gd := BuildDefaultGameDefinition()
 	dataSource.createGameDefinition(&gd)

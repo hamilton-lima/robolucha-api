@@ -12,7 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func UpdateLuchador(t *testing.T, router *gin.Engine, luchador *Luchador) UpdateLuchadorResponse {
+func UpdateLuchador(t *testing.T, router *gin.Engine, luchador *GameComponent) UpdateLuchadorResponse {
 	plan, _ := json.Marshal(luchador)
 	body := string(plan)
 

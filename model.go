@@ -33,15 +33,15 @@ type UserSetting struct {
 
 // Match definition
 type Match struct {
-	ID               uint       `gorm:"primary_key" json:"id"`
-	CreatedAt        time.Time  `json:"-"`
-	UpdatedAt        time.Time  `json:"-"`
-	DeletedAt        *time.Time `json:"-"`
-	TimeStart        time.Time  `json:"timeStart"`
-	TimeEnd          time.Time  `json:"timeEnd"`
-	LastTimeAlive    time.Time  `json:"lastTimeAlive"`
-	GameDefinitionID uint       `json:"gameDefinitionID"`
-	Participants     []Luchador `gorm:"many2many:match_participants" json:"participants"`
+	ID               uint            `gorm:"primary_key" json:"id"`
+	CreatedAt        time.Time       `json:"-"`
+	UpdatedAt        time.Time       `json:"-"`
+	DeletedAt        *time.Time      `json:"-"`
+	TimeStart        time.Time       `json:"timeStart"`
+	TimeEnd          time.Time       `json:"timeEnd"`
+	LastTimeAlive    time.Time       `json:"lastTimeAlive"`
+	GameDefinitionID uint            `json:"gameDefinitionID"`
+	Participants     []GameComponent `gorm:"many2many:match_participants" json:"participants"`
 }
 
 type GameDefinition struct {
@@ -115,21 +115,10 @@ type GameComponent struct {
 	UpdatedAt        time.Time  `json:"-"`
 	DeletedAt        *time.Time `json:"-"`
 	GameDefinitionID uint       `json:"gameDefinition,omitempty"`
-	Name             string     `json:"name"`
+	Name             string     `gorm:"not null;unique_index" json:"name"`
+	UserID           uint       `json:"userID,omitempty"`
 	Codes            []Code     `gorm:"many2many:gamecomponent_codes" json:"codes"`
 	Configs          []Config   `gorm:"many2many:gamecomponent_configs" json:"configs"`
-}
-
-// Luchador definition
-type Luchador struct {
-	ID        uint       `gorm:"primary_key" json:"id"`
-	CreatedAt time.Time  `json:"-"`
-	UpdatedAt time.Time  `json:"-"`
-	DeletedAt *time.Time `json:"-"`
-	UserID    uint       `json:"userID"`
-	Name      string     `gorm:"not null;unique_index" json:"name"`
-	Codes     []Code     `gorm:"many2many:luchador_codes" json:"codes"`
-	Configs   []Config   `gorm:"many2many:luchador_configs" json:"configs"`
 }
 
 // Code definition

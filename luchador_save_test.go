@@ -19,7 +19,7 @@ import (
 var router *gin.Engine
 var mockPublisher *test.MockPublisher
 
-func Setup(t *testing.T) *Luchador {
+func Setup(t *testing.T) *GameComponent {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.WarnLevel)
@@ -42,9 +42,9 @@ func Setup(t *testing.T) *Luchador {
 	return &luchador
 }
 
-func GetLuchador(t *testing.T) Luchador {
+func GetLuchador(t *testing.T) GameComponent {
 	getLuchador := test.PerformRequestNoAuth(router, "GET", "/private/luchador", "")
-	var luchador Luchador
+	var luchador GameComponent
 	json.Unmarshal(getLuchador.Body.Bytes(), &luchador)
 	return luchador
 }

@@ -30,8 +30,8 @@ import (
 
 //UpdateLuchadorResponse data structure
 type UpdateLuchadorResponse struct {
-	Errors   []string  `json:"errors"`
-	Luchador *Luchador `json:"luchador"`
+	Errors   []string       `json:"errors"`
+	Luchador *GameComponent `json:"luchador"`
 }
 
 var dataSource *DataSource
@@ -364,13 +364,13 @@ func getUser(c *gin.Context) {
 // @Summary find or create Luchador for the current user
 // @Accept json
 // @Produce json
-// @Success 200 {object} main.Luchador
+// @Success 200 {object} main.GameComponent
 // @Security ApiKeyAuth
 // @Router /private/luchador [get]
 func getLuchador(c *gin.Context) {
 	val, _ := c.Get("user")
 	user := val.(*User)
-	var luchador *Luchador
+	var luchador *GameComponent
 
 	luchador = dataSource.findLuchador(user)
 	log.WithFields(log.Fields{
@@ -379,7 +379,7 @@ func getLuchador(c *gin.Context) {
 	}).Info("after find luchador on getLuchador")
 
 	if luchador == nil {
-		luchador = &Luchador{
+		luchador = &GameComponent{
 			UserID: user.ID,
 			Name:   fmt.Sprintf("Luchador%d", user.ID),
 		}
@@ -424,7 +424,7 @@ func updateLuchador(c *gin.Context) {
 	user := val.(*User)
 	response := UpdateLuchadorResponse{Errors: []string{}}
 
-	var luchador *Luchador
+	var luchador *GameComponent
 	err := c.BindJSON(&luchador)
 	if err != nil {
 		log.Info("Invalid body content on updateLuchador")
@@ -630,13 +630,13 @@ func getRandomMaskConfig(c *gin.Context) {
 // @Summary Create Gamecomponent as Luchador
 // @Accept  json
 // @Produce  json
-// @Param request body main.Luchador true "Luchador"
+// @Param request body main.GameComponent true "Luchador"
 // @Success 200 {object} main.Luchador
 // @Security ApiKeyAuth
 // @Router /internal/game-component [post]
 func createGameComponent(c *gin.Context) {
 
-	var luchador *Luchador
+	var luchador *GameComponent
 	err := c.BindJSON(&luchador)
 	if err != nil {
 		log.Info("Invalid body content on createGameComponent")
@@ -715,7 +715,7 @@ func getLuchadorConfigsForCurrentMatch(c *gin.Context) {
 	var matchID uint
 	matchID = uint(i32)
 
-	var result *[]Luchador
+	var result *[]GameComponent
 
 	result = dataSource.findLuchadorConfigsByMatchID(matchID)
 	log.WithFields(log.Fields{
@@ -746,7 +746,7 @@ func joinMatch(c *gin.Context) {
 	val, _ := c.Get("user")
 	user := val.(*User)
 
-	var luchador *Luchador
+	var luchador *GameComponent
 	luchador = dataSource.findLuchador(user)
 	if luchador == nil {
 		log.WithFields(log.Fields{
@@ -788,7 +788,7 @@ func joinMatch(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param luchadorID query int false "int valid"
-// @Success 200 {object} main.Luchador
+// @Success 200 {object} main.GameComponent
 // @Security ApiKeyAuth
 // @Router /internal/luchador [get]
 func getLuchadorByID(c *gin.Context) {
@@ -805,7 +805,7 @@ func getLuchadorByID(c *gin.Context) {
 	var luchadorID uint
 	luchadorID = uint(i32)
 
-	var luchador *Luchador
+	var luchador *GameComponent
 
 	luchador = dataSource.findLuchadorByID(luchadorID)
 	if luchador == nil {
