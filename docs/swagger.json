@@ -106,7 +106,7 @@
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.Luchador"
+                            "$ref": "#/definitions/main.GameComponent"
                         }
                     }
                 ],
@@ -115,7 +115,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.Luchador"
+                            "$ref": "#/definitions/main.GameComponent"
                         }
                     }
                 }
@@ -253,7 +253,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.Luchador"
+                            "$ref": "#/definitions/main.GameComponent"
                         }
                     }
                 }
@@ -424,7 +424,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.Luchador"
+                            "$ref": "#/definitions/main.GameComponent"
                         }
                     }
                 }
@@ -450,7 +450,7 @@
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.Luchador"
+                            "$ref": "#/definitions/main.GameComponent"
                         }
                     }
                 ],
@@ -583,7 +583,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/main.Luchador"
+                                "$ref": "#/definitions/main.GameComponent"
                             }
                         }
                     }
@@ -733,6 +733,9 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "userID": {
+                    "type": "integer"
                 }
             }
         },
@@ -884,32 +887,6 @@
                 }
             }
         },
-        "main.Luchador": {
-            "type": "object",
-            "properties": {
-                "codes": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/main.Code"
-                    }
-                },
-                "configs": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/main.Config"
-                    }
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "userID": {
-                    "type": "integer"
-                }
-            }
-        },
         "main.Match": {
             "type": "object",
             "properties": {
@@ -925,7 +902,7 @@
                 "participants": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/main.Luchador"
+                        "$ref": "#/definitions/main.GameComponent"
                     }
                 },
                 "timeEnd": {
@@ -1039,7 +1016,7 @@
                 },
                 "luchador": {
                     "type": "object",
-                    "$ref": "#/definitions/main.Luchador"
+                    "$ref": "#/definitions/main.GameComponent"
                 }
             }
         },

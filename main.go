@@ -415,7 +415,7 @@ func getLuchador(c *gin.Context) {
 // @Summary Updates Luchador
 // @Accept  json
 // @Produce  json
-// @Param request body main.Luchador true "Luchador"
+// @Param request body main.GameComponent true "Luchador"
 // @Success 200 {object} main.UpdateLuchadorResponse
 // @Security ApiKeyAuth
 // @Router /private/luchador [put]
@@ -631,7 +631,7 @@ func getRandomMaskConfig(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param request body main.GameComponent true "Luchador"
-// @Success 200 {object} main.Luchador
+// @Success 200 {object} main.GameComponent
 // @Security ApiKeyAuth
 // @Router /internal/game-component [post]
 func createGameComponent(c *gin.Context) {
@@ -698,7 +698,7 @@ func getActiveMatches(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param matchID query int false "int valid"
-// @Success 200 {array} main.Luchador
+// @Success 200 {array} main.GameComponent
 // @Security ApiKeyAuth
 // @Router /private/match-config [get]
 func getLuchadorConfigsForCurrentMatch(c *gin.Context) {
