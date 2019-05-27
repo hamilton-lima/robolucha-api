@@ -106,7 +106,6 @@ func createRouter(internalAPIKey string, logRequestBody string,
 	internalAPI.Use(KeyIsValid(internalAPIKey))
 	{
 		internalAPI.GET("/game-definition/:name", getGameDefinition)
-		internalAPI.GET("/game-definition-id/:id", getGameDefinitionByID)
 		internalAPI.POST("/game-definition", createGameDefinition)
 		internalAPI.POST("/start-match/:name", startMatch)
 		internalAPI.POST("/game-component", createGameComponent)
@@ -129,8 +128,10 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.PUT("/user/setting", updateUserSetting)
 		privateAPI.GET("/user/setting", findUserSetting)
 		privateAPI.GET("/match", getActiveMatches)
+		privateAPI.GET("/match-single", getMatch)
 		privateAPI.GET("/match-config", getLuchadorConfigsForCurrentMatch)
 		privateAPI.POST("/join-match", joinMatch)
+		privateAPI.GET("/game-definition-id/:id", getGameDefinitionByID)
 	}
 
 	return router
@@ -579,7 +580,7 @@ func getGameDefinition(c *gin.Context) {
 // @Param id path int true "GameDefinition id"
 // @Success 200 200 {object} main.GameDefinition
 // @Security ApiKeyAuth
-// @Router /internal/game-definition-id/{id} [get]
+// @Router /private/game-definition-id/{id} [get]
 func getGameDefinitionByID(c *gin.Context) {
 
 	id := c.Param("id")
@@ -687,6 +688,40 @@ func getActiveMatches(c *gin.Context) {
 	}).Info("getActiveMatches")
 
 	c.JSON(http.StatusOK, matches)
+}
+
+// getMatch godoc
+// @Summary find one match
+// @Accept json
+// @Produce json
+// @Param matchID query int false "int valid"
+// @Success 200 {object} main.Match
+// @Security ApiKeyAuth
+// @Router /private/match-single [get]
+func getMatch(c *gin.Context) {
+	parameter := c.Query("matchID")
+	i32, err := strconv.ParseInt(parameter, 10, 32)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"matchID": parameter,
+		}).Error("Invalid matchID")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	var matchID uint
+	matchID = uint(i32)
+
+	log.WithFields(log.Fields{
+		"matchID": matchID,
+	}).Info("getMatch")
+
+	match := dataSource.findMatch(matchID)
+
+	log.WithFields(log.Fields{
+		"match": match,
+	}).Info("getMatch")
+
+	c.JSON(http.StatusOK, match)
 }
 
 // getLuchadorConfigsForCurrentMatch godoc
