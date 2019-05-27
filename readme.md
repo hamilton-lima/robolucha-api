@@ -1,5 +1,9 @@
 # robolucha-api
 
+## Generate Game definition example file
+
+Run `go test -run TestGenerateSampleGameDefinition`
+
 ## Generate API swagger file 
 
 Follow the instalation procedures in https://github.com/swaggo/swag

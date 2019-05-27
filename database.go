@@ -109,12 +109,11 @@ func NewDataSource(config *DBconfig) *DataSource {
 	db.AutoMigrate(&Session{})
 	db.AutoMigrate(&UserSetting{})
 	db.AutoMigrate(&Match{})
-	db.AutoMigrate(&Luchador{})
 	db.AutoMigrate(&Code{})
 	db.AutoMigrate(&Config{})
 	db.AutoMigrate(&MatchScore{})
-	db.AutoMigrate(&ServerCode{})
 	db.AutoMigrate(&SceneComponent{})
+	db.AutoMigrate(&GameComponent{})
 	db.AutoMigrate(&GameDefinition{})
 
 	secret := os.Getenv("API_SECRET")
@@ -195,45 +194,24 @@ func (ds *DataSource) createHash(key string) string {
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-// func (ds *DataSource) createSession(user *User) *Session {
-// 	uuid, err := uuid.NewV4()
-// 	if err != nil {
-// 		log.Errorf("Error creating session UUID: %v", err)
-// 		return nil
-// 	}
-
-// 	session := Session{UserID: user.ID, UUID: uuid.String()}
-// 	ds.db.Create(&session)
-
-// 	log.WithFields(log.Fields{
-// 		"user": session.UserID,
-// 		"uuid": session.UUID,
-// 	}).Info("Session created")
-
-// 	return &session
-// }
-
-func (ds *DataSource) createMatch(m *Match) *Match {
+func (ds *DataSource) createMatch(gameDefinitionID uint) *Match {
 	match := Match{
-		TimeStart:     m.TimeStart,
-		TimeEnd:       m.TimeEnd,
-		LastTimeAlive: m.LastTimeAlive,
-		Duration:      m.Duration,
-		Participants:  m.Participants,
+		TimeStart:        time.Now(),
+		GameDefinitionID: gameDefinitionID,
 	}
 
 	ds.db.Create(&match)
 
 	log.WithFields(log.Fields{
-		"match.id": match.ID,
-		"duration": match.Duration,
+		"match.id":         match.ID,
+		"gameDefinitionID": gameDefinitionID,
 	}).Info("Match created")
 
 	return &match
 }
 
-func (ds *DataSource) createLuchador(l *Luchador) *Luchador {
-	luchador := Luchador{
+func (ds *DataSource) createLuchador(l *GameComponent) *GameComponent {
+	luchador := GameComponent{
 		UserID:  l.UserID,
 		Name:    l.Name,
 		Codes:   l.Codes,
@@ -249,9 +227,9 @@ func (ds *DataSource) createLuchador(l *Luchador) *Luchador {
 	return &luchador
 }
 
-func (ds *DataSource) findLuchador(user *User) *Luchador {
-	var luchador Luchador
-	if ds.db.Preload("Codes").Preload("Configs").Where(&Luchador{UserID: user.ID}).First(&luchador).RecordNotFound() {
+func (ds *DataSource) findLuchador(user *User) *GameComponent {
+	var luchador GameComponent
+	if ds.db.Preload("Codes").Preload("Configs").Where(&GameComponent{UserID: user.ID}).First(&luchador).RecordNotFound() {
 		return nil
 	}
 
@@ -262,8 +240,8 @@ func (ds *DataSource) findLuchador(user *User) *Luchador {
 	return &luchador
 }
 
-func (ds *DataSource) findLuchadorByIDNoPreload(id uint) *Luchador {
-	var luchador Luchador
+func (ds *DataSource) findLuchadorByIDNoPreload(id uint) *GameComponent {
+	var luchador GameComponent
 	if ds.db.First(&luchador, id).RecordNotFound() {
 		return nil
 	}
@@ -275,15 +253,15 @@ func (ds *DataSource) findLuchadorByIDNoPreload(id uint) *Luchador {
 	return &luchador
 }
 
-func (ds *DataSource) updateLuchador(luchador *Luchador) *Luchador {
-	current := ds.findLuchadorByID(luchador.ID)
+func (ds *DataSource) updateLuchador(component *GameComponent) *GameComponent {
+	current := ds.findLuchadorByID(component.ID)
 	if current == nil {
 		return nil
 	}
 
-	current.Name = luchador.Name
-	current.Configs = applyConfigChanges(current.Configs, luchador.Configs)
-	current.Codes = luchador.Codes
+	current.Name = component.Name
+	current.Configs = applyConfigChanges(current.Configs, component.Configs)
+	current.Codes = component.Codes
 
 	ds.db.Save(current)
 
@@ -321,14 +299,21 @@ func (ds *DataSource) findActiveMatches() *[]Match {
 
 func (ds *DataSource) findMaskConfig(id uint) *[]Config {
 
-	var configs []Config
-	ds.db.Where(&Config{LuchadorID: id}).Find(&configs)
+	var component GameComponent
+	if ds.db.Preload("Configs").Where(&GameComponent{ID: id}).First(&component).RecordNotFound() {
+		var configs []Config
+		return &configs
+	}
 
 	log.WithFields(log.Fields{
-		"configs": configs,
+		"luchador": component,
+	}).Info("findLuchador")
+
+	log.WithFields(log.Fields{
+		"configs": component.Configs,
 	}).Info("findMaskConfig")
 
-	return &configs
+	return &component.Configs
 }
 
 func (ds *DataSource) findMatch(id uint) *Match {
@@ -344,8 +329,8 @@ func (ds *DataSource) findMatch(id uint) *Match {
 	return &match
 }
 
-// func (ds *DataSource) findGameComponentByID(id uint) *Luchador {
-// 	var luchador Luchador
+// func (ds *DataSource) findGameComponentByID(id uint) *GameComponent {
+// 	var luchador GameComponent
 // 	if ds.db.First(&luchador, id).RecordNotFound(){
 // 		return nil
 // 	}
@@ -357,9 +342,9 @@ func (ds *DataSource) findMatch(id uint) *Match {
 // 	return &gameComponent
 // }
 
-func (ds *DataSource) findLuchadorByID(luchadorID uint) *Luchador {
-	var luchador Luchador
-	if ds.db.Preload("Codes").Preload("Configs").Where(&Luchador{ID: luchadorID}).First(&luchador).RecordNotFound() {
+func (ds *DataSource) findLuchadorByID(luchadorID uint) *GameComponent {
+	var luchador GameComponent
+	if ds.db.Preload("Codes").Preload("Configs").Where(&GameComponent{ID: luchadorID}).First(&luchador).RecordNotFound() {
 		return nil
 	}
 
@@ -370,9 +355,9 @@ func (ds *DataSource) findLuchadorByID(luchadorID uint) *Luchador {
 	return &luchador
 }
 
-func (ds *DataSource) findLuchadorByName(name string) *Luchador {
-	var luchador Luchador
-	if ds.db.Where(&Luchador{Name: name}).First(&luchador).RecordNotFound() {
+func (ds *DataSource) findLuchadorByName(name string) *GameComponent {
+	var luchador GameComponent
+	if ds.db.Where(&GameComponent{Name: name}).First(&luchador).RecordNotFound() {
 		return nil
 	}
 
@@ -384,7 +369,7 @@ func (ds *DataSource) findLuchadorByName(name string) *Luchador {
 }
 
 func (ds *DataSource) NameExist(ID uint, name string) bool {
-	var luchador Luchador
+	var luchador GameComponent
 	result := !ds.db.Where("id <> ? AND name = ?", ID, name).First(&luchador).RecordNotFound()
 
 	log.WithFields(log.Fields{
@@ -406,9 +391,9 @@ func (ds *DataSource) addMatchParticipant(mp *MatchParticipant) *MatchParticipan
 		return nil
 	}
 
-	var luchador *Luchador
-	luchador = ds.findLuchadorByIDNoPreload(mp.LuchadorID)
-	if luchador == nil {
+	var component *GameComponent
+	component = ds.findLuchadorByIDNoPreload(mp.LuchadorID)
+	if component == nil {
 		log.WithFields(log.Fields{
 			"luchadorID": mp.LuchadorID,
 		}).Error("Luchador not found")
@@ -425,11 +410,11 @@ func (ds *DataSource) addMatchParticipant(mp *MatchParticipant) *MatchParticipan
 		}
 	}
 
-	match.Participants = append(match.Participants, *luchador)
+	match.Participants = append(match.Participants, *component)
 	ds.db.Save(&match)
 
 	matchPartipant := MatchParticipant{
-		LuchadorID: luchador.ID,
+		LuchadorID: component.ID,
 		MatchID:    match.ID,
 	}
 
@@ -451,12 +436,12 @@ func (ds *DataSource) endMatch(match *Match) *Match {
 	return match
 }
 
-func (ds *DataSource) findLuchadorConfigsByMatchID(id uint) *[]Luchador {
+func (ds *DataSource) findLuchadorConfigsByMatchID(id uint) *[]GameComponent {
 
 	match := Match{}
 	ds.db.First(&match, "id = ?", id)
 
-	var participants []Luchador
+	var participants []GameComponent
 	ds.db.Model(&match).Related(&participants, "Participants").Preload("Configs")
 
 	log.WithFields(log.Fields{
@@ -510,9 +495,9 @@ func (ds *DataSource) addMatchScores(ms *ScoreList) *ScoreList {
 			}).Info("addMatchScores")
 		}
 
-		var luchador *Luchador
-		luchador = ds.findLuchadorByID(score.LuchadorID)
-		if luchador == nil {
+		var component *GameComponent
+		component = ds.findLuchadorByID(score.LuchadorID)
+		if component == nil {
 			log.WithFields(log.Fields{
 				"luchadorID": score.LuchadorID,
 			}).Error("Luchador not found")
@@ -521,11 +506,11 @@ func (ds *DataSource) addMatchScores(ms *ScoreList) *ScoreList {
 
 		log.WithFields(log.Fields{
 			"action":   "luchador-found",
-			"luchador": luchador,
+			"luchador": component,
 		}).Info("addMatchScores")
 
 		score := MatchScore{
-			LuchadorID: luchador.ID,
+			LuchadorID: component.ID,
 			MatchID:    match.ID,
 			Kills:      score.Kills,
 			Deaths:     score.Deaths,
@@ -552,6 +537,10 @@ func (ds *DataSource) createGameDefinition(g *GameDefinition) *GameDefinition {
 
 	gameDefinition := GameDefinition{}
 	copier.Copy(&gameDefinition, &g)
+	for n, _ := range g.GameComponents {
+		g.GameComponents[n].Configs = randomConfig()
+	}
+
 	ds.db.Create(&gameDefinition)
 
 	log.WithFields(log.Fields{
@@ -565,9 +554,9 @@ func (ds *DataSource) findGameDefinition(id uint) *GameDefinition {
 	var gameDefinition GameDefinition
 
 	if ds.db.
-		Preload("Participants").
-		Preload("Participants.Codes").
-		Preload("Participants.Configs").
+		Preload("GameComponents").
+		Preload("GameComponents.Codes").
+		Preload("GameComponents.Configs").
 		Preload("SceneComponents").
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
@@ -602,9 +591,9 @@ func (ds *DataSource) findGameDefinitionByName(name string) *GameDefinition {
 	var gameDefinition GameDefinition
 
 	if ds.db.
-		Preload("Participants").
-		Preload("Participants.Codes").
-		Preload("Participants.Configs").
+		Preload("GameComponents").
+		Preload("GameComponents.Codes").
+		Preload("GameComponents.Configs").
 		Preload("SceneComponents").
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
@@ -630,7 +619,7 @@ func (ds *DataSource) findGameDefinitionByName(name string) *GameDefinition {
 	log.WithFields(log.Fields{
 		"Name":           name,
 		"gameDefinition": gameDefinition,
-	}).Info("findGameDefinition")
+	}).Debug("findGameDefinition")
 
 	return &gameDefinition
 }
@@ -639,9 +628,9 @@ func (ds *DataSource) findTutorialGameDefinition() *[]GameDefinition {
 	var gameDefinitions []GameDefinition
 
 	ds.db.
-		Preload("Participants").
-		Preload("Participants.Codes").
-		Preload("Participants.Configs").
+		Preload("GameComponents").
+		Preload("GameComponents.Codes").
+		Preload("GameComponents.Configs").
 		Preload("SceneComponents").
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
@@ -666,8 +655,8 @@ func (ds *DataSource) findTutorialGameDefinition() *[]GameDefinition {
 }
 
 func resetGameDefinitionArrays(gameDefinition *GameDefinition) {
-	if gameDefinition.Participants == nil {
-		gameDefinition.Participants = make([]Luchador, 0)
+	if gameDefinition.GameComponents == nil {
+		gameDefinition.GameComponents = make([]GameComponent, 0)
 	}
 
 	if gameDefinition.SceneComponents == nil {
@@ -675,10 +664,10 @@ func resetGameDefinitionArrays(gameDefinition *GameDefinition) {
 	}
 
 	if gameDefinition.Codes == nil {
-		gameDefinition.Codes = make([]ServerCode, 0)
+		gameDefinition.Codes = make([]Code, 0)
 	}
 
 	if gameDefinition.LuchadorSuggestedCodes == nil {
-		gameDefinition.LuchadorSuggestedCodes = make([]ServerCode, 0)
+		gameDefinition.LuchadorSuggestedCodes = make([]Code, 0)
 	}
 }

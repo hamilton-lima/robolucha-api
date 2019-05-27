@@ -3,9 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -17,7 +19,7 @@ import (
 var router *gin.Engine
 var mockPublisher *test.MockPublisher
 
-func Setup(t *testing.T) *Luchador {
+func Setup(t *testing.T) *GameComponent {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.WarnLevel)
@@ -40,9 +42,9 @@ func Setup(t *testing.T) *Luchador {
 	return &luchador
 }
 
-func GetLuchador(t *testing.T) Luchador {
+func GetLuchador(t *testing.T) GameComponent {
 	getLuchador := test.PerformRequestNoAuth(router, "GET", "/private/luchador", "")
-	var luchador Luchador
+	var luchador GameComponent
 	json.Unmarshal(getLuchador.Body.Bytes(), &luchador)
 	return luchador
 }
@@ -113,19 +115,23 @@ func TestLuchadorUpdateName(t *testing.T) {
 
 }
 func TestLuchadorUpdateRandomMask(t *testing.T) {
+	rand.Seed(time.Now().UTC().UnixNano())
 	luchador := Setup(t)
 	defer dataSource.db.Close()
 
 	// assign new random Configs to update the luchador
 	var originalConfigs []Config = luchador.Configs
-	var randomConfigs []Config = randomConfig()
-	luchador.Configs = randomConfigs
+	updatedConfigs := make([]Config, len(originalConfigs))
+
+	for n, config := range originalConfigs {
+		updatedConfigs[n].Key = config.Key
+		updatedConfigs[n].Value = config.Value + "A"
+	}
+
+	luchador.Configs = updatedConfigs
 
 	plan2, _ := json.Marshal(luchador)
 	body2 := string(plan2)
-	log.WithFields(log.Fields{
-		"luchador": luchador.Name,
-	}).Debug("luchador before update")
 
 	w := test.PerformRequestNoAuth(router, "PUT", "/private/luchador", body2)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -142,21 +148,13 @@ func TestLuchadorUpdateRandomMask(t *testing.T) {
 	assert.Equal(t, 0, len(response.Errors))
 
 	// check if configs are updated in the response
-	assert.Equal(t, len(randomConfigs), len(response.Luchador.Configs))
-	AssertConfigMatch(t, randomConfigs, response.Luchador.Configs)
-	changed := CountChangesConfigMatch(t, originalConfigs, response.Luchador.Configs)
-	assert.Greater(t, changed, 0)
-
-	log.WithFields(log.Fields{
-		"changed": changed,
-	}).Debug("comparing response.Configs with original.Configs")
+	assert.Equal(t, len(updatedConfigs), len(response.Luchador.Configs))
+	AssertConfigMatch(t, updatedConfigs, response.Luchador.Configs)
 
 	// check if configs are updated in the subsequent GET of luchador
 	afterUpdateLuchador := GetLuchador(t)
-	assert.Equal(t, len(randomConfigs), len(afterUpdateLuchador.Configs))
-	AssertConfigMatch(t, randomConfigs, afterUpdateLuchador.Configs)
-	changed = CountChangesConfigMatch(t, afterUpdateLuchador.Configs, originalConfigs)
-	assert.Greater(t, changed, 0)
+	assert.Equal(t, len(updatedConfigs), len(afterUpdateLuchador.Configs))
+	AssertConfigMatch(t, updatedConfigs, afterUpdateLuchador.Configs)
 
 	// check if after update the correct event is published
 	channel := fmt.Sprintf("luchador.%v.update", luchador.ID)

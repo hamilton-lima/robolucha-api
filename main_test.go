@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -34,15 +33,16 @@ func TestCreateMatch(t *testing.T) {
 	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
 	defer dataSource.db.Close()
 
-	plan, _ := ioutil.ReadFile("test-data/create-match.json")
-	body := string(plan)
-	log.WithFields(log.Fields{
-		"body": body,
-	}).Debug("After Create Match")
+	gd := BuildDefaultGameDefinition()
+	gd.Name = "FOOBAR"
+	dataSource.createGameDefinition(&gd)
+
+	url := fmt.Sprintf("/internal/start-match/%v", gd.Name)
 
 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
-	w := test.PerformRequest(router, "POST", "/internal/match", body, test.API_KEY)
+	w := test.PerformRequest(router, "POST", url, "", test.API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
+
 }
 
 func TestCreateGameComponent(t *testing.T) {
@@ -61,7 +61,7 @@ func TestCreateGameComponent(t *testing.T) {
 	w := test.PerformRequest(router, "POST", "/internal/game-component", body, test.API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var luchador Luchador
+	var luchador GameComponent
 	json.Unmarshal(w.Body.Bytes(), &luchador)
 	assert.Assert(t, luchador.ID > 0)
 	log.WithFields(log.Fields{
@@ -72,7 +72,7 @@ func TestCreateGameComponent(t *testing.T) {
 	w = test.PerformRequest(router, "POST", "/internal/game-component", body, test.API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var luchador2 Luchador
+	var luchador2 GameComponent
 	json.Unmarshal(w.Body.Bytes(), &luchador2)
 	assert.Assert(t, luchador.ID == luchador2.ID)
 	log.WithFields(log.Fields{
@@ -124,19 +124,17 @@ func TestAddScores(t *testing.T) {
 	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
 	defer dataSource.db.Close()
 
-	luchador1 := dataSource.createLuchador(&Luchador{Name: "foo"})
-	luchador2 := dataSource.createLuchador(&Luchador{Name: "bar"})
-	luchador3 := dataSource.createLuchador(&Luchador{Name: "dee"})
+	luchador1 := dataSource.createLuchador(&GameComponent{Name: "foo"})
+	luchador2 := dataSource.createLuchador(&GameComponent{Name: "bar"})
+	luchador3 := dataSource.createLuchador(&GameComponent{Name: "dee"})
 
-	matchData := Match{
-		Duration:        600000,
-		MinParticipants: 1,
-		MaxParticipants: 10,
-		TimeStart:       time.Now(),
-		Participants:    []Luchador{*luchador1, *luchador2, *luchador3},
-	}
+	gd := BuildDefaultGameDefinition()
+	dataSource.createGameDefinition(&gd)
 
-	match := dataSource.createMatch(&matchData)
+	match := dataSource.createMatch(gd.ID)
+	dataSource.addMatchParticipant(&MatchParticipant{LuchadorID: luchador1.ID, MatchID: match.ID})
+	dataSource.addMatchParticipant(&MatchParticipant{LuchadorID: luchador2.ID, MatchID: match.ID})
+	dataSource.addMatchParticipant(&MatchParticipant{LuchadorID: luchador3.ID, MatchID: match.ID})
 
 	matchID := fmt.Sprintf("%v", match.ID)
 	luchador1ID := fmt.Sprintf("%v", luchador1.ID)
@@ -289,9 +287,9 @@ func compareGameDefinition(t *testing.T, a, b GameDefinition) {
 	assert.Assert(t, len(a.Codes) > 0)
 	assert.Assert(t, len(a.LuchadorSuggestedCodes) > 0)
 
-	assert.Assert(t, len(a.Participants) > 0)
-	assert.Assert(t, len(a.Participants[0].Codes) > 0)
-	assert.Assert(t, len(a.Participants[0].Configs) > 0)
+	assert.Assert(t, len(a.GameComponents) > 0)
+	assert.Assert(t, len(a.GameComponents[0].Codes) > 0)
+	assert.Assert(t, len(a.GameComponents[0].Configs) > 0)
 
 	assert.Assert(t, len(a.SceneComponents) > 0)
 	assert.Assert(t, len(a.SceneComponents[0].Codes) > 0)
@@ -299,10 +297,10 @@ func compareGameDefinition(t *testing.T, a, b GameDefinition) {
 	assert.Assert(t, a.Name == b.Name)
 
 	assert.Equal(t, len(a.Codes), len(b.Codes))
-	assert.Equal(t, len(a.Participants), len(b.Participants))
+	assert.Equal(t, len(a.GameComponents), len(b.GameComponents))
 
-	assert.Equal(t, len(a.Participants[0].Codes), len(b.Participants[0].Codes))
-	assert.Equal(t, len(a.Participants[0].Configs), len(b.Participants[0].Configs))
+	assert.Equal(t, len(a.GameComponents[0].Codes), len(b.GameComponents[0].Codes))
+	assert.Equal(t, len(a.GameComponents[0].Configs), len(b.GameComponents[0].Configs))
 }
 
 func fakeGameDefinition(t *testing.T, typeName string, sortOrder uint) (GameDefinition, string, error) {
@@ -320,31 +318,27 @@ func fakeGameDefinition(t *testing.T, typeName string, sortOrder uint) (GameDefi
 	gameDefinition.Type = typeName
 	gameDefinition.SortOrder = sortOrder
 
-	gameDefinition.Participants = make([]Luchador, 2)
+	gameDefinition.GameComponents = make([]GameComponent, 2)
 	gameDefinition.SceneComponents = make([]SceneComponent, 2)
-	gameDefinition.Codes = make([]ServerCode, 2)
-	gameDefinition.LuchadorSuggestedCodes = make([]ServerCode, 2)
+	gameDefinition.Codes = make([]Code, 2)
+	gameDefinition.LuchadorSuggestedCodes = make([]Code, 2)
 
-	for i, _ := range gameDefinition.Participants {
-		faker.FakeData(&gameDefinition.Participants[i])
+	for i, _ := range gameDefinition.GameComponents {
+		faker.FakeData(&gameDefinition.GameComponents[i])
 
-		gameDefinition.Participants[i].Codes = make([]Code, 2)
-		for n, _ := range gameDefinition.Participants[i].Codes {
-			faker.FakeData(&gameDefinition.Participants[i].Codes[n])
-			gameDefinition.Participants[i].Codes[n].ID = 0
+		gameDefinition.GameComponents[i].Codes = make([]Code, 2)
+		for n, _ := range gameDefinition.GameComponents[i].Codes {
+			faker.FakeData(&gameDefinition.GameComponents[i].Codes[n])
+			gameDefinition.GameComponents[i].Codes[n].ID = 0
 		}
 
-		gameDefinition.Participants[i].Configs = make([]Config, 2)
-		for n, _ := range gameDefinition.Participants[i].Configs {
-			faker.FakeData(&gameDefinition.Participants[i].Configs[n])
-			gameDefinition.Participants[i].Configs[n].ID = 0
-		}
+		gameDefinition.GameComponents[i].Configs = randomConfig()
 	}
 
 	for i, _ := range gameDefinition.SceneComponents {
 		faker.FakeData(&gameDefinition.SceneComponents[i])
 
-		gameDefinition.SceneComponents[i].Codes = make([]ServerCode, 2)
+		gameDefinition.SceneComponents[i].Codes = make([]Code, 2)
 		for n, _ := range gameDefinition.SceneComponents[i].Codes {
 			faker.FakeData(&gameDefinition.SceneComponents[i].Codes[n])
 			gameDefinition.SceneComponents[i].Codes[n].ID = 0
@@ -370,9 +364,9 @@ func fakeGameDefinition(t *testing.T, typeName string, sortOrder uint) (GameDefi
 	assert.Assert(t, len(gameDefinition.Codes) == 2)
 	assert.Assert(t, len(gameDefinition.LuchadorSuggestedCodes) == 2)
 
-	assert.Assert(t, len(gameDefinition.Participants) == 2)
-	assert.Assert(t, len(gameDefinition.Participants[0].Codes) == 2)
-	assert.Assert(t, len(gameDefinition.Participants[0].Configs) == 2)
+	assert.Assert(t, len(gameDefinition.GameComponents) == 2)
+	assert.Assert(t, len(gameDefinition.GameComponents[0].Codes) == 2)
+	assert.Assert(t, len(gameDefinition.GameComponents[0].Configs) > 0)
 
 	assert.Assert(t, len(gameDefinition.SceneComponents) == 2)
 	assert.Assert(t, len(gameDefinition.SceneComponents[0].Codes) == 2)

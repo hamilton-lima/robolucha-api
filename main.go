@@ -11,10 +11,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	log "github.com/sirupsen/logrus"
@@ -28,8 +30,8 @@ import (
 
 //UpdateLuchadorResponse data structure
 type UpdateLuchadorResponse struct {
-	Errors   []string  `json:"errors"`
-	Luchador *Luchador `json:"luchador"`
+	Errors   []string       `json:"errors"`
+	Luchador *GameComponent `json:"luchador"`
 }
 
 var dataSource *DataSource
@@ -39,6 +41,7 @@ func main() {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.InfoLevel)
+	rand.Seed(time.Now().UTC().UnixNano())
 
 	log.Info("Robolucha API, start.")
 
@@ -47,6 +50,14 @@ func main() {
 
 	publisher = &RedisPublisher{}
 	go dataSource.KeepAlive()
+
+	if len(os.Args) < 2 {
+		log.Error("Missing gamedefinition folder parameter")
+		os.Exit(2)
+	}
+
+	gameDefinitionFolder := os.Args[1]
+	SetupGameDefinitionFromFolder(gameDefinitionFolder)
 
 	port := os.Getenv("API_PORT")
 	if len(port) == 0 {
@@ -94,9 +105,9 @@ func createRouter(internalAPIKey string, logRequestBody string,
 	internalAPI := router.Group("/internal")
 	internalAPI.Use(KeyIsValid(internalAPIKey))
 	{
-		internalAPI.GET("/game-definition/:id", getGameDefinition)
+		internalAPI.GET("/game-definition/:name", getGameDefinition)
 		internalAPI.POST("/game-definition", createGameDefinition)
-		internalAPI.POST("/match", createMatch)
+		internalAPI.POST("/start-match/:name", startMatch)
 		internalAPI.POST("/game-component", createGameComponent)
 		internalAPI.GET("/luchador", getLuchadorByID)
 		internalAPI.POST("/match-participant", addMatchPartipant)
@@ -117,8 +128,10 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.PUT("/user/setting", updateUserSetting)
 		privateAPI.GET("/user/setting", findUserSetting)
 		privateAPI.GET("/match", getActiveMatches)
+		privateAPI.GET("/match-single", getMatch)
 		privateAPI.GET("/match-config", getLuchadorConfigsForCurrentMatch)
 		privateAPI.POST("/join-match", joinMatch)
+		privateAPI.GET("/game-definition-id/:id", getGameDefinitionByID)
 	}
 
 	return router
@@ -181,15 +194,11 @@ func KeyIsValid(key string) gin.HandlerFunc {
 		}
 
 		if authorization != key {
-			log.WithFields(log.Fields{
-				"Authorization": authorization,
-			}).Info("Invalid Authorization key")
+			log.Info("INVALID Authorization key")
 			c.AbortWithStatus(http.StatusForbidden)
 		}
 
-		log.WithFields(log.Fields{
-			"Authorization": authorization,
-		}).Info(">> Authorization key")
+		log.Info("VALID Authorization key")
 	}
 }
 
@@ -295,32 +304,30 @@ func createGameDefinition(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-// createMatch godoc
+// startMatch godoc
 // @Summary create Match
 // @Accept json
 // @Produce json
-// @Param request body main.Match true "Match"
+// @Param name path string true "GameDefinition name"
 // @Success 200 {object} main.Match
 // @Security ApiKeyAuth
-// @Router /internal/match [post]
-func createMatch(c *gin.Context) {
+// @Router /internal/start-match/{name} [post]
+func startMatch(c *gin.Context) {
 
-	var match *Match
-	err := c.BindJSON(&match)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"error": err,
-		}).Error("Invalid body content on createMatch")
+	name := c.Param("name")
 
+	log.WithFields(log.Fields{
+		"name": name,
+	}).Info("startMatch")
+
+	gameDefinition := dataSource.findGameDefinitionByName(name)
+	if gameDefinition == nil {
+		log.Info("Invalid gamedefinition name")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
-	log.WithFields(log.Fields{
-		"createMatch": match,
-	}).Info("creating match")
-
-	match = dataSource.createMatch(match)
+	match := dataSource.createMatch(gameDefinition.ID)
 	if match == nil {
 		log.Error("Invalid Match when saving")
 		c.AbortWithStatus(http.StatusBadRequest)
@@ -354,13 +361,13 @@ func getUser(c *gin.Context) {
 // @Summary find or create Luchador for the current user
 // @Accept json
 // @Produce json
-// @Success 200 {object} main.Luchador
+// @Success 200 {object} main.GameComponent
 // @Security ApiKeyAuth
 // @Router /private/luchador [get]
 func getLuchador(c *gin.Context) {
 	val, _ := c.Get("user")
 	user := val.(*User)
-	var luchador *Luchador
+	var luchador *GameComponent
 
 	luchador = dataSource.findLuchador(user)
 	log.WithFields(log.Fields{
@@ -369,7 +376,7 @@ func getLuchador(c *gin.Context) {
 	}).Info("after find luchador on getLuchador")
 
 	if luchador == nil {
-		luchador = &Luchador{
+		luchador = &GameComponent{
 			UserID: user.ID,
 			Name:   fmt.Sprintf("Luchador%d", user.ID),
 		}
@@ -405,7 +412,7 @@ func getLuchador(c *gin.Context) {
 // @Summary Updates Luchador
 // @Accept  json
 // @Produce  json
-// @Param request body main.Luchador true "Luchador"
+// @Param request body main.GameComponent true "Luchador"
 // @Success 200 {object} main.UpdateLuchadorResponse
 // @Security ApiKeyAuth
 // @Router /private/luchador [put]
@@ -414,7 +421,7 @@ func updateLuchador(c *gin.Context) {
 	user := val.(*User)
 	response := UpdateLuchadorResponse{Errors: []string{}}
 
-	var luchador *Luchador
+	var luchador *GameComponent
 	err := c.BindJSON(&luchador)
 	if err != nil {
 		log.Info("Invalid body content on updateLuchador")
@@ -546,7 +553,7 @@ func getMaskConfig(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param name path string true "GameDefinition name"
-// @Success 200 200 {array} main.GameDefinition
+// @Success 200 200 {object} main.GameDefinition
 // @Security ApiKeyAuth
 // @Router /internal/game-definition/{name} [get]
 func getGameDefinition(c *gin.Context) {
@@ -558,6 +565,37 @@ func getGameDefinition(c *gin.Context) {
 	}).Info("getGameDefinition")
 
 	gameDefinition := dataSource.findGameDefinitionByName(name)
+
+	log.WithFields(log.Fields{
+		"gameDefinition": gameDefinition,
+	}).Info("getGameDefinition")
+
+	c.JSON(http.StatusOK, gameDefinition)
+}
+
+// getGameDefinitionByID godoc
+// @Summary find a game definition
+// @Accept json
+// @Produce json
+// @Param id path int true "GameDefinition id"
+// @Success 200 200 {object} main.GameDefinition
+// @Security ApiKeyAuth
+// @Router /private/game-definition-id/{id} [get]
+func getGameDefinitionByID(c *gin.Context) {
+
+	id := c.Param("id")
+	aid, err := strconv.Atoi(id)
+	if err != nil {
+		log.Info("Invalid ID")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"id": aid,
+	}).Info("getGameDefinitionByID")
+
+	gameDefinition := dataSource.findGameDefinition(uint(aid))
 
 	log.WithFields(log.Fields{
 		"gameDefinition": gameDefinition,
@@ -589,13 +627,13 @@ func getRandomMaskConfig(c *gin.Context) {
 // @Summary Create Gamecomponent as Luchador
 // @Accept  json
 // @Produce  json
-// @Param request body main.Luchador true "Luchador"
-// @Success 200 {object} main.Luchador
+// @Param request body main.GameComponent true "Luchador"
+// @Success 200 {object} main.GameComponent
 // @Security ApiKeyAuth
 // @Router /internal/game-component [post]
 func createGameComponent(c *gin.Context) {
 
-	var luchador *Luchador
+	var luchador *GameComponent
 	err := c.BindJSON(&luchador)
 	if err != nil {
 		log.Info("Invalid body content on createGameComponent")
@@ -652,12 +690,46 @@ func getActiveMatches(c *gin.Context) {
 	c.JSON(http.StatusOK, matches)
 }
 
+// getMatch godoc
+// @Summary find one match
+// @Accept json
+// @Produce json
+// @Param matchID query int false "int valid"
+// @Success 200 {object} main.Match
+// @Security ApiKeyAuth
+// @Router /private/match-single [get]
+func getMatch(c *gin.Context) {
+	parameter := c.Query("matchID")
+	i32, err := strconv.ParseInt(parameter, 10, 32)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"matchID": parameter,
+		}).Error("Invalid matchID")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	var matchID uint
+	matchID = uint(i32)
+
+	log.WithFields(log.Fields{
+		"matchID": matchID,
+	}).Info("getMatch")
+
+	match := dataSource.findMatch(matchID)
+
+	log.WithFields(log.Fields{
+		"match": match,
+	}).Info("getMatch")
+
+	c.JSON(http.StatusOK, match)
+}
+
 // getLuchadorConfigsForCurrentMatch godoc
 // @Summary return luchador configs for current match
 // @Accept json
 // @Produce json
 // @Param matchID query int false "int valid"
-// @Success 200 {array} main.Luchador
+// @Success 200 {array} main.GameComponent
 // @Security ApiKeyAuth
 // @Router /private/match-config [get]
 func getLuchadorConfigsForCurrentMatch(c *gin.Context) {
@@ -674,7 +746,7 @@ func getLuchadorConfigsForCurrentMatch(c *gin.Context) {
 	var matchID uint
 	matchID = uint(i32)
 
-	var result *[]Luchador
+	var result *[]GameComponent
 
 	result = dataSource.findLuchadorConfigsByMatchID(matchID)
 	log.WithFields(log.Fields{
@@ -705,7 +777,7 @@ func joinMatch(c *gin.Context) {
 	val, _ := c.Get("user")
 	user := val.(*User)
 
-	var luchador *Luchador
+	var luchador *GameComponent
 	luchador = dataSource.findLuchador(user)
 	if luchador == nil {
 		log.WithFields(log.Fields{
@@ -747,7 +819,7 @@ func joinMatch(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param luchadorID query int false "int valid"
-// @Success 200 {object} main.Luchador
+// @Success 200 {object} main.GameComponent
 // @Security ApiKeyAuth
 // @Router /internal/luchador [get]
 func getLuchadorByID(c *gin.Context) {
@@ -764,7 +836,7 @@ func getLuchadorByID(c *gin.Context) {
 	var luchadorID uint
 	luchadorID = uint(i32)
 
-	var luchador *Luchador
+	var luchador *GameComponent
 
 	luchador = dataSource.findLuchadorByID(luchadorID)
 	if luchador == nil {
