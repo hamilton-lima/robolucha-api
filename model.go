@@ -123,13 +123,14 @@ type GameComponent struct {
 
 // Code definition
 type Code struct {
-	ID        uint       `gorm:"primary_key" json:"id,omitempty"`
-	CreatedAt time.Time  `json:"-"`
-	UpdatedAt time.Time  `json:"-"`
-	DeletedAt *time.Time `json:"-"`
-	Event     string     `json:"event"`
-	Script    string     `json:"script"`
-	Exception string     `json:"exception"`
+	ID               uint       `gorm:"primary_key" json:"id,omitempty"`
+	CreatedAt        time.Time  `json:"-"`
+	UpdatedAt        time.Time  `json:"-"`
+	DeletedAt        *time.Time `json:"-"`
+	Event            string     `json:"event"`
+	Script           string     `json:"script"`
+	Exception        string     `json:"exception"`
+	GameDefinitionID uint       `json:"gameDefinition,omitempty"`
 }
 
 // Config definition
