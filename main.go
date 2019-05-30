@@ -105,7 +105,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 	internalAPI := router.Group("/internal")
 	internalAPI.Use(KeyIsValid(internalAPIKey))
 	{
-		internalAPI.GET("/game-definition/:name", getGameDefinition)
+		internalAPI.GET("/game-definition/:name", getGameDefinitionByName)
 		internalAPI.POST("/game-definition", createGameDefinition)
 		internalAPI.POST("/start-match/:name", startMatch)
 		internalAPI.POST("/game-component", createGameComponent)
@@ -132,6 +132,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.GET("/match-config", getLuchadorConfigsForCurrentMatch)
 		privateAPI.POST("/join-match", joinMatch)
 		privateAPI.GET("/game-definition-id/:id", getGameDefinitionByID)
+		privateAPI.GET("/game-definition-all", getGameDefinition)
 	}
 
 	return router
@@ -548,7 +549,7 @@ func getMaskConfig(c *gin.Context) {
 	c.JSON(http.StatusOK, configs)
 }
 
-// getGameDefinition godoc
+// getGameDefinitionByName godoc
 // @Summary find a game definition
 // @Accept json
 // @Produce json
@@ -556,7 +557,7 @@ func getMaskConfig(c *gin.Context) {
 // @Success 200 200 {object} main.GameDefinition
 // @Security ApiKeyAuth
 // @Router /internal/game-definition/{name} [get]
-func getGameDefinition(c *gin.Context) {
+func getGameDefinitionByName(c *gin.Context) {
 
 	name := c.Param("name")
 
@@ -602,6 +603,24 @@ func getGameDefinitionByID(c *gin.Context) {
 	}).Info("getGameDefinition")
 
 	c.JSON(http.StatusOK, gameDefinition)
+}
+
+// getGameDefinition godoc
+// @Summary find all game definitions
+// @Accept json
+// @Produce json
+// @Success 200 200 {array} main.GameDefinition
+// @Security ApiKeyAuth
+// @Router /private/game-definition-all [get]
+func getGameDefinition(c *gin.Context) {
+
+	result := dataSource.findAllGameDefinition()
+
+	log.WithFields(log.Fields{
+		"result": result,
+	}).Info("getGameDefinition")
+
+	c.JSON(http.StatusOK, result)
 }
 
 // getRandomMaskConfig godoc

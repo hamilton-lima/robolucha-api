@@ -309,6 +309,33 @@
                 }
             }
         },
+        "/private/game-definition-all": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find all game definitions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.GameDefinition"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/private/game-definition-id/{id}": {
             "get": {
                 "security": [
@@ -720,6 +747,9 @@
                 },
                 "exception": {
                     "type": "string"
+                },
+                "gameDefinition": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"

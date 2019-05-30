@@ -624,6 +624,35 @@ func (ds *DataSource) findGameDefinitionByName(name string) *GameDefinition {
 	return &gameDefinition
 }
 
+func (ds *DataSource) findAllGameDefinition() *[]GameDefinition {
+	var gameDefinitions []GameDefinition
+
+	ds.db.
+		Preload("GameComponents").
+		Preload("GameComponents.Codes").
+		Preload("GameComponents.Configs").
+		Preload("SceneComponents").
+		Preload("SceneComponents.Codes").
+		Preload("Codes").
+		Preload("LuchadorSuggestedCodes").
+		Order("sort_order").
+		Find(&gameDefinitions)
+
+	log.WithFields(log.Fields{
+		"gameDefinitions": gameDefinitions,
+	}).Debug("findTutorialGameDefinition before array checks")
+
+	for i, _ := range gameDefinitions {
+		resetGameDefinitionArrays(&gameDefinitions[i])
+	}
+
+	log.WithFields(log.Fields{
+		"gameDefinitions": gameDefinitions,
+	}).Debug("findAllGameDefinition")
+
+	return &gameDefinitions
+}
+
 func (ds *DataSource) findTutorialGameDefinition() *[]GameDefinition {
 	var gameDefinitions []GameDefinition
 

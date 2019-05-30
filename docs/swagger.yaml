@@ -6,6 +6,8 @@ definitions:
         type: string
       exception:
         type: string
+      gameDefinition:
+        type: integer
       id:
         type: integer
       script:
@@ -432,6 +434,22 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: create Match
+  /private/game-definition-all:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.GameDefinition'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: find all game definitions
   /private/game-definition-id/{id}:
     get:
       consumes:

@@ -16,7 +16,7 @@ RUN chmod 600 /root/.ssh/id_rsa
 RUN git config --global --add url."git@gitlab.com:robolucha/robolucha-api.git".insteadOf "https://gitlab.com/robolucha/robolucha-api.git"
 
 # get dependencies
-RUN $GOPATH/src/gitlab.com/robolucha/robolucha-api/go-get.sh
+RUN bash -c $GOPATH/src/gitlab.com/robolucha/robolucha-api/go-get.sh
 
 COPY . $GOPATH/src/gitlab.com/robolucha/robolucha-api/
 
