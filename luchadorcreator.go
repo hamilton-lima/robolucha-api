@@ -6,12 +6,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func defaultCode() []Code {
-	repeat := Code{Event: "onRepeat", Script: "move(20)\nfire(1)"}
-	onHitWall := Code{Event: "onHitWall", Script: "turn(45)"}
-	return []Code{repeat, onHitWall}
-}
-
 var maskShape = []string{
 	"segunda_cor0001.png",
 	"segunda_cor0002.png",

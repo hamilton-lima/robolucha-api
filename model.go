@@ -130,7 +130,7 @@ type Code struct {
 	Event            string     `json:"event"`
 	Script           string     `json:"script"`
 	Exception        string     `json:"exception"`
-	GameDefinitionID uint       `json:"gameDefinition,omitempty"`
+	GameDefinitionID uint       `json:"gameDefinition"`
 }
 
 // Config definition
