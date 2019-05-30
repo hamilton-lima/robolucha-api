@@ -65,5 +65,8 @@
   ],
   "sceneComponents": [],
   "codes": [],
-  "suggestedCodes": []
+  "suggestedCodes": [
+    { "event": "onRepeat", "script": "move(20)\nfire(1)" },
+    { "event": "onHitWall", "script": "turn(45)" }
+  ]
 }

@@ -382,7 +382,6 @@ func getLuchador(c *gin.Context) {
 			Name:   fmt.Sprintf("Luchador%d", user.ID),
 		}
 
-		luchador.Codes = defaultCode()
 		luchador.Configs = randomConfig()
 		luchador.Name = randomName(luchador.Configs)
 		log.WithFields(log.Fields{
