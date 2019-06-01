@@ -212,6 +212,12 @@
                         "description": "int valid",
                         "name": "luchadorID",
                         "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "int valid",
+                        "name": "gamedefinitionID",
+                        "in": "query"
                     }
                 ],
                 "responses": {

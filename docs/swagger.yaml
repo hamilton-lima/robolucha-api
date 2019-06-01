@@ -372,6 +372,10 @@ paths:
         in: query
         name: luchadorID
         type: integer
+      - description: int valid
+        in: query
+        name: gamedefinitionID
+        type: integer
       produces:
       - application/json
       responses:
