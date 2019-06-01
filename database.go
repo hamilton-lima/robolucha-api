@@ -329,19 +329,6 @@ func (ds *DataSource) findMatch(id uint) *Match {
 	return &match
 }
 
-// func (ds *DataSource) findGameComponentByID(id uint) *GameComponent {
-// 	var luchador GameComponent
-// 	if ds.db.First(&luchador, id).RecordNotFound(){
-// 		return nil
-// 	}
-
-// 	log.WithFields(log.Fields{
-// 		"luchador": luchador,
-// 	}).Info("findGameComponentByID")
-
-// 	return &gameComponent
-// }
-
 func (ds *DataSource) findLuchadorByID(luchadorID uint) *GameComponent {
 	var luchador GameComponent
 	if ds.db.Preload("Codes").Preload("Configs").Where(&GameComponent{ID: luchadorID}).First(&luchador).RecordNotFound() {
