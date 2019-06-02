@@ -22,6 +22,13 @@ definitions:
       value:
         type: string
     type: object
+  main.FindLuchadorWithGamedefinition:
+    properties:
+      gameDefinitionID:
+        type: integer
+      luchadorID:
+        type: integer
+    type: object
   main.GameComponent:
     properties:
       codes:
@@ -364,18 +371,17 @@ paths:
       - ApiKeyAuth: []
       summary: find a game definition
   /internal/luchador:
-    get:
+    post:
       consumes:
       - application/json
       parameters:
-      - description: int valid
-        in: query
-        name: luchadorID
-        type: integer
-      - description: int valid
-        in: query
-        name: gamedefinitionID
-        type: integer
+      - description: FindLuchadorWithGamedefinition
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.FindLuchadorWithGamedefinition'
+          type: object
       produces:
       - application/json
       responses:

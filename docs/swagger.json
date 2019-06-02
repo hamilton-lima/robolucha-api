@@ -193,7 +193,7 @@
             }
         },
         "/internal/luchador": {
-            "get": {
+            "post": {
                 "security": [
                     {
                         "ApiKeyAuth": []
@@ -208,16 +208,14 @@
                 "summary": "find Luchador by ID",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "int valid",
-                        "name": "luchadorID",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "int valid",
-                        "name": "gamedefinitionID",
-                        "in": "query"
+                        "description": "FindLuchadorWithGamedefinition",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.FindLuchadorWithGamedefinition"
+                        }
                     }
                 ],
                 "responses": {
@@ -776,6 +774,17 @@
                 },
                 "value": {
                     "type": "string"
+                }
+            }
+        },
+        "main.FindLuchadorWithGamedefinition": {
+            "type": "object",
+            "properties": {
+                "gameDefinitionID": {
+                    "type": "integer"
+                },
+                "luchadorID": {
+                    "type": "integer"
                 }
             }
         },

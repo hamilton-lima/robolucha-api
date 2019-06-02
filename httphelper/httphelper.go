@@ -15,8 +15,9 @@ func GetIntegerParam(c *gin.Context, paramName string, context string) (uint, er
 	if err != nil {
 		message := "Invalid Integer parameter"
 		log.WithFields(log.Fields{
-			"parameter": parameter,
-			"context":   context,
+			"parameterName": paramName,
+			"parameter":     parameter,
+			"context":       context,
 		}).Error(message)
 		return 0, errors.New(message)
 	}
