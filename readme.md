@@ -37,6 +37,11 @@ Create symbolic link from workspace to gopath
 	go get -v	
 ```
 
+when using Ubuntu on Windows, create the symlink on Windows to be regonized on both systems
+``
+mklink /d C:\Users\hamil\code\go\src\gitlab.com\robolucha\robolucha-api C:\Users\hamil\code\robolucha-api 
+```
+
 Edit .profile
 ```
 	nano $HOME/.profile

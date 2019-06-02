@@ -25,6 +25,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"gitlab.com/robolucha/robolucha-api/auth"
+
 	_ "gitlab.com/robolucha/robolucha-api/docs"
 )
 
@@ -109,7 +110,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		internalAPI.POST("/game-definition", createGameDefinition)
 		internalAPI.POST("/start-match/:name", startMatch)
 		internalAPI.POST("/game-component", createGameComponent)
-		internalAPI.GET("/luchador", getLuchadorByID)
+		internalAPI.POST("/luchador", getLuchadorByIDAndGamedefinitionID)
 		internalAPI.POST("/match-participant", addMatchPartipant)
 		internalAPI.PUT("/end-match", endMatch)
 		internalAPI.GET("/ready", getReady)
@@ -836,35 +837,39 @@ func joinMatch(c *gin.Context) {
 // @Summary find Luchador by ID
 // @Accept json
 // @Produce json
-// @Param luchadorID query int false "int valid"
+// @Param request body main.FindLuchadorWithGamedefinition true "FindLuchadorWithGamedefinition"
 // @Success 200 {object} main.GameComponent
 // @Security ApiKeyAuth
-// @Router /internal/luchador [get]
-func getLuchadorByID(c *gin.Context) {
+// @Router /internal/luchador [post]
+func getLuchadorByIDAndGamedefinitionID(c *gin.Context) {
 
-	parameter := c.Query("luchadorID")
-	i32, err := strconv.ParseInt(parameter, 10, 32)
+	var parameters *FindLuchadorWithGamedefinition
+	err := c.BindJSON(&parameters)
 	if err != nil {
-		log.WithFields(log.Fields{
-			"luchadorID": parameter,
-		}).Error("Invalid luchadorID")
+		log.Info("Invalid body content on getLuchadorByIDAndGamedefinitionID")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
-	var luchadorID uint
-	luchadorID = uint(i32)
 
 	var luchador *GameComponent
+	luchador = dataSource.findLuchadorByID(parameters.LuchadorID)
 
-	luchador = dataSource.findLuchadorByID(luchadorID)
 	if luchador == nil {
 		log.WithFields(log.Fields{
-			"luchadorID": luchadorID,
+			"luchadorID": parameters.LuchadorID,
 		}).Error("Luchador not found")
 
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
+
+	filteredCodes := make([]Code, 0)
+	for _, code := range luchador.Codes {
+		if code.GameDefinitionID == parameters.GameDefinitionID {
+			filteredCodes = append(filteredCodes, code)
+		}
+	}
+	luchador.Codes = filteredCodes
 
 	log.WithFields(log.Fields{
 		"getLuchador": luchador,

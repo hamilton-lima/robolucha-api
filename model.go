@@ -149,6 +149,12 @@ type JoinMatch struct {
 	LuchadorID uint `json:"luchadorID"`
 }
 
+// JoinMatch definition
+type FindLuchadorWithGamedefinition struct {
+	GameDefinitionID uint `json:"gameDefinitionID"`
+	LuchadorID       uint `json:"luchadorID"`
+}
+
 // ScoreList definition
 type ScoreList struct {
 	Scores []MatchScore `json:"scores"`
