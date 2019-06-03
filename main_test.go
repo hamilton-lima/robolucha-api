@@ -45,6 +45,38 @@ func TestCreateMatch(t *testing.T) {
 
 }
 
+func TestCreateTutorialMatch(t *testing.T) {
+	SetupMain(t)
+	os.Remove(test.DB_NAME)
+	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
+	defer dataSource.db.Close()
+
+	mockPublisher = &test.MockPublisher{}
+	publisher = mockPublisher
+
+	gd := BuildDefaultGameDefinition()
+	gd.Name = "FOOBAR"
+	dataSource.createGameDefinition(&gd)
+
+	url := fmt.Sprintf("/private/start-tutorial-match/%v", gd.Name)
+
+	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
+	w := test.PerformRequest(router, "POST", url, "", test.API_KEY)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var match *Match
+	json.Unmarshal(w.Body.Bytes(), &match)
+
+	var matchFromMessage *Match
+	json.Unmarshal([]byte(mockPublisher.LastMessage), &matchFromMessage)
+
+	assert.Equal(t, match.ID, matchFromMessage.ID)
+	log.WithFields(log.Fields{
+		"match.ID":            match.ID,
+		"matchFromMessage.ID": matchFromMessage.ID,
+	}).Debug("TestCreateTutorialMatch")
+}
+
 func TestCreateGameComponent(t *testing.T) {
 	SetupMain(t)
 	os.Remove(test.DB_NAME)

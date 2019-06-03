@@ -134,6 +134,8 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.POST("/join-match", joinMatch)
 		privateAPI.GET("/game-definition-id/:id", getGameDefinitionByID)
 		privateAPI.GET("/game-definition-all", getGameDefinition)
+		privateAPI.POST("/start-tutorial-match/:name", startTutorialMatch)
+
 	}
 
 	return router
@@ -335,6 +337,50 @@ func startMatch(c *gin.Context) {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
+
+	// load all the fields
+	match = dataSource.findMatch(match.ID)
+
+	log.WithFields(log.Fields{
+		"createMatch": match,
+	}).Info("created match")
+
+	c.JSON(http.StatusOK, match)
+}
+
+// startTutorialMatch godoc
+// @Summary create Match and publish
+// @Accept json
+// @Produce json
+// @Param name path string true "GameDefinition name"
+// @Success 200 {object} main.Match
+// @Security ApiKeyAuth
+// @Router /private/start-tutorial-match/{name} [post]
+func startTutorialMatch(c *gin.Context) {
+
+	name := c.Param("name")
+
+	log.WithFields(log.Fields{
+		"name": name,
+	}).Info("startTutorialMatch")
+
+	gameDefinition := dataSource.findGameDefinitionByName(name)
+	if gameDefinition == nil {
+		log.Info("Invalid gamedefinition name")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	match := dataSource.createMatch(gameDefinition.ID)
+	if match == nil {
+		log.Error("Invalid Match when saving")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	// publish event to run the match
+	matchJSON, _ := json.Marshal(match)
+	publisher.Publish("start.match", string(matchJSON))
 
 	// load all the fields
 	match = dataSource.findMatch(match.ID)
