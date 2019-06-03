@@ -651,6 +651,27 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: find one match
+  /private/start-tutorial-match/{name}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: GameDefinition name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Match'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: create Match and publish
   /private/tutorial:
     get:
       consumes:

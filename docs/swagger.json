@@ -654,6 +654,40 @@
                 }
             }
         },
+        "/private/start-tutorial-match/{name}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "create Match and publish",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "GameDefinition name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.Match"
+                        }
+                    }
+                }
+            }
+        },
         "/private/tutorial": {
             "get": {
                 "security": [
