@@ -297,6 +297,26 @@ func (ds *DataSource) findActiveMatches() *[]Match {
 	return &matches
 }
 
+func (ds *DataSource) findActiveMatchesByGameDefinitionAndParticipant(gameDefinition *GameDefinition, gameComponent *GameComponent) *Match {
+
+	var matches []Match
+	ds.db.Preload("Participants").Where(&Match{GameDefinitionID: gameDefinition.ID}).Where("time_end < time_start").Find(&matches)
+
+	log.WithFields(log.Fields{
+		"matches": matches,
+	}).Info("findActiveMatchesByGameDefinitionAndParticipant")
+
+	for _, match := range matches {
+		for _, participant := range match.Participants {
+			if participant.ID == gameComponent.ID {
+				return &match
+			}
+		}
+	}
+
+	return nil
+}
+
 func (ds *DataSource) findMaskConfig(id uint) *[]Config {
 
 	var component GameComponent

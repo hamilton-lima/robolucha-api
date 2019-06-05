@@ -371,25 +371,47 @@ func startTutorialMatch(c *gin.Context) {
 		return
 	}
 
-	match := dataSource.createMatch(gameDefinition.ID)
+	val, _ := c.Get("user")
+	user := val.(*User)
+
+	luchador := dataSource.findLuchador(user)
+	if luchador == nil {
+		log.WithFields(log.Fields{
+			"user": user,
+		}).Error("Error getting luchador for the current user")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	match := dataSource.findActiveMatchesByGameDefinitionAndParticipant(gameDefinition, luchador)
+	if match != nil {
+		log.WithFields(log.Fields{
+			"gameDefinition.ID": gameDefinition.ID,
+			"luchador.ID":       luchador.ID,
+			"match":             match,
+		}).Info("Existing match found")
+
+		c.JSON(http.StatusOK, match)
+		return
+	}
+
+	match = dataSource.createMatch(gameDefinition.ID)
 	if match == nil {
 		log.Error("Invalid Match when saving")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
+	result := JoinMatch{MatchID: match.ID, LuchadorID: luchador.ID}
 	// publish event to run the match
-	matchJSON, _ := json.Marshal(match)
-	publisher.Publish("start.match", string(matchJSON))
-
-	// load all the fields
-	match = dataSource.findMatch(match.ID)
+	resultJSON, _ := json.Marshal(result)
+	publisher.Publish("start.match", string(resultJSON))
 
 	log.WithFields(log.Fields{
-		"createMatch": match,
+		"createMatch": result,
 	}).Info("created match")
 
-	c.JSON(http.StatusOK, match)
+	c.JSON(http.StatusOK, result)
 }
 
 // getUser godoc
@@ -847,7 +869,7 @@ func joinMatch(c *gin.Context) {
 	if luchador == nil {
 		log.WithFields(log.Fields{
 			"user": user,
-		}).Error("Error getting luchador for the current uses")
+		}).Error("Error getting luchador for the current user")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
