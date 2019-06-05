@@ -391,7 +391,8 @@ func startTutorialMatch(c *gin.Context) {
 			"match":             match,
 		}).Info("Existing match found")
 
-		c.JSON(http.StatusOK, match)
+		result := JoinMatch{MatchID: match.ID, LuchadorID: luchador.ID}
+		c.JSON(http.StatusOK, result)
 		return
 	}
 
