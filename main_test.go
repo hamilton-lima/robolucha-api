@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -59,22 +60,85 @@ func TestCreateTutorialMatch(t *testing.T) {
 	dataSource.createGameDefinition(&gd)
 
 	url := fmt.Sprintf("/private/start-tutorial-match/%v", gd.Name)
-
 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
+
+	// force the luchador creation for the current user
+	luchadorResponse := test.PerformRequestNoAuth(router, "GET", "/private/luchador", "")
+	assert.Equal(t, http.StatusOK, luchadorResponse.Code)
+	var luchador GameComponent
+	json.Unmarshal(luchadorResponse.Body.Bytes(), &luchador)
+
 	w := test.PerformRequest(router, "POST", url, "", test.API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var match *Match
-	json.Unmarshal(w.Body.Bytes(), &match)
+	var apiResult *JoinMatch
+	json.Unmarshal(w.Body.Bytes(), &apiResult)
 
-	var matchFromMessage *Match
-	json.Unmarshal([]byte(mockPublisher.LastMessage), &matchFromMessage)
+	var publisherResult *JoinMatch
+	json.Unmarshal([]byte(mockPublisher.LastMessage), &publisherResult)
 
-	assert.Equal(t, match.ID, matchFromMessage.ID)
+	match := (*dataSource.findActiveMatches())[0]
+
+	assert.Equal(t, match.ID, publisherResult.MatchID)
+	assert.Equal(t, luchador.ID, publisherResult.LuchadorID)
+	assert.Equal(t, match.ID, apiResult.MatchID)
+	assert.Equal(t, luchador.ID, apiResult.LuchadorID)
+
+	// add participant
+	matchParticipant := MatchParticipant{LuchadorID: luchador.ID, MatchID: match.ID}
+	body, _ := json.Marshal(matchParticipant)
+
+	w = test.PerformRequest(router, "POST", "/internal/match-participant", string(body), test.API_KEY)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// no messsage should be sent to the publisher if the match exists
+	mockPublisher.LastMessage = "EMPTY"
+
+	//call again and expect the same matchID
+	w = test.PerformRequest(router, "POST", url, "", test.API_KEY)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var secondApiResult *JoinMatch
+	json.Unmarshal(w.Body.Bytes(), &secondApiResult)
+
+	assert.Equal(t, match.ID, secondApiResult.MatchID)
+	assert.Equal(t, luchador.ID, secondApiResult.LuchadorID)
+	assert.Equal(t, "EMPTY", mockPublisher.LastMessage)
+
+	// end match and call again expecting to have a new match
+	match.TimeEnd = time.Now()
+	body, _ = json.Marshal(match)
+	w = test.PerformRequest(router, "PUT", "/internal/end-match", string(body), test.API_KEY)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	w = test.PerformRequest(router, "POST", url, "", test.API_KEY)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var thirdApiResult *JoinMatch
+	json.Unmarshal(w.Body.Bytes(), &thirdApiResult)
+
+	var thirdPublisherResult *JoinMatch
+	json.Unmarshal([]byte(mockPublisher.LastMessage), &thirdPublisherResult)
+
+	thirdCallMatch := (*dataSource.findActiveMatches())[0]
+
 	log.WithFields(log.Fields{
-		"match.ID":            match.ID,
-		"matchFromMessage.ID": matchFromMessage.ID,
+		"thirdApiResult":       thirdApiResult,
+		"thirdPublisherResult": thirdPublisherResult,
+		"thirdCallMatch":       thirdCallMatch,
+		"step":                 "Third call",
 	}).Debug("TestCreateTutorialMatch")
+
+	assert.Equal(t, thirdCallMatch.ID, thirdApiResult.MatchID)
+	assert.Equal(t, luchador.ID, thirdApiResult.LuchadorID)
+
+	assert.Equal(t, thirdCallMatch.ID, thirdPublisherResult.MatchID)
+	assert.Equal(t, luchador.ID, thirdPublisherResult.LuchadorID)
+
+	// make sure it created a new match
+	assert.Assert(t, match.ID != thirdApiResult.MatchID)
+	assert.Assert(t, match.ID != thirdPublisherResult.MatchID)
+
 }
 
 func TestCreateGameComponent(t *testing.T) {

@@ -682,7 +682,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.Match"
+                            "$ref": "#/definitions/main.JoinMatch"
                         }
                     }
                 }
