@@ -667,7 +667,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.Match'
+            $ref: '#/definitions/main.JoinMatch'
             type: object
       security:
       - ApiKeyAuth: []

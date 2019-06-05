@@ -353,7 +353,7 @@ func startMatch(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param name path string true "GameDefinition name"
-// @Success 200 {object} main.Match
+// @Success 200 {object} main.JoinMatch
 // @Security ApiKeyAuth
 // @Router /private/start-tutorial-match/{name} [post]
 func startTutorialMatch(c *gin.Context) {
