@@ -7,7 +7,7 @@
         "license": {},
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "http://local.robolucha.com:5000",
     "basePath": "/",
     "paths": {
         "/internal/add-match-scores": {
@@ -158,6 +158,40 @@
                 }
             }
         },
+        "/internal/game-definition-id/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find a game definition",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "GameDefinition id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.GameDefinition"
+                        }
+                    }
+                }
+            }
+        },
         "/internal/game-definition/{name}": {
             "get": {
                 "security": [
@@ -266,6 +300,39 @@
                 }
             }
         },
+        "/internal/match-single": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find one match",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "int valid",
+                        "name": "matchID",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.Match"
+                        }
+                    }
+                }
+            }
+        },
         "/internal/ready": {
             "get": {
                 "security": [
@@ -335,40 +402,6 @@
                             "items": {
                                 "$ref": "#/definitions/main.GameDefinition"
                             }
-                        }
-                    }
-                }
-            }
-        },
-        "/private/game-definition-id/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "find a game definition",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "GameDefinition id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/main.GameDefinition"
                         }
                     }
                 }
@@ -616,39 +649,6 @@
                             "items": {
                                 "$ref": "#/definitions/main.GameComponent"
                             }
-                        }
-                    }
-                }
-            }
-        },
-        "/private/match-single": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "find one match",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "int valid",
-                        "name": "matchID",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/main.Match"
                         }
                     }
                 }

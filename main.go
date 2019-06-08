@@ -1,7 +1,7 @@
 // @title Robolucha API
 // @version 1.0
 // @description Robolucha API
-// @host localhost:8080
+// @host http://local.robolucha.com:5000
 // @BasePath /
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
@@ -107,6 +107,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 	internalAPI.Use(KeyIsValid(internalAPIKey))
 	{
 		internalAPI.GET("/game-definition/:name", getGameDefinitionByName)
+		internalAPI.GET("/game-definition-id/:id", getGameDefinitionByID)
 		internalAPI.POST("/game-definition", createGameDefinition)
 		internalAPI.POST("/start-match/:name", startMatch)
 		internalAPI.POST("/game-component", createGameComponent)
@@ -115,6 +116,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		internalAPI.PUT("/end-match", endMatch)
 		internalAPI.GET("/ready", getReady)
 		internalAPI.POST("/add-match-scores", addMatchScores)
+		internalAPI.GET("/match-single", getMatch)
 	}
 
 	privateAPI := router.Group("/private")
@@ -651,6 +653,7 @@ func getGameDefinitionByName(c *gin.Context) {
 // @Success 200 200 {object} main.GameDefinition
 // @Security ApiKeyAuth
 // @Router /private/game-definition-id/{id} [get]
+// @Router /internal/game-definition-id/{id} [get]
 func getGameDefinitionByID(c *gin.Context) {
 
 	id := c.Param("id")
@@ -786,6 +789,7 @@ func getActiveMatches(c *gin.Context) {
 // @Success 200 {object} main.Match
 // @Security ApiKeyAuth
 // @Router /private/match-single [get]
+// @Router /internal/match-single [get]
 func getMatch(c *gin.Context) {
 	parameter := c.Query("matchID")
 	i32, err := strconv.ParseInt(parameter, 10, 32)
