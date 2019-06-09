@@ -549,11 +549,11 @@ func (ds *DataSource) updateGameDefinition(input *GameDefinition) *GameDefinitio
 		gameDefinition.ID = ID
 
 		// udpate the database
-		ds.db.Update(gameDefinition)
+		ds.db.Save(gameDefinition)
 
 		log.WithFields(log.Fields{
 			"gameDefinition": gameDefinition,
-		}).Info("updateGameDefinition")
+		}).Error("updateGameDefinition")
 
 		return gameDefinition
 

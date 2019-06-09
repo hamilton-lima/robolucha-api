@@ -141,6 +141,54 @@ func TestCreateTutorialMatch(t *testing.T) {
 
 }
 
+func TestUpdateGameDefinition(t *testing.T) {
+	SetupMain(t)
+	os.Remove(test.DB_NAME)
+	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
+	defer dataSource.db.Close()
+
+	mockPublisher = &test.MockPublisher{}
+	publisher = mockPublisher
+
+	gd, _, _ := fakeGameDefinition(t, "FOOBAR", 10)
+	created := dataSource.createGameDefinition(&gd)
+
+	ID := created.ID
+	gd.ID = 0
+
+	gd.MinParticipants = 1
+	gd.ArenaHeight = 42
+
+	body, _ := json.Marshal(gd)
+	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
+
+	w := test.PerformRequest(router, "PUT", "/internal/game-definition", string(body), test.API_KEY)
+	assert.Equal(t, http.StatusOK, w.Code)
+	var updated GameDefinition
+	json.Unmarshal(w.Body.Bytes(), &updated)
+
+	log.WithFields(log.Fields{
+		"original": gd,
+		// "created":  created,
+		// "updated":  updated,
+	}).Error("TestUpdateGameDefinition")
+
+	assert.Equal(t, uint(1), updated.MinParticipants)
+	assert.Equal(t, uint(42), updated.ArenaHeight)
+	assert.Equal(t, ID, updated.ID)
+
+	// count elements
+	assert.Assert(t, len(updated.Codes) == 2)
+	assert.Assert(t, len(updated.LuchadorSuggestedCodes) == 2)
+
+	assert.Assert(t, len(updated.GameComponents) == 2)
+	assert.Assert(t, len(updated.GameComponents[0].Codes) == 2)
+	assert.Assert(t, len(updated.GameComponents[0].Configs) > 0)
+
+	assert.Assert(t, len(updated.SceneComponents) == 2)
+	assert.Assert(t, len(updated.SceneComponents[0].Codes) == 2)
+}
+
 func TestCreateGameComponent(t *testing.T) {
 	SetupMain(t)
 	os.Remove(test.DB_NAME)
