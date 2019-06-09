@@ -527,6 +527,27 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: find all game definitions
+  /private/game-definition-id/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: GameDefinition id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.GameDefinition'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: find a game definition
   /private/get-user:
     get:
       consumes:
@@ -677,6 +698,26 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: return luchador configs for current match
+  /private/match-single:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: int valid
+        in: query
+        name: matchID
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Match'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: find one match
   /private/start-tutorial-match/{name}:
     post:
       consumes:

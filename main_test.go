@@ -150,8 +150,18 @@ func TestUpdateGameDefinition(t *testing.T) {
 	mockPublisher = &test.MockPublisher{}
 	publisher = mockPublisher
 
-	gd, _, _ := fakeGameDefinition(t, "FOOBAR", 10)
+	gd, _, _ := fakeGameDefinition(t, "FOOBAR", "tutorial", 10)
 	created := dataSource.createGameDefinition(&gd)
+
+	queryResult := dataSource.findGameDefinitionByName(gd.Name)
+	assert.Equal(t, created.ID, queryResult.ID)
+
+	log.WithFields(log.Fields{
+		"original":      gd.Name,
+		"created.Name":  created.Name,
+		"created.ID":    created.ID,
+		"query by name": queryResult,
+	}).Debug("TestUpdateGameDefinition")
 
 	ID := created.ID
 	gd.ID = 0
@@ -353,7 +363,7 @@ func TestCreateGameDefinition(t *testing.T) {
 	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
 	defer dataSource.db.Close()
 
-	resultFake, body, err := fakeGameDefinition(t, faker.Word(), 0)
+	resultFake, body, err := fakeGameDefinition(t, faker.Word(), faker.Word(), 0)
 	assert.Assert(t, err == nil)
 
 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
@@ -413,7 +423,7 @@ func TestFindTutorialGameDefinition(t *testing.T) {
 }
 
 func createTestGameDefinition(t *testing.T, typeName string, sortOrder uint) GameDefinition {
-	_, body, err := fakeGameDefinition(t, typeName, sortOrder)
+	_, body, err := fakeGameDefinition(t, faker.Word(), typeName, sortOrder)
 	assert.Assert(t, err == nil)
 
 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
@@ -447,7 +457,7 @@ func compareGameDefinition(t *testing.T, a, b GameDefinition) {
 	assert.Equal(t, len(a.GameComponents[0].Configs), len(b.GameComponents[0].Configs))
 }
 
-func fakeGameDefinition(t *testing.T, typeName string, sortOrder uint) (GameDefinition, string, error) {
+func fakeGameDefinition(t *testing.T, name string, typeName string, sortOrder uint) (GameDefinition, string, error) {
 	gameDefinition := GameDefinition{}
 
 	err := faker.FakeData(&gameDefinition)
@@ -461,6 +471,7 @@ func fakeGameDefinition(t *testing.T, typeName string, sortOrder uint) (GameDefi
 	gameDefinition.ID = 0
 	gameDefinition.Type = typeName
 	gameDefinition.SortOrder = sortOrder
+	gameDefinition.Name = name
 
 	gameDefinition.GameComponents = make([]GameComponent, 2)
 	gameDefinition.SceneComponents = make([]SceneComponent, 2)
@@ -473,7 +484,7 @@ func fakeGameDefinition(t *testing.T, typeName string, sortOrder uint) (GameDefi
 		gameDefinition.GameComponents[i].Codes = make([]Code, 2)
 		for n, _ := range gameDefinition.GameComponents[i].Codes {
 			faker.FakeData(&gameDefinition.GameComponents[i].Codes[n])
-			gameDefinition.GameComponents[i].Codes[n].ID = 0
+			// gameDefinition.GameComponents[i].Codes[n].ID = 0
 		}
 
 		gameDefinition.GameComponents[i].Configs = randomConfig()
@@ -485,18 +496,18 @@ func fakeGameDefinition(t *testing.T, typeName string, sortOrder uint) (GameDefi
 		gameDefinition.SceneComponents[i].Codes = make([]Code, 2)
 		for n, _ := range gameDefinition.SceneComponents[i].Codes {
 			faker.FakeData(&gameDefinition.SceneComponents[i].Codes[n])
-			gameDefinition.SceneComponents[i].Codes[n].ID = 0
+			// gameDefinition.SceneComponents[i].Codes[n].ID = 0
 		}
 	}
 
 	for i, _ := range gameDefinition.Codes {
 		faker.FakeData(&gameDefinition.Codes[i])
-		gameDefinition.Codes[i].ID = 0
+		// gameDefinition.Codes[i].ID = 0
 	}
 
 	for i, _ := range gameDefinition.LuchadorSuggestedCodes {
 		faker.FakeData(&gameDefinition.LuchadorSuggestedCodes[i])
-		gameDefinition.LuchadorSuggestedCodes[i].ID = 0
+		// gameDefinition.LuchadorSuggestedCodes[i].ID = 0
 	}
 
 	foo, _ := json.Marshal(gameDefinition)

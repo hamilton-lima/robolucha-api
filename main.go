@@ -107,7 +107,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 	internalAPI.Use(KeyIsValid(internalAPIKey))
 	{
 		internalAPI.GET("/game-definition/:name", getGameDefinitionByName)
-		internalAPI.GET("/game-definition-id/:id", getGameDefinitionByID)
+		internalAPI.GET("/game-definition-id/:id", getGameDefinitionByIDInternal)
 		internalAPI.POST("/game-definition", createGameDefinition)
 		internalAPI.PUT("/game-definition", updateGameDefinition)
 
@@ -118,7 +118,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		internalAPI.PUT("/end-match", endMatch)
 		internalAPI.GET("/ready", getReady)
 		internalAPI.POST("/add-match-scores", addMatchScores)
-		internalAPI.GET("/match-single", getMatch)
+		internalAPI.GET("/match-single", getMatchInternal)
 	}
 
 	privateAPI := router.Group("/private")
@@ -682,6 +682,18 @@ func getGameDefinitionByName(c *gin.Context) {
 	c.JSON(http.StatusOK, gameDefinition)
 }
 
+// getGameDefinitionByIDInternal godoc
+// @Summary find a game definition
+// @Accept json
+// @Produce json
+// @Param id path int true "GameDefinition id"
+// @Success 200 200 {object} main.GameDefinition
+// @Security ApiKeyAuth
+// @Router /internal/game-definition-id/{id} [get]
+func getGameDefinitionByIDInternal(c *gin.Context) {
+	getGameDefinitionByID(c)
+}
+
 // getGameDefinitionByID godoc
 // @Summary find a game definition
 // @Accept json
@@ -690,7 +702,6 @@ func getGameDefinitionByName(c *gin.Context) {
 // @Success 200 200 {object} main.GameDefinition
 // @Security ApiKeyAuth
 // @Router /private/game-definition-id/{id} [get]
-// @Router /internal/game-definition-id/{id} [get]
 func getGameDefinitionByID(c *gin.Context) {
 
 	id := c.Param("id")
@@ -818,6 +829,18 @@ func getActiveMatches(c *gin.Context) {
 	c.JSON(http.StatusOK, matches)
 }
 
+// getMatchInternal godoc
+// @Summary find one match
+// @Accept json
+// @Produce json
+// @Param matchID query int false "int valid"
+// @Success 200 {object} main.Match
+// @Security ApiKeyAuth
+// @Router /internal/match-single [get]
+func getMatchInternal(c *gin.Context) {
+	getMatch(c)
+}
+
 // getMatch godoc
 // @Summary find one match
 // @Accept json
@@ -826,7 +849,6 @@ func getActiveMatches(c *gin.Context) {
 // @Success 200 {object} main.Match
 // @Security ApiKeyAuth
 // @Router /private/match-single [get]
-// @Router /internal/match-single [get]
 func getMatch(c *gin.Context) {
 	parameter := c.Query("matchID")
 	i32, err := strconv.ParseInt(parameter, 10, 32)

@@ -442,6 +442,40 @@
                 }
             }
         },
+        "/private/game-definition-id/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find a game definition",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "GameDefinition id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.GameDefinition"
+                        }
+                    }
+                }
+            }
+        },
         "/private/get-user": {
             "get": {
                 "security": [
@@ -684,6 +718,39 @@
                             "items": {
                                 "$ref": "#/definitions/main.GameComponent"
                             }
+                        }
+                    }
+                }
+            }
+        },
+        "/private/match-single": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find one match",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "int valid",
+                        "name": "matchID",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.Match"
                         }
                     }
                 }
