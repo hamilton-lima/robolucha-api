@@ -540,6 +540,30 @@ func (ds *DataSource) addMatchScores(ms *ScoreList) *ScoreList {
 	return ms
 }
 
+func (ds *DataSource) updateGameDefinition(input *GameDefinition) *GameDefinition {
+
+	gameDefinition := ds.findGameDefinitionByName(input.Name)
+	if gameDefinition != nil {
+		ID := gameDefinition.ID
+		copier.Copy(gameDefinition, &input)
+		gameDefinition.ID = ID
+
+		// udpate the database
+		ds.db.Update(gameDefinition)
+
+		log.WithFields(log.Fields{
+			"gameDefinition": gameDefinition,
+		}).Info("updateGameDefinition")
+
+		return gameDefinition
+
+	} else {
+		// not found call create instead
+		return ds.createGameDefinition(input)
+	}
+
+}
+
 func (ds *DataSource) createGameDefinition(g *GameDefinition) *GameDefinition {
 
 	gameDefinition := GameDefinition{}

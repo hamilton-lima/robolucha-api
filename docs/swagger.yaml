@@ -349,6 +349,28 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: create Game definition
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: GameDefinition
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.GameDefinition'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.GameDefinition'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: update Game definition
   /internal/game-definition-id/{id}:
     get:
       consumes:

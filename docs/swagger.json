@@ -122,6 +122,41 @@
             }
         },
         "/internal/game-definition": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "update Game definition",
+                "parameters": [
+                    {
+                        "description": "GameDefinition",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.GameDefinition"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.GameDefinition"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
