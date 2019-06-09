@@ -84,6 +84,8 @@ type GameDefinition struct {
 	IncreaseSpeedEnergyCost       uint             `json:"increaseSpeedEnergyCost"`
 	IncreaseSpeedPercentage       uint             `json:"increaseSpeedPercentage"`
 	FireEnergyCost                uint             `json:"fireEnergyCost"`
+	RespawnX                      uint             `json:"respawnX"`
+	RespawnY                      uint             `json:"respawnY"`
 	GameComponents                []GameComponent  `json:"gameComponents"`
 	SceneComponents               []SceneComponent `json:"sceneComponents"`
 	Codes                         []Code           `gorm:"many2many:gamedefinition_codes" json:"codes"`

@@ -120,6 +120,10 @@ definitions:
         type: integer
       respawnCooldown:
         type: integer
+      respawnX:
+        type: integer
+      respawnY:
+        type: integer
       restoreEnergyperSecond:
         type: integer
       sceneComponents:

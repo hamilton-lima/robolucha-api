@@ -169,9 +169,9 @@ func TestUpdateGameDefinition(t *testing.T) {
 
 	log.WithFields(log.Fields{
 		"original": gd,
-		// "created":  created,
-		// "updated":  updated,
-	}).Error("TestUpdateGameDefinition")
+		"created":  created,
+		"updated":  updated,
+	}).Debug("TestUpdateGameDefinition")
 
 	assert.Equal(t, uint(1), updated.MinParticipants)
 	assert.Equal(t, uint(42), updated.ArenaHeight)
