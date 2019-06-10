@@ -412,8 +412,9 @@ func (ds *DataSource) addMatchParticipant(mp *MatchParticipant) *MatchParticipan
 			log.WithFields(log.Fields{
 				"matchID":    mp.MatchID,
 				"luchadorID": mp.LuchadorID,
-			}).Error("Luchador is already in the match")
-			return nil
+			}).Warning("Luchador is already in the match")
+
+			return &(MatchParticipant{MatchID: mp.MatchID, LuchadorID: mp.LuchadorID})
 		}
 	}
 

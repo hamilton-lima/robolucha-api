@@ -423,23 +423,14 @@ func startTutorialMatch(c *gin.Context) {
 	}
 
 	match := dataSource.findActiveMatchesByGameDefinitionAndParticipant(gameDefinition, luchador)
-	if match != nil {
-		log.WithFields(log.Fields{
-			"gameDefinition.ID": gameDefinition.ID,
-			"luchador.ID":       luchador.ID,
-			"match":             match,
-		}).Info("Existing match found")
-
-		result := JoinMatch{MatchID: match.ID, LuchadorID: luchador.ID}
-		c.JSON(http.StatusOK, result)
-		return
-	}
-
-	match = dataSource.createMatch(gameDefinition.ID)
+	// not found will create
 	if match == nil {
-		log.Error("Invalid Match when saving")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
+		match = dataSource.createMatch(gameDefinition.ID)
+		if match == nil {
+			log.Error("Invalid Match when saving")
+			c.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
 	}
 
 	result := JoinMatch{MatchID: match.ID, LuchadorID: luchador.ID}

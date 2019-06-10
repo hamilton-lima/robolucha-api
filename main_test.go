@@ -103,7 +103,13 @@ func TestCreateTutorialMatch(t *testing.T) {
 
 	assert.Equal(t, match.ID, secondApiResult.MatchID)
 	assert.Equal(t, luchador.ID, secondApiResult.LuchadorID)
-	assert.Equal(t, "EMPTY", mockPublisher.LastMessage)
+
+	// even if the match exists should send the message to start
+	// the runner should only start ONCE
+	var publisherResult2 *JoinMatch
+	json.Unmarshal([]byte(mockPublisher.LastMessage), &publisherResult2)
+	assert.Equal(t, match.ID, publisherResult2.MatchID)
+	assert.Equal(t, luchador.ID, publisherResult2.LuchadorID)
 
 	// end match and call again expecting to have a new match
 	match.TimeEnd = time.Now()
