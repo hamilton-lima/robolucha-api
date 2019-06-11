@@ -7,7 +7,7 @@ type User struct {
 	ID        uint       `gorm:"primary_key" json:"id"`
 	CreatedAt time.Time  `json:"-"`
 	UpdatedAt time.Time  `json:"-"`
-	DeletedAt *time.Time `json:"-"`
+	DeletedAt *time.Time `json:"-" faker:"-"`
 	Username  string     `json:"username"`
 }
 
@@ -16,7 +16,7 @@ type Session struct {
 	ID        uint       `gorm:"primary_key" json:"id"`
 	CreatedAt time.Time  `json:"-"`
 	UpdatedAt time.Time  `json:"-"`
-	DeletedAt *time.Time `json:"-"`
+	DeletedAt *time.Time `json:"-" faker:"-"`
 	UUID      string     `json:"UUID"`
 	UserID    uint       `json:"userID"`
 }
@@ -26,7 +26,7 @@ type UserSetting struct {
 	ID         uint       `gorm:"primary_key" json:"id"`
 	CreatedAt  time.Time  `json:"-"`
 	UpdatedAt  time.Time  `json:"-"`
-	DeletedAt  *time.Time `json:"-"`
+	DeletedAt  *time.Time `json:"-" faker:"-"`
 	UserID     uint       `json:"userID"`
 	LastOption string     `json:"lastOption"`
 }
@@ -36,7 +36,7 @@ type Match struct {
 	ID               uint            `gorm:"primary_key" json:"id"`
 	CreatedAt        time.Time       `json:"-"`
 	UpdatedAt        time.Time       `json:"-"`
-	DeletedAt        *time.Time      `json:"-"`
+	DeletedAt        *time.Time      `json:"-" faker:"-"`
 	TimeStart        time.Time       `json:"timeStart"`
 	TimeEnd          time.Time       `json:"timeEnd"`
 	LastTimeAlive    time.Time       `json:"lastTimeAlive"`
@@ -45,10 +45,10 @@ type Match struct {
 }
 
 type GameDefinition struct {
-	ID                            uint             `gorm:"primary_key" json:"id"`
+	ID                            uint             `gorm:"primary_key" json:"id" faker:"-"`
 	CreatedAt                     time.Time        `json:"-"`
 	UpdatedAt                     time.Time        `json:"-"`
-	DeletedAt                     *time.Time       `json:"-"`
+	DeletedAt                     *time.Time       `json:"-" faker:"-"`
 	Duration                      uint64           `json:"duration"`
 	MinParticipants               uint             `json:"minParticipants"`
 	MaxParticipants               uint             `json:"maxParticipants"`
@@ -84,6 +84,8 @@ type GameDefinition struct {
 	IncreaseSpeedEnergyCost       uint             `json:"increaseSpeedEnergyCost"`
 	IncreaseSpeedPercentage       uint             `json:"increaseSpeedPercentage"`
 	FireEnergyCost                uint             `json:"fireEnergyCost"`
+	RespawnX                      uint             `json:"respawnX"`
+	RespawnY                      uint             `json:"respawnY"`
 	GameComponents                []GameComponent  `json:"gameComponents"`
 	SceneComponents               []SceneComponent `json:"sceneComponents"`
 	Codes                         []Code           `gorm:"many2many:gamedefinition_codes" json:"codes"`
@@ -91,11 +93,11 @@ type GameDefinition struct {
 }
 
 type SceneComponent struct {
-	ID               uint       `gorm:"primary_key" json:"id"`
+	ID               uint       `gorm:"primary_key" json:"id" faker:"-"`
 	CreatedAt        time.Time  `json:"-"`
 	UpdatedAt        time.Time  `json:"-"`
-	DeletedAt        *time.Time `json:"-"`
-	GameDefinitionID uint       `json:"gameDefinition,omitempty"`
+	DeletedAt        *time.Time `json:"-" faker:"-"`
+	GameDefinitionID uint       `json:"gameDefinition,omitempty" faker:"-"`
 	X                uint       `json:"x"`
 	Y                uint       `json:"y"`
 	Width            uint       `json:"width"`
@@ -110,11 +112,11 @@ type SceneComponent struct {
 }
 
 type GameComponent struct {
-	ID               uint       `gorm:"primary_key" json:"id"`
+	ID               uint       `gorm:"primary_key" json:"id" faker:"-"`
 	CreatedAt        time.Time  `json:"-"`
 	UpdatedAt        time.Time  `json:"-"`
-	DeletedAt        *time.Time `json:"-"`
-	GameDefinitionID uint       `json:"gameDefinition,omitempty"`
+	DeletedAt        *time.Time `json:"-" faker:"-"`
+	GameDefinitionID uint       `json:"gameDefinition,omitempty" faker:"-"`
 	Name             string     `gorm:"not null;unique_index" json:"name"`
 	UserID           uint       `json:"userID,omitempty"`
 	Codes            []Code     `gorm:"many2many:gamecomponent_codes" json:"codes"`
@@ -123,22 +125,22 @@ type GameComponent struct {
 
 // Code definition
 type Code struct {
-	ID               uint       `gorm:"primary_key" json:"id,omitempty"`
+	ID               uint       `gorm:"primary_key" json:"id,omitempty" faker:"-"`
 	CreatedAt        time.Time  `json:"-"`
 	UpdatedAt        time.Time  `json:"-"`
-	DeletedAt        *time.Time `json:"-"`
+	DeletedAt        *time.Time `json:"-" faker:"-"`
 	Event            string     `json:"event"`
 	Script           string     `json:"script"`
 	Exception        string     `json:"exception"`
-	GameDefinitionID uint       `json:"gameDefinition"`
+	GameDefinitionID uint       `json:"gameDefinition" faker:"-"`
 }
 
 // Config definition
 type Config struct {
-	ID        uint       `gorm:"primary_key" json:"id,omitempty"`
+	ID        uint       `gorm:"primary_key" json:"id,omitempty" faker:"-"`
 	CreatedAt time.Time  `json:"-"`
 	UpdatedAt time.Time  `json:"-"`
-	DeletedAt *time.Time `json:"-"`
+	DeletedAt *time.Time `json:"-" faker:"-"`
 	Key       string     `json:"key"`
 	Value     string     `json:"value"`
 }
@@ -171,7 +173,7 @@ type MatchScore struct {
 	ID         uint       `gorm:"primary_key" json:"id,omitempty"`
 	CreatedAt  time.Time  `json:"-"`
 	UpdatedAt  time.Time  `json:"-"`
-	DeletedAt  *time.Time `json:"-"`
+	DeletedAt  *time.Time `json:"-" faker:"-"`
 	LuchadorID uint       `json:"luchadorID"`
 	MatchID    uint       `json:"matchID"`
 	Kills      int        `json:"kills"`

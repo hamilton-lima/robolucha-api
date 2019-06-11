@@ -7,7 +7,7 @@
         "license": {},
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "http://local.robolucha.com:5000",
     "basePath": "/",
     "paths": {
         "/internal/add-match-scores": {
@@ -122,6 +122,41 @@
             }
         },
         "/internal/game-definition": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "update Game definition",
+                "parameters": [
+                    {
+                        "description": "GameDefinition",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.GameDefinition"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.GameDefinition"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -145,6 +180,40 @@
                             "type": "object",
                             "$ref": "#/definitions/main.GameDefinition"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.GameDefinition"
+                        }
+                    }
+                }
+            }
+        },
+        "/internal/game-definition-id/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find a game definition",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "GameDefinition id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -261,6 +330,39 @@
                         "schema": {
                             "type": "object",
                             "$ref": "#/definitions/main.MatchParticipant"
+                        }
+                    }
+                }
+            }
+        },
+        "/internal/match-single": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find one match",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "int valid",
+                        "name": "matchID",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.Match"
                         }
                     }
                 }
@@ -957,6 +1059,12 @@
                     "type": "integer"
                 },
                 "respawnCooldown": {
+                    "type": "integer"
+                },
+                "respawnX": {
+                    "type": "integer"
+                },
+                "respawnY": {
                     "type": "integer"
                 },
                 "restoreEnergyperSecond": {

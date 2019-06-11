@@ -103,7 +103,13 @@ func TestCreateTutorialMatch(t *testing.T) {
 
 	assert.Equal(t, match.ID, secondApiResult.MatchID)
 	assert.Equal(t, luchador.ID, secondApiResult.LuchadorID)
-	assert.Equal(t, "EMPTY", mockPublisher.LastMessage)
+
+	// even if the match exists should send the message to start
+	// the runner should only start ONCE
+	var publisherResult2 *JoinMatch
+	json.Unmarshal([]byte(mockPublisher.LastMessage), &publisherResult2)
+	assert.Equal(t, match.ID, publisherResult2.MatchID)
+	assert.Equal(t, luchador.ID, publisherResult2.LuchadorID)
 
 	// end match and call again expecting to have a new match
 	match.TimeEnd = time.Now()
@@ -139,6 +145,64 @@ func TestCreateTutorialMatch(t *testing.T) {
 	assert.Assert(t, match.ID != thirdApiResult.MatchID)
 	assert.Assert(t, match.ID != thirdPublisherResult.MatchID)
 
+}
+
+func TestUpdateGameDefinition(t *testing.T) {
+	SetupMain(t)
+	os.Remove(test.DB_NAME)
+	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
+	defer dataSource.db.Close()
+
+	mockPublisher = &test.MockPublisher{}
+	publisher = mockPublisher
+
+	gd, _, _ := fakeGameDefinition(t, "FOOBAR", "tutorial", 10)
+	created := dataSource.createGameDefinition(&gd)
+
+	queryResult := dataSource.findGameDefinitionByName(gd.Name)
+	assert.Equal(t, created.ID, queryResult.ID)
+
+	log.WithFields(log.Fields{
+		"original":      gd.Name,
+		"created.Name":  created.Name,
+		"created.ID":    created.ID,
+		"query by name": queryResult,
+	}).Debug("TestUpdateGameDefinition")
+
+	ID := created.ID
+	gd.ID = 0
+
+	gd.MinParticipants = 1
+	gd.ArenaHeight = 42
+
+	body, _ := json.Marshal(gd)
+	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
+
+	w := test.PerformRequest(router, "PUT", "/internal/game-definition", string(body), test.API_KEY)
+	assert.Equal(t, http.StatusOK, w.Code)
+	var updated GameDefinition
+	json.Unmarshal(w.Body.Bytes(), &updated)
+
+	log.WithFields(log.Fields{
+		"original": gd,
+		"created":  created,
+		"updated":  updated,
+	}).Debug("TestUpdateGameDefinition")
+
+	assert.Equal(t, uint(1), updated.MinParticipants)
+	assert.Equal(t, uint(42), updated.ArenaHeight)
+	assert.Equal(t, ID, updated.ID)
+
+	// count elements
+	assert.Assert(t, len(updated.Codes) == 2)
+	assert.Assert(t, len(updated.LuchadorSuggestedCodes) == 2)
+
+	assert.Assert(t, len(updated.GameComponents) == 2)
+	assert.Assert(t, len(updated.GameComponents[0].Codes) == 2)
+	assert.Assert(t, len(updated.GameComponents[0].Configs) > 0)
+
+	assert.Assert(t, len(updated.SceneComponents) == 2)
+	assert.Assert(t, len(updated.SceneComponents[0].Codes) == 2)
 }
 
 func TestCreateGameComponent(t *testing.T) {
@@ -305,7 +369,7 @@ func TestCreateGameDefinition(t *testing.T) {
 	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
 	defer dataSource.db.Close()
 
-	resultFake, body, err := fakeGameDefinition(t, faker.Word(), 0)
+	resultFake, body, err := fakeGameDefinition(t, faker.Word(), faker.Word(), 0)
 	assert.Assert(t, err == nil)
 
 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
@@ -365,7 +429,7 @@ func TestFindTutorialGameDefinition(t *testing.T) {
 }
 
 func createTestGameDefinition(t *testing.T, typeName string, sortOrder uint) GameDefinition {
-	_, body, err := fakeGameDefinition(t, typeName, sortOrder)
+	_, body, err := fakeGameDefinition(t, faker.Word(), typeName, sortOrder)
 	assert.Assert(t, err == nil)
 
 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
@@ -399,7 +463,7 @@ func compareGameDefinition(t *testing.T, a, b GameDefinition) {
 	assert.Equal(t, len(a.GameComponents[0].Configs), len(b.GameComponents[0].Configs))
 }
 
-func fakeGameDefinition(t *testing.T, typeName string, sortOrder uint) (GameDefinition, string, error) {
+func fakeGameDefinition(t *testing.T, name string, typeName string, sortOrder uint) (GameDefinition, string, error) {
 	gameDefinition := GameDefinition{}
 
 	err := faker.FakeData(&gameDefinition)
@@ -413,6 +477,7 @@ func fakeGameDefinition(t *testing.T, typeName string, sortOrder uint) (GameDefi
 	gameDefinition.ID = 0
 	gameDefinition.Type = typeName
 	gameDefinition.SortOrder = sortOrder
+	gameDefinition.Name = name
 
 	gameDefinition.GameComponents = make([]GameComponent, 2)
 	gameDefinition.SceneComponents = make([]SceneComponent, 2)
@@ -425,7 +490,7 @@ func fakeGameDefinition(t *testing.T, typeName string, sortOrder uint) (GameDefi
 		gameDefinition.GameComponents[i].Codes = make([]Code, 2)
 		for n, _ := range gameDefinition.GameComponents[i].Codes {
 			faker.FakeData(&gameDefinition.GameComponents[i].Codes[n])
-			gameDefinition.GameComponents[i].Codes[n].ID = 0
+			// gameDefinition.GameComponents[i].Codes[n].ID = 0
 		}
 
 		gameDefinition.GameComponents[i].Configs = randomConfig()
@@ -437,18 +502,18 @@ func fakeGameDefinition(t *testing.T, typeName string, sortOrder uint) (GameDefi
 		gameDefinition.SceneComponents[i].Codes = make([]Code, 2)
 		for n, _ := range gameDefinition.SceneComponents[i].Codes {
 			faker.FakeData(&gameDefinition.SceneComponents[i].Codes[n])
-			gameDefinition.SceneComponents[i].Codes[n].ID = 0
+			// gameDefinition.SceneComponents[i].Codes[n].ID = 0
 		}
 	}
 
 	for i, _ := range gameDefinition.Codes {
 		faker.FakeData(&gameDefinition.Codes[i])
-		gameDefinition.Codes[i].ID = 0
+		// gameDefinition.Codes[i].ID = 0
 	}
 
 	for i, _ := range gameDefinition.LuchadorSuggestedCodes {
 		faker.FakeData(&gameDefinition.LuchadorSuggestedCodes[i])
-		gameDefinition.LuchadorSuggestedCodes[i].ID = 0
+		// gameDefinition.LuchadorSuggestedCodes[i].ID = 0
 	}
 
 	foo, _ := json.Marshal(gameDefinition)

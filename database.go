@@ -412,8 +412,9 @@ func (ds *DataSource) addMatchParticipant(mp *MatchParticipant) *MatchParticipan
 			log.WithFields(log.Fields{
 				"matchID":    mp.MatchID,
 				"luchadorID": mp.LuchadorID,
-			}).Error("Luchador is already in the match")
-			return nil
+			}).Warning("Luchador is already in the match")
+
+			return &(MatchParticipant{MatchID: mp.MatchID, LuchadorID: mp.LuchadorID})
 		}
 	}
 
@@ -540,6 +541,53 @@ func (ds *DataSource) addMatchScores(ms *ScoreList) *ScoreList {
 	return ms
 }
 
+// update existing gamedefinitions with the current ID from the database
+// to prevent duplication when saving
+func updateGameComponentIDs(current, input *GameDefinition) {
+	for _, componentC := range current.GameComponents {
+		for i, componentI := range input.GameComponents {
+			if componentC.Name == componentI.Name {
+				input.GameComponents[i].ID = componentC.ID
+			}
+		}
+	}
+}
+
+func (ds *DataSource) updateGameDefinition(input *GameDefinition) *GameDefinition {
+
+	gameDefinition := ds.findGameDefinitionByName(input.Name)
+
+	if gameDefinition != nil {
+		updateGameComponentIDs(gameDefinition, input)
+
+		ID := gameDefinition.ID
+		copier.Copy(gameDefinition, &input)
+		gameDefinition.ID = ID
+
+		// udpate the database
+		dbc := ds.db.Save(gameDefinition)
+
+		if dbc.Error != nil {
+			log.WithFields(log.Fields{
+				"error":          dbc.Error,
+				"gameDefinition": gameDefinition,
+			}).Error("Error updating updateGameDefinition")
+
+			return nil
+		}
+
+		log.WithFields(log.Fields{
+			"gameDefinition": gameDefinition,
+		}).Info("updateGameDefinition")
+
+		return gameDefinition
+	}
+
+	// not found
+	return nil
+
+}
+
 func (ds *DataSource) createGameDefinition(g *GameDefinition) *GameDefinition {
 
 	gameDefinition := GameDefinition{}
@@ -610,8 +658,9 @@ func (ds *DataSource) findGameDefinitionByName(name string) *GameDefinition {
 		RecordNotFound() {
 
 		log.WithFields(log.Fields{
-			"Name": name,
-		}).Info("findGameDefinition not found")
+			"Name":           name,
+			"gamedefinition": gameDefinition,
+		}).Error("findGameDefinitionByName not found")
 
 		return nil
 	}
@@ -619,14 +668,14 @@ func (ds *DataSource) findGameDefinitionByName(name string) *GameDefinition {
 	log.WithFields(log.Fields{
 		"Name":           name,
 		"gameDefinition": gameDefinition,
-	}).Debug("findGameDefinition before array checks")
+	}).Debug("findGameDefinitionByName before array checks")
 
 	resetGameDefinitionArrays(&gameDefinition)
 
 	log.WithFields(log.Fields{
 		"Name":           name,
 		"gameDefinition": gameDefinition,
-	}).Debug("findGameDefinition")
+	}).Debug("findGameDefinitionByName")
 
 	return &gameDefinition
 }

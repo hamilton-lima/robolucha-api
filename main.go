@@ -1,7 +1,7 @@
 // @title Robolucha API
 // @version 1.0
 // @description Robolucha API
-// @host localhost:8080
+// @host http://local.robolucha.com:5000
 // @BasePath /
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
@@ -107,7 +107,10 @@ func createRouter(internalAPIKey string, logRequestBody string,
 	internalAPI.Use(KeyIsValid(internalAPIKey))
 	{
 		internalAPI.GET("/game-definition/:name", getGameDefinitionByName)
+		internalAPI.GET("/game-definition-id/:id", getGameDefinitionByIDInternal)
 		internalAPI.POST("/game-definition", createGameDefinition)
+		internalAPI.PUT("/game-definition", updateGameDefinition)
+
 		internalAPI.POST("/start-match/:name", startMatch)
 		internalAPI.POST("/game-component", createGameComponent)
 		internalAPI.POST("/luchador", getLuchadorByIDAndGamedefinitionID)
@@ -115,6 +118,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		internalAPI.PUT("/end-match", endMatch)
 		internalAPI.GET("/ready", getReady)
 		internalAPI.POST("/add-match-scores", addMatchScores)
+		internalAPI.GET("/match-single", getMatchInternal)
 	}
 
 	privateAPI := router.Group("/private")
@@ -308,6 +312,41 @@ func createGameDefinition(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// updateGameDefinition godoc
+// @Summary update Game definition
+// @Accept json
+// @Produce json
+// @Param request body main.GameDefinition true "GameDefinition"
+// @Success 200 {object} main.GameDefinition
+// @Security ApiKeyAuth
+// @Router /internal/game-definition [put]
+func updateGameDefinition(c *gin.Context) {
+
+	var gameDefinition *GameDefinition
+	err := c.BindJSON(&gameDefinition)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Error("Invalid body content on createGameDefinition")
+
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"gameDefinition": gameDefinition,
+	}).Info("updateGameDefinition")
+
+	result := dataSource.updateGameDefinition(gameDefinition)
+	if result == nil {
+		log.Error("Invalid GameDefinition when updating")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
 // startMatch godoc
 // @Summary create Match
 // @Accept json
@@ -384,23 +423,14 @@ func startTutorialMatch(c *gin.Context) {
 	}
 
 	match := dataSource.findActiveMatchesByGameDefinitionAndParticipant(gameDefinition, luchador)
-	if match != nil {
-		log.WithFields(log.Fields{
-			"gameDefinition.ID": gameDefinition.ID,
-			"luchador.ID":       luchador.ID,
-			"match":             match,
-		}).Info("Existing match found")
-
-		result := JoinMatch{MatchID: match.ID, LuchadorID: luchador.ID}
-		c.JSON(http.StatusOK, result)
-		return
-	}
-
-	match = dataSource.createMatch(gameDefinition.ID)
+	// not found will create
 	if match == nil {
-		log.Error("Invalid Match when saving")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
+		match = dataSource.createMatch(gameDefinition.ID)
+		if match == nil {
+			log.Error("Invalid Match when saving")
+			c.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
 	}
 
 	result := JoinMatch{MatchID: match.ID, LuchadorID: luchador.ID}
@@ -643,6 +673,18 @@ func getGameDefinitionByName(c *gin.Context) {
 	c.JSON(http.StatusOK, gameDefinition)
 }
 
+// getGameDefinitionByIDInternal godoc
+// @Summary find a game definition
+// @Accept json
+// @Produce json
+// @Param id path int true "GameDefinition id"
+// @Success 200 200 {object} main.GameDefinition
+// @Security ApiKeyAuth
+// @Router /internal/game-definition-id/{id} [get]
+func getGameDefinitionByIDInternal(c *gin.Context) {
+	getGameDefinitionByID(c)
+}
+
 // getGameDefinitionByID godoc
 // @Summary find a game definition
 // @Accept json
@@ -776,6 +818,18 @@ func getActiveMatches(c *gin.Context) {
 	}).Info("getActiveMatches")
 
 	c.JSON(http.StatusOK, matches)
+}
+
+// getMatchInternal godoc
+// @Summary find one match
+// @Accept json
+// @Produce json
+// @Param matchID query int false "int valid"
+// @Success 200 {object} main.Match
+// @Security ApiKeyAuth
+// @Router /internal/match-single [get]
+func getMatchInternal(c *gin.Context) {
+	getMatch(c)
 }
 
 // getMatch godoc
