@@ -199,20 +199,22 @@ definitions:
         type: array
       colider:
         type: boolean
+      color:
+        type: string
       gameDefinition:
         type: integer
       height:
         type: integer
       id:
         type: integer
-      name:
-        type: string
       respawn:
         type: boolean
       rotation:
         type: integer
       showInRadar:
         type: boolean
+      type:
+        type: string
       width:
         type: integer
       x:
