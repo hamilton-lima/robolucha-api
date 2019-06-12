@@ -107,7 +107,8 @@ type SceneComponent struct {
 	Colider          bool       `json:"colider"`
 	ShowInRadar      bool       `json:"showInRadar"`
 	BlockMovement    bool       `json:"blockMovement"`
-	Type             string     `json:"name"`
+	Type             string     `json:"type"`
+	Color            string     `json:"color"`
 	Codes            []Code     `gorm:"many2many:scenecomponent_codes" json:"codes"`
 }
 
