@@ -27,5 +27,5 @@ RUN mkdir -pv /usr/src/app/gamedefinition
 # Copy our static executable
 COPY --from=builder /tmp/api /usr/src/app
 COPY --from=builder /tmp/gamedefinition /usr/src/app/gamedefinition
-RUN ls -alh /usr/src/app
+RUN ls -alhR /usr/src/app
 ENTRYPOINT ["/usr/src/app/api", "/usr/src/app/gamedefinition"]
