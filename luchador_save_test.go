@@ -82,7 +82,7 @@ func TestLuchadorUpdateLongName(t *testing.T) {
 
 	luchador.Name = "123456789 123456789 123456789 123456789 A"
 	response := UpdateLuchador(t, router, luchador)
-	assert.Greater(t, len(response.Errors), 0)
+	assert.True(t, len(response.Errors) > 0)
 }
 
 func TestLuchadorUpdateEmptyAndSmallNames(t *testing.T) {
@@ -92,7 +92,7 @@ func TestLuchadorUpdateEmptyAndSmallNames(t *testing.T) {
 	// then try a too large name
 	luchador.Name = "A"
 	response := UpdateLuchador(t, router, luchador)
-	assert.Greater(t, len(response.Errors), 0)
+	assert.True(t, len(response.Errors) > 0)
 }
 
 func TestLuchadorUpdateName(t *testing.T) {

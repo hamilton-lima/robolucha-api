@@ -558,15 +558,52 @@ func (ds *DataSource) updateGameDefinition(input *GameDefinition) *GameDefinitio
 	gameDefinition := ds.findGameDefinitionByName(input.Name)
 
 	if gameDefinition != nil {
-		updateGameComponentIDs(gameDefinition, input)
 
-		ID := gameDefinition.ID
-		copier.Copy(gameDefinition, &input)
-		gameDefinition.ID = ID
+		gameDefinition.Duration = input.Duration
+		gameDefinition.MinParticipants = input.MinParticipants
+		gameDefinition.MaxParticipants = input.MaxParticipants
+		gameDefinition.ArenaWidth = input.ArenaWidth
+		gameDefinition.ArenaHeight = input.ArenaHeight
+		gameDefinition.BulletSize = input.BulletSize
+		gameDefinition.LuchadorSize = input.LuchadorSize
+		gameDefinition.Fps = input.Fps
+		gameDefinition.BuletSpeed = input.BuletSpeed
+		gameDefinition.Label = input.Label
+		gameDefinition.Description = input.Description
+		gameDefinition.Type = input.Type
+		gameDefinition.SortOrder = input.SortOrder
+		gameDefinition.RadarAngle = input.RadarAngle
+		gameDefinition.RadarRadius = input.RadarRadius
+		gameDefinition.PunchAngle = input.PunchAngle
+		gameDefinition.Life = input.Life
+		gameDefinition.Energy = input.Energy
+		gameDefinition.PunchDamage = input.PunchDamage
+		gameDefinition.PunchCoolDown = input.PunchCoolDown
+		gameDefinition.MoveSpeed = input.MoveSpeed
+		gameDefinition.TurnSpeed = input.TurnSpeed
+		gameDefinition.TurnGunSpeed = input.TurnGunSpeed
+		gameDefinition.RespawnCooldown = input.RespawnCooldown
+		gameDefinition.MaxFireCooldown = input.MaxFireCooldown
+		gameDefinition.MinFireDamage = input.MinFireDamage
+		gameDefinition.MaxFireDamage = input.MaxFireDamage
+		gameDefinition.MinFireAmount = input.MinFireAmount
+		gameDefinition.MaxFireAmount = input.MaxFireAmount
+		gameDefinition.RestoreEnergyperSecond = input.RestoreEnergyperSecond
+		gameDefinition.RecycledLuchadorEnergyRestore = input.RecycledLuchadorEnergyRestore
+		gameDefinition.IncreaseSpeedEnergyCost = input.IncreaseSpeedEnergyCost
+		gameDefinition.IncreaseSpeedPercentage = input.IncreaseSpeedPercentage
+		gameDefinition.FireEnergyCost = input.FireEnergyCost
+		gameDefinition.RespawnX = input.RespawnX
+		gameDefinition.RespawnY = input.RespawnY
 
-		// udpate the database
 		dbc := ds.db.Save(gameDefinition)
 
+		ds.db.Model(gameDefinition).Association("GameComponents").Replace(input.GameComponents)
+		ds.db.Model(gameDefinition).Association("SceneComponents").Replace(input.SceneComponents)
+		ds.db.Model(gameDefinition).Association("Codes").Replace(input.Codes)
+		ds.db.Model(gameDefinition).Association("LuchadorSuggestedCodes").Replace(input.LuchadorSuggestedCodes)
+
+		// udpate the database
 		if dbc.Error != nil {
 			log.WithFields(log.Fields{
 				"error":          dbc.Error,

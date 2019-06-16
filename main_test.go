@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/bxcodec/faker"
+	"github.com/bxcodec/faker/v3"
 	// "github.com/stretchr/testify/assert"
 	"gitlab.com/robolucha/robolucha-api/test"
 	"gotest.tools/assert"
