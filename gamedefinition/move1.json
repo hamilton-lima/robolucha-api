@@ -2,8 +2,8 @@
   "duration": 0,
   "minParticipants": 1,
   "maxParticipants": 1,
-  "arenaWidth": 300,
-  "arenaHeight": 300,
+  "arenaWidth": 600,
+  "arenaHeight": 400,
   "bulletSize": 16,
   "luchadorSize": 60,
   "fps": 30,
@@ -53,7 +53,7 @@
       "width": 60,
       "height": 80,
       "type": "wall",
-      "color": "#00FF00",
+      "color": "#D79851",
       "colider": true,
       "blockMovement": true
     }

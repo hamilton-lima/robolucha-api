@@ -375,6 +375,19 @@ func (ds *DataSource) findLuchadorByName(name string) *GameComponent {
 	return &luchador
 }
 
+func (ds *DataSource) findLuchadorByNamePreload(name string) *GameComponent {
+	var luchador GameComponent
+	if ds.db.Preload("Codes").Preload("Configs").Where(&GameComponent{Name: name}).First(&luchador).RecordNotFound() {
+		return nil
+	}
+
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+	}).Info("findLuchadorByNamePreload")
+
+	return &luchador
+}
+
 func (ds *DataSource) NameExist(ID uint, name string) bool {
 	var luchador GameComponent
 	result := !ds.db.Where("id <> ? AND name = ?", ID, name).First(&luchador).RecordNotFound()
@@ -541,18 +554,6 @@ func (ds *DataSource) addMatchScores(ms *ScoreList) *ScoreList {
 	return ms
 }
 
-// update existing gamedefinitions with the current ID from the database
-// to prevent duplication when saving
-func updateGameComponentIDs(current, input *GameDefinition) {
-	for _, componentC := range current.GameComponents {
-		for i, componentI := range input.GameComponents {
-			if componentC.Name == componentI.Name {
-				input.GameComponents[i].ID = componentC.ID
-			}
-		}
-	}
-}
-
 func (ds *DataSource) updateGameDefinition(input *GameDefinition) *GameDefinition {
 
 	gameDefinition := ds.findGameDefinitionByName(input.Name)
@@ -597,17 +598,72 @@ func (ds *DataSource) updateGameDefinition(input *GameDefinition) *GameDefinitio
 		gameDefinition.RespawnY = input.RespawnY
 
 		dbc := ds.db.Save(gameDefinition)
-
-		ds.db.Model(gameDefinition).Association("GameComponents").Replace(input.GameComponents)
-		ds.db.Model(gameDefinition).Association("SceneComponents").Replace(input.SceneComponents)
-		ds.db.Model(gameDefinition).Association("Codes").Replace(input.Codes)
-		ds.db.Model(gameDefinition).Association("LuchadorSuggestedCodes").Replace(input.LuchadorSuggestedCodes)
-
-		// udpate the database
 		if dbc.Error != nil {
 			log.WithFields(log.Fields{
 				"error":          dbc.Error,
-				"gameDefinition": gameDefinition,
+				"gameDefinition.Name": gameDefinition.Name,
+				"step": "save",
+			}).Error("Error updating updateGameDefinition")
+
+			return nil
+		}
+
+		for n, gc := range input.GameComponents {
+			component := ds.findLuchadorByNamePreload(gc.Name)
+
+			log.WithFields(log.Fields{
+				"gc.Name": gc.Name,
+				"gc.ID": gc.ID,
+			}).Debug("searching gamedefinition")
+
+			if component != nil {
+				input.GameComponents[n] = *(ds.updateLuchador(component))
+			}
+		}
+
+		ds.db.Model(gameDefinition).Association("GameComponents").Replace(input.GameComponents)
+		dbc = ds.db.Save(gameDefinition)
+		if dbc.Error != nil {
+			log.WithFields(log.Fields{
+				"error":          dbc.Error,
+				"gameDefinition.Name": gameDefinition.Name,
+				"step": "GameComponents",
+			}).Error("Error updating updateGameDefinition")
+
+			return nil
+		}
+		
+		ds.db.Model(gameDefinition).Association("SceneComponents").Replace(input.SceneComponents)
+		dbc = ds.db.Save(gameDefinition)
+		if dbc.Error != nil {
+			log.WithFields(log.Fields{
+				"error":          dbc.Error,
+				"gameDefinition.Name": gameDefinition.Name,
+				"step": "SceneComponents",
+			}).Error("Error updating updateGameDefinition")
+
+			return nil
+		}
+
+		ds.db.Model(gameDefinition).Association("Codes").Replace(input.Codes)
+		dbc = ds.db.Save(gameDefinition)
+		if dbc.Error != nil {
+			log.WithFields(log.Fields{
+				"error":          dbc.Error,
+				"gameDefinition.Name": gameDefinition.Name,
+				"step": "Codes",
+			}).Error("Error updating updateGameDefinition")
+
+			return nil
+		}
+
+		ds.db.Model(gameDefinition).Association("LuchadorSuggestedCodes").Replace(input.LuchadorSuggestedCodes)
+		dbc = ds.db.Save(gameDefinition)
+		if dbc.Error != nil {
+			log.WithFields(log.Fields{
+				"error":          dbc.Error,
+				"gameDefinition.Name": gameDefinition.Name,
+				"step": "LuchadorSuggestedCodes",
 			}).Error("Error updating updateGameDefinition")
 
 			return nil

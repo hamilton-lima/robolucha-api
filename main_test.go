@@ -172,9 +172,21 @@ func TestUpdateGameDefinition(t *testing.T) {
 	ID := created.ID
 	gd.ID = 0
 
+	// remove IDS from GameComponents to create with a differnt name 
+	gd.GameComponents[0].ID = 0
+	gd.GameComponents[0].GameDefinitionID = 0
+	gd.GameComponents[0].Name = gd.GameComponents[0].Name + "-UPDATED"
+
+	gd.GameComponents[1].ID = 0
+	gd.GameComponents[1].GameDefinitionID = 0
+
+	log.WithFields(log.Fields{
+		"gd.GameComponents": gd.GameComponents,
+	}).Debug("Before update")
+	
 	gd.MinParticipants = 1
 	gd.ArenaHeight = 42
-
+	
 	body, _ := json.Marshal(gd)
 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
 
@@ -203,6 +215,40 @@ func TestUpdateGameDefinition(t *testing.T) {
 
 	assert.Assert(t, len(updated.SceneComponents) == 2)
 	assert.Assert(t, len(updated.SceneComponents[0].Codes) == 2)
+
+	counterUpdatedCounter := 0
+	for _, gc := range updated.GameComponents {
+
+		log.WithFields(log.Fields{
+			"gc.Name": gc.Name,
+		}).Debug("counterUpdatedCounter")
+
+		if strings.HasSuffix(gc.Name, "-UPDATED") {
+			counterUpdatedCounter = counterUpdatedCounter +1
+		}
+	}
+	assert.Assert(t, counterUpdatedCounter == 1)
+
+	url := fmt.Sprintf("/internal/game-definition/%v", updated.Name)
+	w = test.PerformRequest(router, "GET", url, "", test.API_KEY)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	resultGameDefinition := GameDefinition{}
+	json.Unmarshal(w.Body.Bytes(), &resultGameDefinition)
+
+	assert.Assert(t, len(resultGameDefinition.GameComponents) == 2)
+
+	counterUpdatedCounter2 := 0
+	for _, gc := range resultGameDefinition.GameComponents {
+		log.WithFields(log.Fields{
+			"gc.Name": gc.Name,
+		}).Debug("counterUpdatedCounter2")
+
+		if strings.HasSuffix(gc.Name, "-UPDATED") {
+			counterUpdatedCounter2 = counterUpdatedCounter2 +1
+		}
+	}
+	assert.Assert(t, counterUpdatedCounter2 == 1)
 }
 
 func TestCreateGameComponent(t *testing.T) {
