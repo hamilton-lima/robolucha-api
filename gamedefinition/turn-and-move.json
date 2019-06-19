@@ -2,8 +2,8 @@
   "duration": 0,
   "minParticipants": 1,
   "maxParticipants": 1,
-  "arenaWidth": 400,
-  "arenaHeight": 200,
+  "arenaWidth": 600,
+  "arenaHeight": 400,
   "bulletSize": 16,
   "luchadorSize": 60,
   "fps": 30,
@@ -34,14 +34,45 @@
   "increaseSpeedEnergyCost": 10,
   "increaseSpeedPercentage": 20,
   "fireEnergyCost": 2,
-  "respawnX": 150,
-  "respawnY": 100,
+  "respawnX": 400,
+  "respawnY": 200,
   "gameComponents": [],
-  "sceneComponents": [],
+  "sceneComponents": [
+    {
+      "x":150,
+      "y":0,
+      "width":50,
+      "height":150,
+      "type":"wall",
+      "color": "#FFFF00",
+      "colider": true,
+      "codes": []
+    },
+    {
+      "x": 100,
+      "y": 150,
+      "width": 80,
+      "height": 120,
+      "type": "region",
+      "color": "#00FF00",
+      "colider": true,
+      "codes": [{ "event": "onHitOther", "script": "endGame()" }]
+    },
+    {
+      "x":150,
+      "y":270,
+      "width":50,
+      "height":150,
+      "type":"wall",
+      "color": "#FFFF00",
+      "colider": true,
+      "codes": []
+    }
+  ],
   "codes": [],
   "suggestedCodes": [
-    { "event": "onStart", "script": "-- Turn and Move suggested code" },
-    { "event": "onRepeat", "script": "move(20)\nfire(1)" },
-    { "event": "onHitWall", "script": "turn(45)" }
+    { "event": "onStart", "script": "--You have to turn around!" },
+    { "event": "onRepeat", "script": "move(1)" },
+    { "event": "onHitWall", "script": "" }
   ]
 }

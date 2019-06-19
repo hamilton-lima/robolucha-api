@@ -34,25 +34,45 @@
   "increaseSpeedEnergyCost": 10,
   "increaseSpeedPercentage": 20,
   "fireEnergyCost": 2,
-  "respawnX": 50,
+  "respawnX": 400,
   "respawnY": 50,
   "gameComponents": [],
   "sceneComponents": [
     {
-      "x": 300,
-      "y": 0,
-      "width": 300,
-      "height": 400,
+      "x":150,
+      "y":0,
+      "width":50,
+      "height":150,
+      "type":"wall",
+      "color": "#FFFF00",
+      "colider": true,
+      "codes": []
+    },
+    {
+      "x": 100,
+      "y": 150,
+      "width": 80,
+      "height": 120,
       "type": "region",
-      "color": "#0000FF",
+      "color": "#00FF00",
       "colider": true,
       "codes": [{ "event": "onHitOther", "script": "endGame()" }]
+    },
+    {
+      "x":150,
+      "y":270,
+      "width":50,
+      "height":150,
+      "type":"wall",
+      "color": "#FFFF00",
+      "colider": true,
+      "codes": []
     }
   ],
   "codes": [],
   "suggestedCodes": [
-    { "event": "onStart", "script": "-- Curve suggested code" },
-    { "event": "onRepeat", "script": "move(20)\nfire(1)" },
-    { "event": "onHitWall", "script": "turn(45)" }
+    { "event": "onStart", "script": "" },
+    { "event": "onRepeat", "script": "--You can run two commands at the same time\nmove(1)" },
+    { "event": "onHitWall", "script": "" }
   ]
 }
