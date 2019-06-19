@@ -39,15 +39,6 @@
   "gameComponents": [],
   "sceneComponents": [
     {
-      "x": 0,
-      "y": 0,
-      "width": 100,
-      "height": 150,
-      "type": "region",
-      "color": "#0000FF",
-      "colider": true
-    },
-    {
       "x": 80,
       "y": 30,
       "width": 60,
@@ -55,7 +46,8 @@
       "type": "wall",
       "color": "#D79851",
       "colider": true,
-      "blockMovement": true
+      "blockMovement": true,
+      "codes": [{ "event": "onHitOther", "script": "addDamage(other.id, 1)" }]
     }
   ],
   "codes": [],

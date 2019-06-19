@@ -2,8 +2,8 @@
   "duration": 0,
   "minParticipants": 1,
   "maxParticipants": 1,
-  "arenaWidth": 400,
-  "arenaHeight": 200,
+  "arenaWidth": 600,
+  "arenaHeight": 400,
   "bulletSize": 16,
   "luchadorSize": 60,
   "fps": 30,
@@ -37,7 +37,18 @@
   "respawnX": 50,
   "respawnY": 50,
   "gameComponents": [],
-  "sceneComponents": [],
+  "sceneComponents": [
+    {
+      "x": 300,
+      "y": 0,
+      "width": 300,
+      "height": 400,
+      "type": "region",
+      "color": "#0000FF",
+      "colider": true,
+      "codes": [{ "event": "onHitOther", "script": "endGame()" }]
+    }
+  ],
   "codes": [],
   "suggestedCodes": [
     { "event": "onStart", "script": "-- Curve suggested code" },
