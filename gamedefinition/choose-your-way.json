@@ -8,11 +8,11 @@
   "luchadorSize": 60,
   "fps": 30,
   "buletSpeed": 120,
-  "name": "MOVE1",
-  "label": "Move 1",
+  "name": "CHOOSEYOURWAY",
+  "label": "Choose your way",
   "description": "",
   "type": "tutorial",
-  "sortOrder": 10,
+  "sortOrder": 50,
   "radarAngle": 45,
   "radarRadius": 200,
   "punchAngle": 90,
@@ -39,37 +39,36 @@
   "gameComponents": [],
   "sceneComponents": [
   	{
-  		"x":350,
+  		"x":400,
   		"y":0,
   		"width":50,
   		"height":150,
-  		"blockMovement":true,
+      "blockMovement": true,
   		"type":"wall",
-  		"color": "#FFFF00",
-  		"colider": true,
-  		"codes": []
+      "color": "#FF8800",
+      "colider": true,
+      "codes": [{ "event": "onHitOther", "script": "" }]
   	},
     {
       "x": 400,
       "y": 150,
-      "width": 80,
+      "width": 50,
       "height": 120,
-      "type": "region",
-      "color": "#00FF00",
+      "type": "wall",
+      "color": "#FF8800",
       "colider": true,
-      "codes": [{ "event": "onHitOther", "script": "endGame()" }]
+      "codes": [{ "event": "onHitOther", "script": "" }]
     },
   	{
-  		"x":350,
+  		"x":400,
   		"y":270,
   		"width":50,
   		"height":150,
-  		"blockMovement":true,
+      "blockMovement": true,
   		"type":"wall",
-  		"color": "#FFFF00",
-  		"alpha": 0.2,
-  		"colider": true,
-  		"codes": []
+      "color": "#FF8800",
+      "colider": true,
+      "codes": [{ "event": "onHitOther", "script": "" }]
   	}
   ],
   "codes": [],
