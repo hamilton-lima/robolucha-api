@@ -86,6 +86,8 @@ type GameDefinition struct {
 	FireEnergyCost                uint             `json:"fireEnergyCost"`
 	RespawnX                      uint             `json:"respawnX"`
 	RespawnY                      uint             `json:"respawnY"`
+	RespawnAngle                  uint             `json:"respawnAngle"`
+	RespawnGunAngle               uint             `json:"respawnGunAngle"`
 	GameComponents                []GameComponent  `json:"gameComponents"`
 	SceneComponents               []SceneComponent `json:"sceneComponents"`
 	Codes                         []Code           `gorm:"many2many:gamedefinition_codes" json:"codes"`
@@ -109,6 +111,7 @@ type SceneComponent struct {
 	BlockMovement    bool       `json:"blockMovement"`
 	Type             string     `json:"type"`
 	Color            string     `json:"color"`
+	Alpha            float32    `json:"alpha"`
 	Codes            []Code     `gorm:"many2many:scenecomponent_codes" json:"codes"`
 }
 

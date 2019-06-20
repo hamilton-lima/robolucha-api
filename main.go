@@ -812,7 +812,7 @@ func getActiveMatches(c *gin.Context) {
 
 	var matches *[]Match
 
-	matches = dataSource.findActiveMatches()
+	matches = dataSource.findActiveMultiplayerMatches()
 	log.WithFields(log.Fields{
 		"matches": matches,
 	}).Info("getActiveMatches")

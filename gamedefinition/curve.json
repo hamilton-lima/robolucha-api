@@ -43,10 +43,12 @@
       "y": 0,
       "width": 300,
       "height": 400,
-      "type": "region",
+      "type": "wall",
       "color": "#0000FF",
+      "alpha": 0.5,
       "colider": true,
-      "codes": [{ "event": "onHitOther", "script": "endGame()" }]
+      "blockMovement": true,
+      "codes": []
     }
   ],
   "codes": [],

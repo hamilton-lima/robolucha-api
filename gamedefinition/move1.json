@@ -36,6 +36,8 @@
   "fireEnergyCost": 2,
   "respawnX": 200,
   "respawnY": 200,
+  "respawnAngle": 45,
+  "respawnGunAngle": 90,
   "gameComponents": [],
   "sceneComponents": [
     {
@@ -45,6 +47,7 @@
       "height": 80,
       "type": "wall",
       "color": "#D79851",
+      "alpha": 0.2,
       "colider": true,
       "blockMovement": true,
       "codes": [{ "event": "onHitOther", "script": "addDamage(other.id, 1)" }]

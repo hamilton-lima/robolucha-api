@@ -1058,7 +1058,13 @@
                 "recycledLuchadorEnergyRestore": {
                     "type": "integer"
                 },
+                "respawnAngle": {
+                    "type": "integer"
+                },
                 "respawnCooldown": {
+                    "type": "integer"
+                },
+                "respawnGunAngle": {
                     "type": "integer"
                 },
                 "respawnX": {
@@ -1170,6 +1176,9 @@
         "main.SceneComponent": {
             "type": "object",
             "properties": {
+                "alpha": {
+                    "type": "number"
+                },
                 "blockMovement": {
                     "type": "boolean"
                 },
