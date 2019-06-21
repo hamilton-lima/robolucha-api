@@ -12,7 +12,7 @@
   "label": "Follow the Path of the Dragon",
   "description": "",
   "type": "tutorial",
-  "sortOrder": 80,
+  "sortOrder": 100,
   "radarAngle": 45,
   "radarRadius": 200,
   "punchAngle": 90,
@@ -41,7 +41,7 @@
   	{
   		"x":150,
   		"y":150,
-  		"width":50,
+  		"width":40,
   		"height":250,
       "blockMovement": true,
   		"type":"wall",
@@ -52,7 +52,7 @@
     {
       "x":310,
       "y":0,
-      "width":50,
+      "width":40,
       "height":250,
       "blockMovement": true,
       "type":"wall",
@@ -63,7 +63,7 @@
     {
       "x":470,
       "y":150,
-      "width":50,
+      "width":40,
       "height":250,
       "blockMovement": true,
       "type":"wall",
