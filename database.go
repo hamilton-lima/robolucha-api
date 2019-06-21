@@ -613,6 +613,8 @@ func (ds *DataSource) updateGameDefinition(input *GameDefinition) *GameDefinitio
 		gameDefinition.FireEnergyCost = input.FireEnergyCost
 		gameDefinition.RespawnX = input.RespawnX
 		gameDefinition.RespawnY = input.RespawnY
+		gameDefinition.RespawnAngle = input.RespawnAngle
+		gameDefinition.RespawnGunAngle = input.RespawnGunAngle
 
 		dbc := ds.db.Save(gameDefinition)
 		if dbc.Error != nil {
