@@ -805,19 +805,52 @@ func createGameComponent(c *gin.Context) {
 // @Summary find active matches
 // @Accept json
 // @Produce json
-// @Success 200 {array} main.Match
+// @Success 200 {array} main.ActiveMatch
 // @Security ApiKeyAuth
 // @Router /private/match [get]
 func getActiveMatches(c *gin.Context) {
 
-	var matches *[]Match
+	var result []ActiveMatch
 
-	matches = dataSource.findActiveMultiplayerMatches()
+	// multiplayer matches
+	matches := *dataSource.findActiveMultiplayerMatches()
+	for _, match := range matches {
+		gameDefinition := dataSource.findGameDefinition(match.GameDefinitionID)
+		add := ActiveMatch {
+			MatchID: match.ID,
+			Name: gameDefinition.Name,
+			Label: gameDefinition.Label,
+			Description: gameDefinition.Description,
+			Type: gameDefinition.Type,
+			SortOrder: gameDefinition.SortOrder,
+			Duration: gameDefinition.Duration,
+			TimeStart: match.TimeStart,
+		}
+
+		result = append(result, add)
+	}
+
+	// gamedefinitions
+	gameDefinitions := *dataSource.findTutorialGameDefinition()
+	for _, gameDefinition := range gameDefinitions {
+		add := ActiveMatch {
+			MatchID: 0,
+			Name: gameDefinition.Name,
+			Label: gameDefinition.Label,
+			Description: gameDefinition.Description,
+			Type: gameDefinition.Type,
+			SortOrder: gameDefinition.SortOrder,
+			Duration: gameDefinition.Duration,
+		}
+
+		result = append(result, add)
+	}
+
 	log.WithFields(log.Fields{
-		"matches": matches,
+		"matches": result,
 	}).Info("getActiveMatches")
 
-	c.JSON(http.StatusOK, matches)
+	c.JSON(http.StatusOK, &result)
 }
 
 // getMatchInternal godoc
