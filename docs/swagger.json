@@ -681,7 +681,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/main.Match"
+                                "$ref": "#/definitions/main.ActiveMatch"
                             }
                         }
                     }
@@ -879,6 +879,35 @@
         }
     },
     "definitions": {
+        "main.ActiveMatch": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "integer"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "matchID": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "sortOrder": {
+                    "type": "integer"
+                },
+                "timeStart": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "main.Code": {
             "type": "object",
             "properties": {

@@ -1,5 +1,24 @@
 basePath: /
 definitions:
+  main.ActiveMatch:
+    properties:
+      description:
+        type: string
+      duration:
+        type: integer
+      label:
+        type: string
+      matchID:
+        type: integer
+      name:
+        type: string
+      sortOrder:
+        type: integer
+      timeStart:
+        type: string
+      type:
+        type: string
+    type: object
   main.Code:
     properties:
       event:
@@ -680,7 +699,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/main.Match'
+              $ref: '#/definitions/main.ActiveMatch'
             type: array
       security:
       - ApiKeyAuth: []
