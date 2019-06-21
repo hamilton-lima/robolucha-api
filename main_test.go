@@ -468,11 +468,15 @@ func TestFindMultiplayerMatch(t *testing.T) {
 	w := test.PerformRequestNoAuth(router, "GET", "/private/match", "")
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var matches []Match
+	var matches []ActiveMatch
 	json.Unmarshal(w.Body.Bytes(), &matches)
 
-	assert.Assert(t, matches[0].ID == match.ID)
-	assert.Assert(t, len(matches) == 1)
+	assert.Assert(t, matches[0].MatchID == match.ID)
+
+	gameDefinitions := *dataSource.findTutorialGameDefinition()
+
+	// all the tutorial gamedefinitions and the active multiplayer matches 
+	assert.Assert(t, len(matches) == len(gameDefinitions) +1 )
 }
 
 func TestFindTutorialGameDefinition(t *testing.T) {

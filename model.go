@@ -31,6 +31,17 @@ type UserSetting struct {
 	LastOption string     `json:"lastOption"`
 }
 
+type ActiveMatch struct {
+	MatchID      uint      `json:"matchID"`
+	Name         string    `json:"name"`
+	Label        string    `json:"label"`
+	Description  string    `json:"description"`
+	Type         string    `json:"type"`
+	SortOrder    uint      `json:"sortOrder"`
+	Duration     uint64    `json:"duration"`
+	TimeStart    time.Time `json:"timeStart"`
+}
+
 // Match definition
 type Match struct {
 	ID               uint            `gorm:"primary_key" json:"id"`
