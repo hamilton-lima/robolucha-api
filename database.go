@@ -34,6 +34,7 @@ type DataSource struct {
 }
 
 const GAMEDEFINITION_TYPE_TUTORIAL = "tutorial"
+const GAMEDEFINITION_TYPE_MULTIPLAYER = "multiplayer"
 
 // BuildMysqlConfig creates a DBconfig for Mysql based on environment variables
 func BuildMysqlConfig() *DBconfig {
@@ -283,6 +284,22 @@ func applyConfigChanges(original []Config, updated []Config) []Config {
 		}
 	}
 	return original
+}
+
+func (ds *DataSource) findActiveMultiplayerMatches() *[]Match {
+
+	var matches []Match
+	ds.db.
+	Joins("left join game_definitions on matches.game_definition_id = game_definitions.id").
+	Where("game_definitions.type = ?", GAMEDEFINITION_TYPE_MULTIPLAYER).
+	Where("time_end < time_start").
+	Order("time_start desc").Find(&matches)
+
+	log.WithFields(log.Fields{
+		"matches": matches,
+	}).Info("findActiveMatches")
+
+	return &matches
 }
 
 func (ds *DataSource) findActiveMatches() *[]Match {
@@ -596,6 +613,8 @@ func (ds *DataSource) updateGameDefinition(input *GameDefinition) *GameDefinitio
 		gameDefinition.FireEnergyCost = input.FireEnergyCost
 		gameDefinition.RespawnX = input.RespawnX
 		gameDefinition.RespawnY = input.RespawnY
+		gameDefinition.RespawnAngle = input.RespawnAngle
+		gameDefinition.RespawnGunAngle = input.RespawnGunAngle
 
 		dbc := ds.db.Save(gameDefinition)
 		if dbc.Error != nil {

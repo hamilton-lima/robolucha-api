@@ -449,6 +449,36 @@ func TestGETGameDefinition(t *testing.T) {
 	assert.Assert(t, definition1.ID != definition2.ID)
 }
 
+func TestFindMultiplayerMatch(t *testing.T) {
+	SetupMain(t)
+
+	os.Remove(test.DB_NAME)
+	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
+	defer dataSource.db.Close()
+
+	definition1 := createTestGameDefinition(t, GAMEDEFINITION_TYPE_TUTORIAL, 20)
+	definition2 := createTestGameDefinition(t, GAMEDEFINITION_TYPE_MULTIPLAYER, 10)
+	definition3 := createTestGameDefinition(t, faker.Word(), 1)
+
+	dataSource.createMatch(definition1.ID)
+	match := dataSource.createMatch(definition2.ID)
+	dataSource.createMatch(definition3.ID)
+
+	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
+	w := test.PerformRequestNoAuth(router, "GET", "/private/match", "")
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var matches []ActiveMatch
+	json.Unmarshal(w.Body.Bytes(), &matches)
+
+	assert.Assert(t, matches[0].MatchID == match.ID)
+
+	gameDefinitions := *dataSource.findTutorialGameDefinition()
+
+	// all the tutorial gamedefinitions and the active multiplayer matches 
+	assert.Assert(t, len(matches) == len(gameDefinitions) +1 )
+}
+
 func TestFindTutorialGameDefinition(t *testing.T) {
 	SetupMain(t)
 

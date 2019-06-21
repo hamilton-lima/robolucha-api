@@ -37,6 +37,8 @@ func BuildDefaultGameDefinition() GameDefinition {
 
 	gd.RespawnX = 0
 	gd.RespawnY = 0
+	gd.RespawnAngle = 0
+	gd.RespawnGunAngle = 0
 
 	gd.GameComponents = make([]GameComponent, 0)
 	gd.SceneComponents = make([]SceneComponent, 0)
