@@ -8,11 +8,11 @@
   "luchadorSize": 60,
   "fps": 30,
   "buletSpeed": 120,
-  "name": "TURNANDMOVE",
-  "label": "Turn and Move",
+  "name": "FIREDRAGON",
+  "label": "Follow the Path of the Fire Dragon",
   "description": "",
   "type": "tutorial",
-  "sortOrder": 20,
+  "sortOrder": 170,
   "radarAngle": 45,
   "radarRadius": 200,
   "punchAngle": 90,
@@ -34,46 +34,57 @@
   "increaseSpeedEnergyCost": 10,
   "increaseSpeedPercentage": 20,
   "fireEnergyCost": 2,
-  "respawnX": 400,
+  "respawnX": 60,
   "respawnY": 200,
   "gameComponents": [],
   "sceneComponents": [
+  	{
+  		"x":150,
+  		"y":150,
+  		"width":40,
+  		"height":250,
+      "blockMovement": true,
+  		"type":"wall",
+  		"color": "#FF0000",
+  		"colider": true,
+      "codes": [{"event":"onHitOther", "script": "addDamage(1)"}]
+  	},
     {
-      "x":150,
+      "x":310,
       "y":0,
       "width":40,
-      "height":150,
+      "height":250,
       "blockMovement": true,
       "type":"wall",
-      "color": "#FFFF00",
+      "color": "#FF0000",
       "colider": true,
-      "codes": []
+      "codes": [{"event":"onHitOther", "script": "addDamage(1)"}]
     },
     {
-      "x": 100,
-      "y": 150,
-      "width": 80,
-      "height": 120,
+      "x":470,
+      "y":150,
+      "width":40,
+      "height":250,
+      "blockMovement": true,
+      "type":"wall",
+      "color": "#FF0000",
+      "colider": true,
+      "codes": [{"event":"onHitOther", "script": "addDamage(1)"}]
+    },
+    {
+      "x": 500,
+      "y": 320,
+      "width": 100,
+      "height": 100,
       "type": "region",
       "color": "#00FF00",
       "colider": true,
       "codes": [{ "event": "onHitOther", "script": "endGame()" }]
-    },
-    {
-      "x":150,
-      "y":270,
-      "width":40,
-      "height":150,
-      "blockMovement": true,
-      "type":"wall",
-      "color": "#FFFF00",
-      "colider": true,
-      "codes": []
     }
   ],
   "codes": [],
   "suggestedCodes": [
-    { "event": "onStart", "script": "--You have to turn around!" },
+    { "event": "onStart", "script": "-- Move 1 suggested code" },
     { "event": "onRepeat", "script": "move(1)" },
     { "event": "onHitWall", "script": "" }
   ]

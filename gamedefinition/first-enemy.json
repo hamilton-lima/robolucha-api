@@ -1,0 +1,57 @@
+{
+  "duration": 0,
+  "minParticipants": 1,
+  "maxParticipants": 1,
+  "arenaWidth": 600,
+  "arenaHeight": 400,
+  "bulletSize": 16,
+  "luchadorSize": 60,
+  "fps": 30,
+  "buletSpeed": 120,
+  "name": "FIRST-ENEMY",
+  "label": "First Enemy",
+  "description": "",
+  "type": "tutorial",
+  "sortOrder": 110,
+  "radarAngle": 45,
+  "radarRadius": 200,
+  "punchAngle": 90,
+  "life": 20,
+  "energy": 30,
+  "punchDamage": 2,
+  "punchCoolDown": 2,
+  "moveSpeed": 50,
+  "turnSpeed": 180,
+  "turnGunSpeed": 60,
+  "respawnCooldown": 10,
+  "maxFireCooldown": 10,
+  "minFireDamage": 1,
+  "maxFireDamage": 10,
+  "minFireAmount": 1,
+  "maxFireAmount": 10,
+  "restoreEnergyperSecond": 3,
+  "recycledLuchadorEnergyRestore": 6,
+  "increaseSpeedEnergyCost": 10,
+  "increaseSpeedPercentage": 20,
+  "fireEnergyCost": 2,
+  "respawnX": 100,
+  "respawnY": 200,
+  "gameComponents": [
+    {
+      "id": 0,
+      "name": "El Bravucón",
+      "codes": [
+        { "event": "onStart", "script": "turnGun(-90)", "exception": "" },
+        { "event": "onRepeat", "script": "fire(1)", "exception": "" },
+      ],
+      "configs": []
+    }
+  ],
+  "sceneComponents": [],
+  "codes": [],
+  "suggestedCodes": [
+    { "event": "onRepeat", "script": "move(20)\nfire(1)" },
+    { "event": "onHitWall", "script": "turn(45)" }
+    { "event": "onFound", "script": "if chance > 0.8 then\n  --do something here!\nend"}
+  ]
+}
