@@ -8,7 +8,7 @@
   "luchadorSize": 60,
   "fps": 30,
   "buletSpeed": 120,
-  "name": "MOVE1",
+  "name": "move1",
   "label": "Move 1",
   "description": "",
   "type": "tutorial",
@@ -45,6 +45,7 @@
   		"height":150,
   		"blockMovement":true,
   		"type":"wall",
+  		"alpha": 1,
   		"color": "#FFFF00",
   		"colider": true,
   		"codes": []
@@ -66,8 +67,8 @@
   		"height":150,
   		"blockMovement":true,
   		"type":"wall",
+  		"alpha": 1,
   		"color": "#FFFF00",
-  		"alpha": 0.2,
   		"colider": true,
   		"codes": []
   	}

@@ -8,7 +8,7 @@
   "luchadorSize": 60,
   "fps": 30,
   "buletSpeed": 120,
-  "name": "PATHOFDRAGON",
+  "name": "path-of-dragon",
   "label": "Follow the Path of the Dragon",
   "description": "",
   "type": "tutorial",
@@ -45,6 +45,7 @@
   		"height":250,
       "blockMovement": true,
   		"type":"wall",
+      "alpha":1,
   		"color": "#FFFF00",
   		"colider": true,
   		"codes": []
@@ -56,6 +57,7 @@
       "height":250,
       "blockMovement": true,
       "type":"wall",
+      "alpha":1,
       "color": "#FFFF00",
       "colider": true,
       "codes": []
@@ -67,6 +69,7 @@
       "height":250,
       "blockMovement": true,
       "type":"wall",
+      "alpha":1,
       "color": "#FFFF00",
       "colider": true,
       "codes": []

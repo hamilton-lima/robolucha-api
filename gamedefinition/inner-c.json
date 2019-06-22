@@ -8,7 +8,7 @@
   "luchadorSize": 60,
   "fps": 30,
   "buletSpeed": 120,
-  "name": "INNERC",
+  "name": "inner-c",
   "label": "Find your inner C",
   "description": "",
   "type": "tutorial",
@@ -45,6 +45,7 @@
   		"height":50,
       "blockMovement": true,
   		"type":"wall",
+      "alpha":1,
   		"color": "#FFFF00",
   		"colider": true,
   		"codes": []
@@ -66,6 +67,7 @@
       "blockMovement": true,
       "height":50,
       "type":"wall",
+      "alpha":1,
       "color": "#FFFF00",
       "colider": true,
       "codes": []
@@ -77,6 +79,7 @@
       "height":240,
       "blockMovement": true,
       "type":"wall",
+      "alpha":1,
       "color": "#FFFF00",
       "colider": true,
       "codes": []
