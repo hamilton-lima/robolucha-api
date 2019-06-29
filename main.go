@@ -71,7 +71,16 @@ func main() {
 
 	internalAPIKey := os.Getenv("INTERNAL_API_KEY")
 	logRequestBody := os.Getenv("GIM_LOG_REQUEST_BODY")
-	router := createRouter(internalAPIKey, logRequestBody, SessionIsValid)
+	disableAuth := os.Getenv("DISABLE_AUTH")
+
+	var router *gin.Engine
+
+	if disableAuth == "true" {
+		router = createRouter(internalAPIKey, logRequestBody, SessionAllwaysValid)
+	} else {
+		router = createRouter(internalAPIKey, logRequestBody, SessionIsValid)
+	}
+
 	router.Run(":" + port)
 
 	log.WithFields(log.Fields{
