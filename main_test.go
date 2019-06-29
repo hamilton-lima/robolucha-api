@@ -172,7 +172,7 @@ func TestUpdateGameDefinition(t *testing.T) {
 	ID := created.ID
 	gd.ID = 0
 
-	// remove IDS from GameComponents to create with a differnt name 
+	// remove IDS from GameComponents to create with a differnt name
 	gd.GameComponents[0].ID = 0
 	gd.GameComponents[0].GameDefinitionID = 0
 	gd.GameComponents[0].Name = gd.GameComponents[0].Name + "-UPDATED"
@@ -183,10 +183,10 @@ func TestUpdateGameDefinition(t *testing.T) {
 	log.WithFields(log.Fields{
 		"gd.GameComponents": gd.GameComponents,
 	}).Debug("Before update")
-	
+
 	gd.MinParticipants = 1
 	gd.ArenaHeight = 42
-	
+
 	body, _ := json.Marshal(gd)
 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
 
@@ -224,7 +224,7 @@ func TestUpdateGameDefinition(t *testing.T) {
 		}).Debug("counterUpdatedCounter")
 
 		if strings.HasSuffix(gc.Name, "-UPDATED") {
-			counterUpdatedCounter = counterUpdatedCounter +1
+			counterUpdatedCounter = counterUpdatedCounter + 1
 		}
 	}
 	assert.Assert(t, counterUpdatedCounter == 1)
@@ -245,7 +245,7 @@ func TestUpdateGameDefinition(t *testing.T) {
 		}).Debug("counterUpdatedCounter2")
 
 		if strings.HasSuffix(gc.Name, "-UPDATED") {
-			counterUpdatedCounter2 = counterUpdatedCounter2 +1
+			counterUpdatedCounter2 = counterUpdatedCounter2 + 1
 		}
 	}
 	assert.Assert(t, counterUpdatedCounter2 == 1)
@@ -475,8 +475,8 @@ func TestFindMultiplayerMatch(t *testing.T) {
 
 	gameDefinitions := *dataSource.findTutorialGameDefinition()
 
-	// all the tutorial gamedefinitions and the active multiplayer matches 
-	assert.Assert(t, len(matches) == len(gameDefinitions) +1 )
+	// all the tutorial gamedefinitions and the active multiplayer matches
+	assert.Assert(t, len(matches) == len(gameDefinitions)+1)
 }
 
 func TestFindTutorialGameDefinition(t *testing.T) {
@@ -609,4 +609,36 @@ func fakeGameDefinition(t *testing.T, name string, typeName string, sortOrder ui
 	assert.Assert(t, len(gameDefinition.SceneComponents[0].Codes) == 2)
 
 	return gameDefinition, result, nil
+}
+
+func TestPOSTMatchMetric(t *testing.T) {
+	SetupMain(t)
+	os.Remove(test.DB_NAME)
+	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
+	defer dataSource.db.Close()
+
+	var metric *MatchMetric
+	err := faker.FakeData(&metric)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Error("Error generation fake match metric")
+		panic(1)
+	}
+	body, _ := json.Marshal(metric)
+
+	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
+	w := test.PerformRequest(router, "POST", "/internal/match-metric", string(body), test.API_KEY)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var afterSave MatchMetric
+	dataSource.db.First(&afterSave)
+
+	assert.Assert(t, &afterSave != nil)
+
+	assert.Equal(t, metric.MatchID, afterSave.MatchID)
+	assert.Equal(t, metric.FPS, afterSave.FPS)
+	assert.Equal(t, metric.FPSSentToPublisher, afterSave.FPSSentToPublisher)
+	assert.Equal(t, metric.Players, afterSave.Players)
+	assert.Equal(t, metric.GameDefinitionID, afterSave.GameDefinitionID)
 }

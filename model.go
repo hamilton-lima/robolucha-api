@@ -32,14 +32,14 @@ type UserSetting struct {
 }
 
 type ActiveMatch struct {
-	MatchID      uint      `json:"matchID"`
-	Name         string    `json:"name"`
-	Label        string    `json:"label"`
-	Description  string    `json:"description"`
-	Type         string    `json:"type"`
-	SortOrder    uint      `json:"sortOrder"`
-	Duration     uint64    `json:"duration"`
-	TimeStart    time.Time `json:"timeStart"`
+	MatchID     uint      `json:"matchID"`
+	Name        string    `json:"name"`
+	Label       string    `json:"label"`
+	Description string    `json:"description"`
+	Type        string    `json:"type"`
+	SortOrder   uint      `json:"sortOrder"`
+	Duration    uint64    `json:"duration"`
+	TimeStart   time.Time `json:"timeStart"`
 }
 
 // Match definition
@@ -194,4 +194,17 @@ type MatchScore struct {
 	Kills      int        `json:"kills"`
 	Deaths     int        `json:"deaths"`
 	Score      int        `json:"score"`
+}
+
+// MatchMetric definition
+type MatchMetric struct {
+	ID                 uint       `gorm:"primary_key" json:"id,omitempty"`
+	CreatedAt          time.Time  `json:"-"`
+	UpdatedAt          time.Time  `json:"-"`
+	DeletedAt          *time.Time `json:"-" faker:"-"`
+	MatchID            uint       `json:"matchID"`
+	FPS                uint       `json:"fps"`
+	FPSSentToPublisher uint       `json:"fpsSentToPublisher"`
+	Players            uint       `json:"players"`
+	GameDefinitionID   uint       `json:"gameDefinitionID"`
 }
