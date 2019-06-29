@@ -1161,7 +1161,7 @@ func addMatchScores(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body main.MatchMetric true "MatchMetric"
-// @Success 200 {string}
+// @Success 200 {string} string
 // @Security ApiKeyAuth
 // @Router /internal/match-metric [post]
 func addMatchMetric(c *gin.Context) {

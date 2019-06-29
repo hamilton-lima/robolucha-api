@@ -298,6 +298,42 @@
                 }
             }
         },
+        "/internal/match-metric": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "saves a match metric",
+                "parameters": [
+                    {
+                        "description": "MatchMetric",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.MatchMetric"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/internal/match-participant": {
             "post": {
                 "security": [
@@ -1165,6 +1201,29 @@
                 },
                 "timeStart": {
                     "type": "string"
+                }
+            }
+        },
+        "main.MatchMetric": {
+            "type": "object",
+            "properties": {
+                "fps": {
+                    "type": "integer"
+                },
+                "fpsSentToPublisher": {
+                    "type": "integer"
+                },
+                "gameDefinitionID": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "matchID": {
+                    "type": "integer"
+                },
+                "players": {
+                    "type": "integer"
                 }
             }
         },
