@@ -128,6 +128,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		internalAPI.GET("/ready", getReady)
 		internalAPI.POST("/add-match-scores", addMatchScores)
 		internalAPI.GET("/match-single", getMatchInternal)
+		internalAPI.POST("/match-metric", addMatchMetric)
 	}
 
 	privateAPI := router.Group("/private")
@@ -825,15 +826,15 @@ func getActiveMatches(c *gin.Context) {
 	matches := *dataSource.findActiveMultiplayerMatches()
 	for _, match := range matches {
 		gameDefinition := dataSource.findGameDefinition(match.GameDefinitionID)
-		add := ActiveMatch {
-			MatchID: match.ID,
-			Name: gameDefinition.Name,
-			Label: gameDefinition.Label,
+		add := ActiveMatch{
+			MatchID:     match.ID,
+			Name:        gameDefinition.Name,
+			Label:       gameDefinition.Label,
 			Description: gameDefinition.Description,
-			Type: gameDefinition.Type,
-			SortOrder: gameDefinition.SortOrder,
-			Duration: gameDefinition.Duration,
-			TimeStart: match.TimeStart,
+			Type:        gameDefinition.Type,
+			SortOrder:   gameDefinition.SortOrder,
+			Duration:    gameDefinition.Duration,
+			TimeStart:   match.TimeStart,
 		}
 
 		result = append(result, add)
@@ -842,14 +843,14 @@ func getActiveMatches(c *gin.Context) {
 	// gamedefinitions
 	gameDefinitions := *dataSource.findTutorialGameDefinition()
 	for _, gameDefinition := range gameDefinitions {
-		add := ActiveMatch {
-			MatchID: 0,
-			Name: gameDefinition.Name,
-			Label: gameDefinition.Label,
+		add := ActiveMatch{
+			MatchID:     0,
+			Name:        gameDefinition.Name,
+			Label:       gameDefinition.Label,
 			Description: gameDefinition.Description,
-			Type: gameDefinition.Type,
-			SortOrder: gameDefinition.SortOrder,
-			Duration: gameDefinition.Duration,
+			Type:        gameDefinition.Type,
+			SortOrder:   gameDefinition.SortOrder,
+			Duration:    gameDefinition.Duration,
 		}
 
 		result = append(result, add)
@@ -1153,4 +1154,37 @@ func addMatchScores(c *gin.Context) {
 	}).Info("result")
 
 	c.JSON(http.StatusOK, score)
+}
+
+// addMatchMetric godoc
+// @Summary saves a match metric
+// @Accept json
+// @Produce json
+// @Param request body main.MatchMetric true "MatchMetric"
+// @Success 200 {string}
+// @Security ApiKeyAuth
+// @Router /internal/match-metric [post]
+func addMatchMetric(c *gin.Context) {
+	var metric *MatchMetric
+	err := c.BindJSON(&metric)
+	if err != nil {
+		log.Info("Invalid body content on addMatchMetric")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	result := dataSource.addMatchMetric(metric)
+	if result == nil {
+		log.WithFields(log.Fields{
+			"metric": metric,
+		}).Error("Error saving metric")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"metric": result,
+	}).Debug("result")
+
+	c.JSON(http.StatusOK, "")
 }
