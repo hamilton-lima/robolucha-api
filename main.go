@@ -202,6 +202,13 @@ func SessionIsValid() gin.HandlerFunc {
 	}
 }
 
+func SessionAllwaysValid() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user := dataSource.createUser(User{Username: "test"})
+		c.Set("user", user)
+	}
+}
+
 // KeyIsValid check if Authoraization header is valid
 func KeyIsValid(key string) gin.HandlerFunc {
 	return func(c *gin.Context) {

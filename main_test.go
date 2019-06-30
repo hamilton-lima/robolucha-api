@@ -19,8 +19,6 @@ import (
 	"gotest.tools/assert"
 )
 
-const TEST_USERNAME = "foo"
-
 func SetupMain(t *testing.T) {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stdout)
@@ -399,13 +397,6 @@ func getConfigs(t *testing.T, router *gin.Engine, id uint) []Config {
 	json.Unmarshal(w.Body.Bytes(), &configs)
 
 	return configs
-}
-
-func SessionAllwaysValid() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		user := dataSource.createUser(User{Username: TEST_USERNAME})
-		c.Set("user", user)
-	}
 }
 
 func TestCreateGameDefinition(t *testing.T) {
