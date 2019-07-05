@@ -1,5 +1,24 @@
 basePath: /
 definitions:
+  main.ActiveMatch:
+    properties:
+      description:
+        type: string
+      duration:
+        type: integer
+      label:
+        type: string
+      matchID:
+        type: integer
+      name:
+        type: string
+      sortOrder:
+        type: integer
+      timeStart:
+        type: string
+      type:
+        type: string
+    type: object
   main.Code:
     properties:
       event:
@@ -118,7 +137,11 @@ definitions:
         type: integer
       recycledLuchadorEnergyRestore:
         type: integer
+      respawnAngle:
+        type: integer
       respawnCooldown:
+        type: integer
+      respawnGunAngle:
         type: integer
       respawnX:
         type: integer
@@ -167,6 +190,21 @@ definitions:
       timeStart:
         type: string
     type: object
+  main.MatchMetric:
+    properties:
+      fps:
+        type: integer
+      fpsSentToPublisher:
+        type: integer
+      gameDefinitionID:
+        type: integer
+      id:
+        type: integer
+      matchID:
+        type: integer
+      players:
+        type: integer
+    type: object
   main.MatchParticipant:
     properties:
       luchadorID:
@@ -191,6 +229,8 @@ definitions:
     type: object
   main.SceneComponent:
     properties:
+      alpha:
+        type: number
       blockMovement:
         type: boolean
       codes:
@@ -442,6 +482,28 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: find Luchador by ID
+  /internal/match-metric:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: MatchMetric
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.MatchMetric'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: saves a match metric
   /internal/match-participant:
     post:
       consumes:
@@ -674,7 +736,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/main.Match'
+              $ref: '#/definitions/main.ActiveMatch'
             type: array
       security:
       - ApiKeyAuth: []

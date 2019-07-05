@@ -31,6 +31,17 @@ type UserSetting struct {
 	LastOption string     `json:"lastOption"`
 }
 
+type ActiveMatch struct {
+	MatchID     uint      `json:"matchID"`
+	Name        string    `json:"name"`
+	Label       string    `json:"label"`
+	Description string    `json:"description"`
+	Type        string    `json:"type"`
+	SortOrder   uint      `json:"sortOrder"`
+	Duration    uint64    `json:"duration"`
+	TimeStart   time.Time `json:"timeStart"`
+}
+
 // Match definition
 type Match struct {
 	ID               uint            `gorm:"primary_key" json:"id"`
@@ -86,6 +97,8 @@ type GameDefinition struct {
 	FireEnergyCost                uint             `json:"fireEnergyCost"`
 	RespawnX                      uint             `json:"respawnX"`
 	RespawnY                      uint             `json:"respawnY"`
+	RespawnAngle                  uint             `json:"respawnAngle"`
+	RespawnGunAngle               uint             `json:"respawnGunAngle"`
 	GameComponents                []GameComponent  `json:"gameComponents"`
 	SceneComponents               []SceneComponent `json:"sceneComponents"`
 	Codes                         []Code           `gorm:"many2many:gamedefinition_codes" json:"codes"`
@@ -109,6 +122,7 @@ type SceneComponent struct {
 	BlockMovement    bool       `json:"blockMovement"`
 	Type             string     `json:"type"`
 	Color            string     `json:"color"`
+	Alpha            float32    `json:"alpha"`
 	Codes            []Code     `gorm:"many2many:scenecomponent_codes" json:"codes"`
 }
 
@@ -180,4 +194,17 @@ type MatchScore struct {
 	Kills      int        `json:"kills"`
 	Deaths     int        `json:"deaths"`
 	Score      int        `json:"score"`
+}
+
+// MatchMetric definition
+type MatchMetric struct {
+	ID                 uint       `gorm:"primary_key" json:"id,omitempty"`
+	CreatedAt          time.Time  `json:"-"`
+	UpdatedAt          time.Time  `json:"-"`
+	DeletedAt          *time.Time `json:"-" faker:"-"`
+	MatchID            uint       `json:"matchID"`
+	FPS                uint       `json:"fps"`
+	FPSSentToPublisher uint       `json:"fpsSentToPublisher"`
+	Players            uint       `json:"players"`
+	GameDefinitionID   uint       `json:"gameDefinitionID"`
 }

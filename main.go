@@ -71,7 +71,16 @@ func main() {
 
 	internalAPIKey := os.Getenv("INTERNAL_API_KEY")
 	logRequestBody := os.Getenv("GIM_LOG_REQUEST_BODY")
-	router := createRouter(internalAPIKey, logRequestBody, SessionIsValid)
+	disableAuth := os.Getenv("DISABLE_AUTH")
+
+	var router *gin.Engine
+
+	if disableAuth == "true" {
+		router = createRouter(internalAPIKey, logRequestBody, SessionAllwaysValid)
+	} else {
+		router = createRouter(internalAPIKey, logRequestBody, SessionIsValid)
+	}
+
 	router.Run(":" + port)
 
 	log.WithFields(log.Fields{
@@ -119,6 +128,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		internalAPI.GET("/ready", getReady)
 		internalAPI.POST("/add-match-scores", addMatchScores)
 		internalAPI.GET("/match-single", getMatchInternal)
+		internalAPI.POST("/match-metric", addMatchMetric)
 	}
 
 	privateAPI := router.Group("/private")
@@ -188,6 +198,13 @@ func SessionIsValid() gin.HandlerFunc {
 		}
 
 		user := dataSource.createUser(User{Username: sessionUser.Username})
+		c.Set("user", user)
+	}
+}
+
+func SessionAllwaysValid() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user := dataSource.createUser(User{Username: "test"})
 		c.Set("user", user)
 	}
 }
@@ -805,19 +822,52 @@ func createGameComponent(c *gin.Context) {
 // @Summary find active matches
 // @Accept json
 // @Produce json
-// @Success 200 {array} main.Match
+// @Success 200 {array} main.ActiveMatch
 // @Security ApiKeyAuth
 // @Router /private/match [get]
 func getActiveMatches(c *gin.Context) {
 
-	var matches *[]Match
+	var result []ActiveMatch
 
-	matches = dataSource.findActiveMatches()
+	// multiplayer matches
+	matches := *dataSource.findActiveMultiplayerMatches()
+	for _, match := range matches {
+		gameDefinition := dataSource.findGameDefinition(match.GameDefinitionID)
+		add := ActiveMatch{
+			MatchID:     match.ID,
+			Name:        gameDefinition.Name,
+			Label:       gameDefinition.Label,
+			Description: gameDefinition.Description,
+			Type:        gameDefinition.Type,
+			SortOrder:   gameDefinition.SortOrder,
+			Duration:    gameDefinition.Duration,
+			TimeStart:   match.TimeStart,
+		}
+
+		result = append(result, add)
+	}
+
+	// gamedefinitions
+	gameDefinitions := *dataSource.findTutorialGameDefinition()
+	for _, gameDefinition := range gameDefinitions {
+		add := ActiveMatch{
+			MatchID:     0,
+			Name:        gameDefinition.Name,
+			Label:       gameDefinition.Label,
+			Description: gameDefinition.Description,
+			Type:        gameDefinition.Type,
+			SortOrder:   gameDefinition.SortOrder,
+			Duration:    gameDefinition.Duration,
+		}
+
+		result = append(result, add)
+	}
+
 	log.WithFields(log.Fields{
-		"matches": matches,
+		"matches": result,
 	}).Info("getActiveMatches")
 
-	c.JSON(http.StatusOK, matches)
+	c.JSON(http.StatusOK, &result)
 }
 
 // getMatchInternal godoc
@@ -1111,4 +1161,37 @@ func addMatchScores(c *gin.Context) {
 	}).Info("result")
 
 	c.JSON(http.StatusOK, score)
+}
+
+// addMatchMetric godoc
+// @Summary saves a match metric
+// @Accept json
+// @Produce json
+// @Param request body main.MatchMetric true "MatchMetric"
+// @Success 200 {string} string
+// @Security ApiKeyAuth
+// @Router /internal/match-metric [post]
+func addMatchMetric(c *gin.Context) {
+	var metric *MatchMetric
+	err := c.BindJSON(&metric)
+	if err != nil {
+		log.Info("Invalid body content on addMatchMetric")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	result := dataSource.addMatchMetric(metric)
+	if result == nil {
+		log.WithFields(log.Fields{
+			"metric": metric,
+		}).Error("Error saving metric")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"metric": result,
+	}).Debug("result")
+
+	c.JSON(http.StatusOK, "")
 }

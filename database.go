@@ -34,6 +34,7 @@ type DataSource struct {
 }
 
 const GAMEDEFINITION_TYPE_TUTORIAL = "tutorial"
+const GAMEDEFINITION_TYPE_MULTIPLAYER = "multiplayer"
 
 // BuildMysqlConfig creates a DBconfig for Mysql based on environment variables
 func BuildMysqlConfig() *DBconfig {
@@ -115,6 +116,7 @@ func NewDataSource(config *DBconfig) *DataSource {
 	db.AutoMigrate(&SceneComponent{})
 	db.AutoMigrate(&GameComponent{})
 	db.AutoMigrate(&GameDefinition{})
+	db.AutoMigrate(&MatchMetric{})
 
 	secret := os.Getenv("API_SECRET")
 
@@ -283,6 +285,22 @@ func applyConfigChanges(original []Config, updated []Config) []Config {
 		}
 	}
 	return original
+}
+
+func (ds *DataSource) findActiveMultiplayerMatches() *[]Match {
+
+	var matches []Match
+	ds.db.
+		Joins("left join game_definitions on matches.game_definition_id = game_definitions.id").
+		Where("game_definitions.type = ?", GAMEDEFINITION_TYPE_MULTIPLAYER).
+		Where("time_end < time_start").
+		Order("time_start desc").Find(&matches)
+
+	log.WithFields(log.Fields{
+		"matches": matches,
+	}).Info("findActiveMatches")
+
+	return &matches
 }
 
 func (ds *DataSource) findActiveMatches() *[]Match {
@@ -596,13 +614,15 @@ func (ds *DataSource) updateGameDefinition(input *GameDefinition) *GameDefinitio
 		gameDefinition.FireEnergyCost = input.FireEnergyCost
 		gameDefinition.RespawnX = input.RespawnX
 		gameDefinition.RespawnY = input.RespawnY
+		gameDefinition.RespawnAngle = input.RespawnAngle
+		gameDefinition.RespawnGunAngle = input.RespawnGunAngle
 
 		dbc := ds.db.Save(gameDefinition)
 		if dbc.Error != nil {
 			log.WithFields(log.Fields{
-				"error":          dbc.Error,
+				"error":               dbc.Error,
 				"gameDefinition.Name": gameDefinition.Name,
-				"step": "save",
+				"step":                "save",
 			}).Error("Error updating updateGameDefinition")
 
 			return nil
@@ -613,7 +633,7 @@ func (ds *DataSource) updateGameDefinition(input *GameDefinition) *GameDefinitio
 
 			log.WithFields(log.Fields{
 				"gc.Name": gc.Name,
-				"gc.ID": gc.ID,
+				"gc.ID":   gc.ID,
 			}).Debug("searching gamedefinition")
 
 			if component != nil {
@@ -625,21 +645,21 @@ func (ds *DataSource) updateGameDefinition(input *GameDefinition) *GameDefinitio
 		dbc = ds.db.Save(gameDefinition)
 		if dbc.Error != nil {
 			log.WithFields(log.Fields{
-				"error":          dbc.Error,
+				"error":               dbc.Error,
 				"gameDefinition.Name": gameDefinition.Name,
-				"step": "GameComponents",
+				"step":                "GameComponents",
 			}).Error("Error updating updateGameDefinition")
 
 			return nil
 		}
-		
+
 		ds.db.Model(gameDefinition).Association("SceneComponents").Replace(input.SceneComponents)
 		dbc = ds.db.Save(gameDefinition)
 		if dbc.Error != nil {
 			log.WithFields(log.Fields{
-				"error":          dbc.Error,
+				"error":               dbc.Error,
 				"gameDefinition.Name": gameDefinition.Name,
-				"step": "SceneComponents",
+				"step":                "SceneComponents",
 			}).Error("Error updating updateGameDefinition")
 
 			return nil
@@ -649,9 +669,9 @@ func (ds *DataSource) updateGameDefinition(input *GameDefinition) *GameDefinitio
 		dbc = ds.db.Save(gameDefinition)
 		if dbc.Error != nil {
 			log.WithFields(log.Fields{
-				"error":          dbc.Error,
+				"error":               dbc.Error,
 				"gameDefinition.Name": gameDefinition.Name,
-				"step": "Codes",
+				"step":                "Codes",
 			}).Error("Error updating updateGameDefinition")
 
 			return nil
@@ -661,9 +681,9 @@ func (ds *DataSource) updateGameDefinition(input *GameDefinition) *GameDefinitio
 		dbc = ds.db.Save(gameDefinition)
 		if dbc.Error != nil {
 			log.WithFields(log.Fields{
-				"error":          dbc.Error,
+				"error":               dbc.Error,
 				"gameDefinition.Name": gameDefinition.Name,
-				"step": "LuchadorSuggestedCodes",
+				"step":                "LuchadorSuggestedCodes",
 			}).Error("Error updating updateGameDefinition")
 
 			return nil
@@ -821,7 +841,7 @@ func (ds *DataSource) findTutorialGameDefinition() *[]GameDefinition {
 		"gameDefinitions": gameDefinitions,
 	}).Debug("findTutorialGameDefinition before array checks")
 
-	for i, _ := range gameDefinitions {
+	for i := range gameDefinitions {
 		resetGameDefinitionArrays(&gameDefinitions[i])
 	}
 
@@ -848,4 +868,17 @@ func resetGameDefinitionArrays(gameDefinition *GameDefinition) {
 	if gameDefinition.LuchadorSuggestedCodes == nil {
 		gameDefinition.LuchadorSuggestedCodes = make([]Code, 0)
 	}
+}
+
+func (ds *DataSource) addMatchMetric(m *MatchMetric) *MatchMetric {
+
+	metric := MatchMetric{}
+	copier.Copy(&metric, &m)
+	ds.db.Create(&metric)
+
+	log.WithFields(log.Fields{
+		"metric": metric,
+	}).Debug("addMatchMetric")
+
+	return &metric
 }

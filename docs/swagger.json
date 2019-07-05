@@ -298,6 +298,42 @@
                 }
             }
         },
+        "/internal/match-metric": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "saves a match metric",
+                "parameters": [
+                    {
+                        "description": "MatchMetric",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.MatchMetric"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/internal/match-participant": {
             "post": {
                 "security": [
@@ -681,7 +717,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/main.Match"
+                                "$ref": "#/definitions/main.ActiveMatch"
                             }
                         }
                     }
@@ -879,6 +915,35 @@
         }
     },
     "definitions": {
+        "main.ActiveMatch": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "integer"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "matchID": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "sortOrder": {
+                    "type": "integer"
+                },
+                "timeStart": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "main.Code": {
             "type": "object",
             "properties": {
@@ -1058,7 +1123,13 @@
                 "recycledLuchadorEnergyRestore": {
                     "type": "integer"
                 },
+                "respawnAngle": {
+                    "type": "integer"
+                },
                 "respawnCooldown": {
+                    "type": "integer"
+                },
+                "respawnGunAngle": {
                     "type": "integer"
                 },
                 "respawnX": {
@@ -1133,6 +1204,29 @@
                 }
             }
         },
+        "main.MatchMetric": {
+            "type": "object",
+            "properties": {
+                "fps": {
+                    "type": "integer"
+                },
+                "fpsSentToPublisher": {
+                    "type": "integer"
+                },
+                "gameDefinitionID": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "matchID": {
+                    "type": "integer"
+                },
+                "players": {
+                    "type": "integer"
+                }
+            }
+        },
         "main.MatchParticipant": {
             "type": "object",
             "properties": {
@@ -1170,6 +1264,9 @@
         "main.SceneComponent": {
             "type": "object",
             "properties": {
+                "alpha": {
+                    "type": "number"
+                },
                 "blockMovement": {
                     "type": "boolean"
                 },
