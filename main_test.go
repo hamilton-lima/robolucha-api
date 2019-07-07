@@ -629,7 +629,6 @@ func TestPOSTMatchMetric(t *testing.T) {
 
 	assert.Equal(t, metric.MatchID, afterSave.MatchID)
 	assert.Equal(t, metric.FPS, afterSave.FPS)
-	assert.Equal(t, metric.FPSSentToPublisher, afterSave.FPSSentToPublisher)
 	assert.Equal(t, metric.Players, afterSave.Players)
 	assert.Equal(t, metric.GameDefinitionID, afterSave.GameDefinitionID)
 }
