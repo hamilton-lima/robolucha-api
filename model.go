@@ -31,6 +31,7 @@ type UserSetting struct {
 	LastOption string     `json:"lastOption"`
 }
 
+// ActiveMatch definition
 type ActiveMatch struct {
 	MatchID     uint      `json:"matchID"`
 	Name        string    `json:"name"`
@@ -55,6 +56,7 @@ type Match struct {
 	Participants     []GameComponent `gorm:"many2many:match_participants" json:"participants"`
 }
 
+// GameDefinition definition
 type GameDefinition struct {
 	ID                            uint             `gorm:"primary_key" json:"id" faker:"-"`
 	CreatedAt                     time.Time        `json:"-"`
@@ -105,6 +107,7 @@ type GameDefinition struct {
 	LuchadorSuggestedCodes        []Code           `gorm:"many2many:gamedefinition_suggestedcodes" json:"suggestedCodes"`
 }
 
+// SceneComponent definition
 type SceneComponent struct {
 	ID               uint       `gorm:"primary_key" json:"id" faker:"-"`
 	CreatedAt        time.Time  `json:"-"`
@@ -126,6 +129,7 @@ type SceneComponent struct {
 	Codes            []Code     `gorm:"many2many:scenecomponent_codes" json:"codes"`
 }
 
+// GameComponent definition
 type GameComponent struct {
 	ID               uint       `gorm:"primary_key" json:"id" faker:"-"`
 	CreatedAt        time.Time  `json:"-"`
@@ -166,7 +170,7 @@ type JoinMatch struct {
 	LuchadorID uint `json:"luchadorID"`
 }
 
-// JoinMatch definition
+// FindLuchadorWithGamedefinition definition
 type FindLuchadorWithGamedefinition struct {
 	GameDefinitionID uint `json:"gameDefinitionID"`
 	LuchadorID       uint `json:"luchadorID"`
@@ -198,13 +202,12 @@ type MatchScore struct {
 
 // MatchMetric definition
 type MatchMetric struct {
-	ID                 uint       `gorm:"primary_key" json:"id,omitempty"`
-	CreatedAt          time.Time  `json:"-"`
-	UpdatedAt          time.Time  `json:"-"`
-	DeletedAt          *time.Time `json:"-" faker:"-"`
-	MatchID            uint       `json:"matchID"`
-	FPS                uint       `json:"fps"`
-	FPSSentToPublisher uint       `json:"fpsSentToPublisher"`
-	Players            uint       `json:"players"`
-	GameDefinitionID   uint       `json:"gameDefinitionID"`
+	ID               uint       `gorm:"primary_key" json:"id,omitempty"`
+	CreatedAt        time.Time  `json:"-"`
+	UpdatedAt        time.Time  `json:"-"`
+	DeletedAt        *time.Time `json:"-" faker:"-"`
+	MatchID          uint       `json:"matchID"`
+	FPS              uint       `json:"fps"`
+	Players          uint       `json:"players"`
+	GameDefinitionID uint       `json:"gameDefinitionID"`
 }
