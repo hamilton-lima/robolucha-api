@@ -8,7 +8,7 @@
   "luchadorSize": 60,
   "fps": 30,
   "buletSpeed": 120,
-  "name": "CLEARYOURWAY",
+  "name": "clear-your-way",
   "label": "Clear your way",
   "description": "",
   "type": "tutorial",
@@ -39,12 +39,14 @@
   "gameComponents": [],
   "sceneComponents": [
   	{
+      "name"
   		"x":400,
   		"y":0,
   		"width":40,
   		"height":150,
       "blockMovement": true,
   		"type":"wall",
+      "alpha": 1,
   		"color": "#FFFF00",
   		"colider": true,
   		"codes": []
@@ -55,6 +57,7 @@
       "width": 40,
       "height": 120,
       "type": "wall",
+      "alpha": 1,
       "color": "#FF8800",
       "colider": true,
       "codes": [{ "event": "onHitOther", "script": "" }]
@@ -66,6 +69,7 @@
   		"height":150,
       "blockMovement": true,
   		"type":"wall",
+      "alpha": 1,
   		"color": "#FFFF00",
   		"colider": true,
   		"codes": []

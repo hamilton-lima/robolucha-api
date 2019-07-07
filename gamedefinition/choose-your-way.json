@@ -8,7 +8,7 @@
   "luchadorSize": 60,
   "fps": 30,
   "buletSpeed": 120,
-  "name": "CHOOSEYOURWAY",
+  "name": "choose-your-way",
   "label": "Choose your way",
   "description": "",
   "type": "tutorial",
@@ -45,6 +45,7 @@
   		"height":150,
       "blockMovement": true,
   		"type":"wall",
+      "alpha":1,
       "color": "#FF8800",
       "colider": true,
       "codes": [{ "event": "onHitOther", "script": "" }]
@@ -55,6 +56,7 @@
       "width": 40,
       "height": 120,
       "type": "wall",
+      "alpha":1,
       "color": "#FF8800",
       "colider": true,
       "codes": [{ "event": "onHitOther", "script": "" }]
@@ -66,6 +68,7 @@
   		"height":150,
       "blockMovement": true,
   		"type":"wall",
+      "alpha":1,
       "color": "#FF8800",
       "colider": true,
       "codes": [{ "event": "onHitOther", "script": "" }]

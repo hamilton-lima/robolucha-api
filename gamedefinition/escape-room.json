@@ -8,7 +8,7 @@
   "luchadorSize": 60,
   "fps": 30,
   "buletSpeed": 120,
-  "name": "ESCAPEROOM",
+  "name": "escape-room",
   "label": "Escape Room",
   "description": "",
   "type": "tutorial",
@@ -45,6 +45,7 @@
   		"height":50,
       "blockMovement": true,
   		"type":"wall",
+      "alpha":1,
   		"color": "#FFFF00",
   		"colider": true,
   		"codes": []
@@ -56,6 +57,7 @@
       "height":50,
       "blockMovement": true,
       "type":"wall",
+      "alpha":1,
       "color": "#FFFF00",
       "colider": true,
       "codes": []
@@ -67,6 +69,7 @@
       "height":80,
       "blockMovement": true,
       "type":"wall",
+      "alpha":1,
       "color": "#FFFF00",
       "colider": true,
       "codes": []
@@ -78,6 +81,7 @@
       "height":80,
       "blockMovement": true,
       "type":"wall",
+      "alpha":1,
       "color": "#FFFF00",
       "colider": true,
       "codes": []
@@ -89,6 +93,7 @@
       "height":80,
       "blockMovement": true,
       "type":"wall",
+      "alpha":1,
       "color": "#FF8800",
       "colider": true,
       "codes": []
@@ -100,6 +105,7 @@
       "height":50,
       "blockMovement": true,
       "type":"wall",
+      "alpha":1,
       "color": "#FFFF00",
       "colider": true,
       "codes": []
@@ -111,6 +117,7 @@
       "height":50,
       "blockMovement": true,
       "type":"wall",
+      "alpha":1,
       "color": "#FFFF00",
       "colider": true,
       "codes": []
@@ -122,6 +129,7 @@
       "height":50,
       "blockMovement": true,
       "type":"wall",
+      "alpha":1,
       "color": "#FF8800",
       "colider": true,
       "codes": []
@@ -133,6 +141,7 @@
       "height":50,
       "blockMovement": true,
       "type":"wall",
+      "alpha":1,
       "color": "#FF8800",
       "colider": true,
       "codes": []
@@ -144,6 +153,7 @@
       "height":80,
       "blockMovement": true,
       "type":"wall",
+      "alpha":1,
       "color": "#FFFF00",
       "colider": true,
       "codes": []
@@ -155,6 +165,7 @@
       "height":80,
       "blockMovement": true,
       "type":"wall",
+      "alpha":1,
       "color": "#FFFF00",
       "colider": true,
       "codes": []
@@ -166,6 +177,7 @@
       "height":80,
       "blockMovement": true,
       "type":"wall",
+      "alpha":1,
       "color": "#FF8800",
       "colider": true,
       "codes": []
@@ -176,6 +188,7 @@
       "width": 60,
       "height": 400,
       "type": "region",
+      "alpha": 0.4,
       "color": "#00FF00",
       "colider": true,
       "codes": [{ "event": "onHitOther", "script": "endGame()" }]
