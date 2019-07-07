@@ -1210,9 +1210,6 @@
                 "fps": {
                     "type": "integer"
                 },
-                "fpsSentToPublisher": {
-                    "type": "integer"
-                },
                 "gameDefinitionID": {
                     "type": "integer"
                 },
