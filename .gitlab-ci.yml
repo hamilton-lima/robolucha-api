@@ -13,6 +13,6 @@ prod:
 dev:
   stage: build
   script:
-    - curl --max-time 900 --silent --fail -H "web-hook-token:$DEV" dev.robolucha.com:4295/api
+    - curl --max-time 900 --silent --fail -H "web-hook-token:$DEV" dev.robolucha.com:4295/dev-api
   only:
     - development
