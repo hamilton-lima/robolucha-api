@@ -451,6 +451,67 @@
                 }
             }
         },
+        "/private/classroom": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find all Classroom",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.Classroom"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "add a Classroom",
+                "parameters": [
+                    {
+                        "description": "Classroom",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.Classroom"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/private/game-definition-all": {
             "get": {
                 "security": [
@@ -944,6 +1005,29 @@
                 }
             }
         },
+        "main.Classroom": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "integer"
+                },
+                "students": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/main.Student"
+                    }
+                }
+            }
+        },
         "main.Code": {
             "type": "object",
             "properties": {
@@ -1319,6 +1403,17 @@
                     "items": {
                         "$ref": "#/definitions/main.MatchScore"
                     }
+                }
+            }
+        },
+        "main.Student": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "userID": {
+                    "type": "integer"
                 }
             }
         },

@@ -149,6 +149,8 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.GET("/game-definition-id/:id", getGameDefinitionByID)
 		privateAPI.GET("/game-definition-all", getGameDefinition)
 		privateAPI.POST("/start-tutorial-match/:name", startTutorialMatch)
+		privateAPI.GET("/classroom", getClassroom)
+		privateAPI.POST("/classroom", addClassroom)
 
 	}
 
@@ -1194,4 +1196,44 @@ func addMatchMetric(c *gin.Context) {
 	}).Debug("result")
 
 	c.JSON(http.StatusOK, "")
+}
+
+// getClassroom godoc
+// @Summary find all Classroom
+// @Accept json
+// @Produce json
+// @Success 200 200 {array} main.Classroom
+// @Security ApiKeyAuth
+// @Router /private/classroom [get]
+func getClassroom(c *gin.Context) {
+
+	result := make([]Classroom, 0)
+
+	log.WithFields(log.Fields{
+		"result": result,
+	}).Info("getClassroom")
+
+	c.JSON(http.StatusOK, result)
+}
+
+// addClassroom godoc
+// @Summary add a Classroom
+// @Accept json
+// @Produce json
+// @Param request body main.Classroom true "Classroom"
+// @Success 200 {string} string
+// @Security ApiKeyAuth
+// @Router /private/classroom [post]
+func addClassroom(c *gin.Context) {
+
+	var classroom *Classroom
+	err := c.BindJSON(&classroom)
+	if err != nil {
+		log.Info("Invalid body content on addClassroom")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	result := Classroom{}
+	c.JSON(http.StatusOK, result)
 }

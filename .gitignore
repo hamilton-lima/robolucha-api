@@ -12,3 +12,4 @@
 *.out
 tests/robolucha-api-test.db
 robolucha-api-test.db
+robolucha-api

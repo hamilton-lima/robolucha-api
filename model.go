@@ -211,3 +211,24 @@ type MatchMetric struct {
 	Players          uint       `json:"players"`
 	GameDefinitionID uint       `json:"gameDefinitionID"`
 }
+
+// Classroom definition
+type Classroom struct {
+	ID        uint       `gorm:"primary_key" json:"id,omitempty" faker:"-"`
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
+	DeletedAt *time.Time `json:"-" faker:"-"`
+	Name      string     `json:"name"`
+	Code      string     `json:"code"`
+	Owner     uint       `json:"owner,omitempty"`
+	Students  []Student  `gorm:"many2many:classroom_students" json:"students"`
+}
+
+// Student definition
+type Student struct {
+	ID        uint       `gorm:"primary_key" json:"id,omitempty" faker:"-"`
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
+	DeletedAt *time.Time `json:"-" faker:"-"`
+	UserID    uint       `json:"userID,omitempty"`
+}

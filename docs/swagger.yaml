@@ -19,6 +19,21 @@ definitions:
       type:
         type: string
     type: object
+  main.Classroom:
+    properties:
+      code:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      owner:
+        type: integer
+      students:
+        items:
+          $ref: '#/definitions/main.Student'
+        type: array
+    type: object
   main.Code:
     properties:
       event:
@@ -266,6 +281,13 @@ definitions:
         items:
           $ref: '#/definitions/main.MatchScore'
         type: array
+    type: object
+  main.Student:
+    properties:
+      id:
+        type: integer
+      userID:
+        type: integer
     type: object
   main.UpdateLuchadorResponse:
     properties:
@@ -573,6 +595,43 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: create Match
+  /private/classroom:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.Classroom'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: find all Classroom
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Classroom
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.Classroom'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: add a Classroom
   /private/game-definition-all:
     get:
       consumes:
