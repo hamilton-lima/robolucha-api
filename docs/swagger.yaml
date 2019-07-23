@@ -21,13 +21,13 @@ definitions:
     type: object
   main.Classroom:
     properties:
-      code:
+      accessCode:
         type: string
       id:
         type: integer
       name:
         type: string
-      owner:
+      ownerID:
         type: integer
       students:
         items:
@@ -628,7 +628,8 @@ paths:
         "200":
           description: OK
           schema:
-            type: string
+            $ref: '#/definitions/main.Classroom'
+            type: object
       security:
       - ApiKeyAuth: []
       summary: add a Classroom

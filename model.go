@@ -214,14 +214,14 @@ type MatchMetric struct {
 
 // Classroom definition
 type Classroom struct {
-	ID        uint       `gorm:"primary_key" json:"id,omitempty" faker:"-"`
-	CreatedAt time.Time  `json:"-"`
-	UpdatedAt time.Time  `json:"-"`
-	DeletedAt *time.Time `json:"-" faker:"-"`
-	Name      string     `json:"name"`
-	Code      string     `json:"code"`
-	Owner     uint       `json:"owner,omitempty"`
-	Students  []Student  `gorm:"many2many:classroom_students" json:"students"`
+	ID         uint       `gorm:"primary_key" json:"id,omitempty" faker:"-"`
+	CreatedAt  time.Time  `json:"-"`
+	UpdatedAt  time.Time  `json:"-"`
+	DeletedAt  *time.Time `json:"-" faker:"-"`
+	Name       string     `json:"name"`
+	AccessCode string     `json:"accessCode" gorm:"not null;unique_index"`
+	OwnerID    uint       `json:"ownerID,omitempty"`
+	Students   []Student  `gorm:"many2many:classroom_students" json:"students"`
 }
 
 // Student definition

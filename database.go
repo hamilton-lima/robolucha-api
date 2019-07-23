@@ -117,6 +117,8 @@ func NewDataSource(config *DBconfig) *DataSource {
 	db.AutoMigrate(&GameComponent{})
 	db.AutoMigrate(&GameDefinition{})
 	db.AutoMigrate(&MatchMetric{})
+	db.AutoMigrate(&Classroom{})
+	db.AutoMigrate(&Student{})
 
 	secret := os.Getenv("API_SECRET")
 
@@ -881,4 +883,52 @@ func (ds *DataSource) addMatchMetric(m *MatchMetric) *MatchMetric {
 	}).Debug("addMatchMetric")
 
 	return &metric
+}
+
+// TODO: remove this
+var accessCodeCounter int64 = 0
+
+func (ds *DataSource) addClassroom(c *Classroom) *Classroom {
+
+	now := fmt.Sprintf("%X", time.Now().Unix()+accessCodeCounter)
+	accessCodeCounter = accessCodeCounter + 1
+
+	classroom := Classroom{
+		Name:       c.Name,
+		OwnerID:    c.OwnerID,
+		AccessCode: now,
+	}
+
+	log.WithFields(log.Fields{
+		"classroom": classroom,
+	}).Debug("addClassroom")
+
+	ds.db.Create(&classroom)
+	classroom.Students = make([]Student, 0)
+
+	log.WithFields(log.Fields{
+		"classroom": classroom,
+	}).Debug("after addClassroom")
+
+	return &classroom
+}
+
+func (ds *DataSource) findAllClassroom(user *User) *[]Classroom {
+	var result []Classroom
+
+	ds.db.
+		Preload("Students").
+		Where(&Classroom{OwnerID: user.ID}).
+		Order("name").
+		Find(&result)
+
+	log.WithFields(log.Fields{
+		"classrooms": result,
+	}).Debug("findAllClassroom")
+
+	log.WithFields(log.Fields{
+		"classrooms": result,
+	}).Debug("findAllClassroom")
+
+	return &result
 }
