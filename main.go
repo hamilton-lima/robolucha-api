@@ -1206,8 +1206,10 @@ func addMatchMetric(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /private/classroom [get]
 func getClassroom(c *gin.Context) {
+	val, _ := c.Get("user")
+	user := val.(*User)
 
-	result := make([]Classroom, 0)
+	result := dataSource.findAllClassroom(user)
 
 	log.WithFields(log.Fields{
 		"result": result,

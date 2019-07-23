@@ -61,3 +61,46 @@ func TestAddClassroom(t *testing.T) {
 	assert.True(t, response.OwnerID == 1)
 
 }
+
+func AddTestClassroom(t *testing.T, name string) {
+	classroom := Classroom{Name: name}
+	plan, _ := json.Marshal(classroom)
+	body := string(plan)
+
+	log.WithFields(log.Fields{
+		"classroom": classroom.Name,
+	}).Debug("classroom before save")
+
+	w := test.PerformRequestNoAuth(router, "POST", "/private/classroom", body)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestGetClassroom(t *testing.T) {
+	SetupClassroom(t)
+	defer dataSource.db.Close()
+
+	AddTestClassroom(t, "A")
+	AddTestClassroom(t, "B")
+	AddTestClassroom(t, "C")
+
+	w := test.PerformRequestNoAuth(router, "GET", "/private/classroom", "")
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response []Classroom
+	json.Unmarshal(w.Body.Bytes(), &response)
+
+	log.WithFields(log.Fields{
+		"response": response,
+	}).Debug("after create")
+
+	assert.Equal(t, response[0].Name, "A")
+	assert.Equal(t, response[1].Name, "B")
+	assert.Equal(t, response[2].Name, "C")
+
+	for _, classroom := range response {
+		assert.True(t, len(classroom.AccessCode) > 0)
+		assert.True(t, len(classroom.Students) == 0)
+		assert.True(t, classroom.OwnerID == 1)
+	}
+
+}
