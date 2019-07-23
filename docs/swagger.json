@@ -506,7 +506,8 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "type": "object",
+                            "$ref": "#/definitions/main.Classroom"
                         }
                     }
                 }
@@ -1008,7 +1009,7 @@
         "main.Classroom": {
             "type": "object",
             "properties": {
-                "code": {
+                "accessCode": {
                     "type": "string"
                 },
                 "id": {
@@ -1017,7 +1018,7 @@
                 "name": {
                     "type": "string"
                 },
-                "owner": {
+                "ownerID": {
                     "type": "integer"
                 },
                 "students": {

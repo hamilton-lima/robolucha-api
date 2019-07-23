@@ -117,6 +117,7 @@ func NewDataSource(config *DBconfig) *DataSource {
 	db.AutoMigrate(&GameComponent{})
 	db.AutoMigrate(&GameDefinition{})
 	db.AutoMigrate(&MatchMetric{})
+	db.AutoMigrate(&Classroom{})
 
 	secret := os.Getenv("API_SECRET")
 
@@ -881,4 +882,27 @@ func (ds *DataSource) addMatchMetric(m *MatchMetric) *MatchMetric {
 	}).Debug("addMatchMetric")
 
 	return &metric
+}
+
+func (ds *DataSource) addClassroom(c *Classroom) *Classroom {
+
+	now := fmt.Sprintf("%X", time.Now().Unix())
+
+	classroom := Classroom{
+		Name:       c.Name,
+		OwnerID:    c.OwnerID,
+		AccessCode: now,
+	}
+
+	log.WithFields(log.Fields{
+		"classroom": classroom,
+	}).Warn("addClassroom")
+
+	ds.db.Create(&classroom)
+
+	log.WithFields(log.Fields{
+		"classroom": classroom,
+	}).Warn("after addClassroom")
+
+	return &classroom
 }

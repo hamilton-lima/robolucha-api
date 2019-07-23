@@ -1221,10 +1221,12 @@ func getClassroom(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body main.Classroom true "Classroom"
-// @Success 200 {string} string
+// @Success 200 {object} main.Classroom
 // @Security ApiKeyAuth
 // @Router /private/classroom [post]
 func addClassroom(c *gin.Context) {
+	val, _ := c.Get("user")
+	user := val.(*User)
 
 	var classroom *Classroom
 	err := c.BindJSON(&classroom)
@@ -1234,6 +1236,20 @@ func addClassroom(c *gin.Context) {
 		return
 	}
 
-	result := Classroom{}
-	c.JSON(http.StatusOK, result)
+	classroom.OwnerID = user.ID
+
+	result := dataSource.addClassroom(classroom)
+	if result == nil {
+		log.WithFields(log.Fields{
+			"classroom": classroom,
+		}).Error("Error saving classroom")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"classroom": classroom,
+	}).Warn("result (1)")
+
+	c.JSON(http.StatusOK, classroom)
 }
