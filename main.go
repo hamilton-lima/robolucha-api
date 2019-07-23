@@ -1248,8 +1248,8 @@ func addClassroom(c *gin.Context) {
 	}
 
 	log.WithFields(log.Fields{
-		"classroom": classroom,
-	}).Warn("result (1)")
+		"classroom": result,
+	}).Debug("results")
 
-	c.JSON(http.StatusOK, classroom)
+	c.JSON(http.StatusOK, result)
 }

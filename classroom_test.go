@@ -53,10 +53,11 @@ func TestAddClassroom(t *testing.T) {
 	log.WithFields(log.Fields{
 		"response": response,
 		"body":     string(w.Body.Bytes()),
-	}).Warn("after create")
+	}).Debug("after create")
 
 	assert.Equal(t, response.Name, "testClassroom")
 	assert.True(t, len(response.AccessCode) > 0)
-	assert.True(t, response.OwnerID > 0)
+	assert.True(t, len(response.Students) == 0)
+	assert.True(t, response.OwnerID == 1)
 
 }

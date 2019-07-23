@@ -896,13 +896,14 @@ func (ds *DataSource) addClassroom(c *Classroom) *Classroom {
 
 	log.WithFields(log.Fields{
 		"classroom": classroom,
-	}).Warn("addClassroom")
+	}).Debug("addClassroom")
 
 	ds.db.Create(&classroom)
+	classroom.Students = make([]Student, 0)
 
 	log.WithFields(log.Fields{
 		"classroom": classroom,
-	}).Warn("after addClassroom")
+	}).Debug("after addClassroom")
 
 	return &classroom
 }
