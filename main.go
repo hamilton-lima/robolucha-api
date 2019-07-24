@@ -151,6 +151,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.POST("/start-tutorial-match/:name", startTutorialMatch)
 		privateAPI.GET("/classroom", getClassroom)
 		privateAPI.POST("/classroom", addClassroom)
+		privateAPI.POST("/join-classroom/:accessCode", joinClassroom)
 
 	}
 
@@ -1254,4 +1255,31 @@ func addClassroom(c *gin.Context) {
 	}).Debug("results")
 
 	c.JSON(http.StatusOK, result)
+}
+
+// joinClassroom godoc
+// @Summary join a classroom
+// @Accept json
+// @Produce json
+// @Param accessCode path string true "classroom access code"
+// @Success 200 200 {object} main.Classroom
+// @Security ApiKeyAuth
+// @Router /internal/join-classroom/{accessCode} [post]
+func joinClassroom(c *gin.Context) {
+
+	accessCode := c.Param("accessCode")
+	val, _ := c.Get("user")
+	user := val.(*User)
+
+	log.WithFields(log.Fields{
+		"accessCode": accessCode,
+	}).Info("joinClassroom")
+
+	classroom := dataSource.joinClassroom(user, accessCode)
+
+	log.WithFields(log.Fields{
+		"classroom": classroom,
+	}).Info("classroom")
+
+	c.JSON(http.StatusOK, classroom)
 }

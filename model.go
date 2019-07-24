@@ -230,5 +230,5 @@ type Student struct {
 	CreatedAt time.Time  `json:"-"`
 	UpdatedAt time.Time  `json:"-"`
 	DeletedAt *time.Time `json:"-" faker:"-"`
-	UserID    uint       `json:"userID,omitempty"`
+	UserID    uint       `json:"userID,omitempty" gorm:"not null;unique_index"`
 }
