@@ -479,6 +479,27 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: find a game definition
+  /internal/join-classroom/{accessCode}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: classroom access code
+        in: path
+        name: accessCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Classroom'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: join a classroom
   /internal/luchador:
     post:
       consumes:

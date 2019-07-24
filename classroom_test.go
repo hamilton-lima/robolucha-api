@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"testing"
@@ -102,5 +103,41 @@ func TestGetClassroom(t *testing.T) {
 		assert.True(t, len(classroom.Students) == 0)
 		assert.True(t, classroom.OwnerID == 1)
 	}
+
+}
+
+func TestJoinClassroom(t *testing.T) {
+	SetupClassroom(t)
+	defer dataSource.db.Close()
+
+	AddTestClassroom(t, "A")
+	AddTestClassroom(t, "B")
+	AddTestClassroom(t, "C")
+
+	w := test.PerformRequestNoAuth(router, "GET", "/private/classroom", "")
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response []Classroom
+	json.Unmarshal(w.Body.Bytes(), &response)
+
+	url := fmt.Sprintf("/private/join-classroom/%v", response[1].AccessCode)
+
+	w = test.PerformRequestNoAuth(router, "POST", url, "")
+	assert.Equal(t, http.StatusOK, w.Code)
+	var joinedClassroom Classroom
+	json.Unmarshal(w.Body.Bytes(), &joinedClassroom)
+
+	assert.Equal(t, joinedClassroom.Name, "B")
+
+	w = test.PerformRequestNoAuth(router, "GET", "/private/classroom", "")
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var afterJoined []Classroom
+	json.Unmarshal(w.Body.Bytes(), &afterJoined)
+
+	assert.True(t, len(afterJoined[0].Students) == 0)
+	assert.True(t, len(afterJoined[1].Students) == 1)
+	assert.True(t, len(afterJoined[2].Students) == 0)
+	assert.True(t, afterJoined[1].Students[0].UserID == 1)
 
 }

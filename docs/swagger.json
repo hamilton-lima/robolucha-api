@@ -261,6 +261,40 @@
                 }
             }
         },
+        "/internal/join-classroom/{accessCode}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "join a classroom",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "classroom access code",
+                        "name": "accessCode",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/main.Classroom"
+                        }
+                    }
+                }
+            }
+        },
         "/internal/luchador": {
             "post": {
                 "security": [
