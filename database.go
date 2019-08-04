@@ -970,3 +970,57 @@ func (ds *DataSource) joinClassroom(user *User, accessCode string) *Classroom {
 
 	return &result
 }
+
+func (ds *DataSource) findAvailableMatch(user *User) *[]AvailableMatch {
+
+	var availableMatch AvailableMatch
+
+	db.Model(&availableMatch).Association("Languages").Find(&languages)
+
+
+
+	var classrooms []int
+
+	var allClassrooms []Classroom
+	ds.db.
+		Preload("Students").
+		Find(&allClassrooms)
+
+	for i, classroom range classrooms {
+		result = append(result)
+		}
+	
+	if ds.db.Preload("Students").
+		Where(&Classroom{AccessCode: accessCode}).
+		First(&result).
+		RecordNotFound() {
+
+		log.WithFields(log.Fields{
+			"accessCode": accessCode,
+		}).Info("classroom not found")
+
+		return nil
+	}
+
+	if ds.db.
+		Where(&student).
+		First(&student).
+		RecordNotFound() {
+
+		log.WithFields(log.Fields{
+			"userID": user.ID,
+		}).Info("student not found will create")
+
+		ds.db.Create(&student)
+	}
+
+	result.Students = append(result.Students, student)
+	ds.db.Save(&result)
+
+	log.WithFields(log.Fields{
+		"classroom": result,
+	}).Debug("joinClassroom")
+
+	return &result
+}
+

@@ -31,7 +31,8 @@ type UserSetting struct {
 	LastOption string     `json:"lastOption"`
 }
 
-// ActiveMatch definition
+// ActiveMatch definition, describes the result of findActiveMatches
+// mixing Tutorial and PVP matches
 type ActiveMatch struct {
 	MatchID     uint      `json:"matchID"`
 	Name        string    `json:"name"`
@@ -231,4 +232,15 @@ type Student struct {
 	UpdatedAt time.Time  `json:"-"`
 	DeletedAt *time.Time `json:"-" faker:"-"`
 	UserID    uint       `json:"userID,omitempty" gorm:"not null;unique_index"`
+}
+
+// AvailableMatch definition
+type AvailableMatch struct {
+	ID               uint       `gorm:"primary_key" json:"id"`
+	CreatedAt        time.Time  `json:"-"`
+	UpdatedAt        time.Time  `json:"-"`
+	DeletedAt        *time.Time `json:"-" faker:"-"`
+	Name             string     `json:"name"`
+	GameDefinitionID uint       `json:"gameDefinitionID"`
+	Classroom        *Classroom `gorm:"many2many:available_match_classrooms" json:"classroom"`
 }
