@@ -1,6 +1,6 @@
 basePath: /
 definitions:
-  main.ActiveMatch:
+  model.ActiveMatch:
     properties:
       description:
         type: string
@@ -19,7 +19,7 @@ definitions:
       type:
         type: string
     type: object
-  main.Classroom:
+  model.Classroom:
     properties:
       accessCode:
         type: string
@@ -31,10 +31,10 @@ definitions:
         type: integer
       students:
         items:
-          $ref: '#/definitions/main.Student'
+          $ref: '#/definitions/model.Student'
         type: array
     type: object
-  main.Code:
+  model.Code:
     properties:
       event:
         type: string
@@ -47,7 +47,7 @@ definitions:
       script:
         type: string
     type: object
-  main.Config:
+  model.Config:
     properties:
       id:
         type: integer
@@ -56,22 +56,22 @@ definitions:
       value:
         type: string
     type: object
-  main.FindLuchadorWithGamedefinition:
+  model.FindLuchadorWithGamedefinition:
     properties:
       gameDefinitionID:
         type: integer
       luchadorID:
         type: integer
     type: object
-  main.GameComponent:
+  model.GameComponent:
     properties:
       codes:
         items:
-          $ref: '#/definitions/main.Code'
+          $ref: '#/definitions/model.Code'
         type: array
       configs:
         items:
-          $ref: '#/definitions/main.Config'
+          $ref: '#/definitions/model.Config'
         type: array
       gameDefinition:
         type: integer
@@ -82,7 +82,7 @@ definitions:
       userID:
         type: integer
     type: object
-  main.GameDefinition:
+  model.GameDefinition:
     properties:
       arenaHeight:
         type: integer
@@ -94,7 +94,7 @@ definitions:
         type: integer
       codes:
         items:
-          $ref: '#/definitions/main.Code'
+          $ref: '#/definitions/model.Code'
         type: array
       description:
         type: string
@@ -108,7 +108,7 @@ definitions:
         type: integer
       gameComponents:
         items:
-          $ref: '#/definitions/main.GameComponent'
+          $ref: '#/definitions/model.GameComponent'
         type: array
       id:
         type: integer
@@ -166,13 +166,13 @@ definitions:
         type: integer
       sceneComponents:
         items:
-          $ref: '#/definitions/main.SceneComponent'
+          $ref: '#/definitions/model.SceneComponent'
         type: array
       sortOrder:
         type: integer
       suggestedCodes:
         items:
-          $ref: '#/definitions/main.Code'
+          $ref: '#/definitions/model.Code'
         type: array
       turnGunSpeed:
         type: integer
@@ -181,14 +181,14 @@ definitions:
       type:
         type: string
     type: object
-  main.JoinMatch:
+  model.JoinMatch:
     properties:
       luchadorID:
         type: integer
       matchID:
         type: integer
     type: object
-  main.Match:
+  model.Match:
     properties:
       gameDefinitionID:
         type: integer
@@ -198,14 +198,14 @@ definitions:
         type: string
       participants:
         items:
-          $ref: '#/definitions/main.GameComponent'
+          $ref: '#/definitions/model.GameComponent'
         type: array
       timeEnd:
         type: string
       timeStart:
         type: string
     type: object
-  main.MatchMetric:
+  model.MatchMetric:
     properties:
       fps:
         type: integer
@@ -218,14 +218,14 @@ definitions:
       players:
         type: integer
     type: object
-  main.MatchParticipant:
+  model.MatchParticipant:
     properties:
       luchadorID:
         type: integer
       matchID:
         type: integer
     type: object
-  main.MatchScore:
+  model.MatchScore:
     properties:
       deaths:
         type: integer
@@ -240,7 +240,7 @@ definitions:
       score:
         type: integer
     type: object
-  main.SceneComponent:
+  model.SceneComponent:
     properties:
       alpha:
         type: number
@@ -248,7 +248,7 @@ definitions:
         type: boolean
       codes:
         items:
-          $ref: '#/definitions/main.Code'
+          $ref: '#/definitions/model.Code'
         type: array
       colider:
         type: boolean
@@ -275,38 +275,38 @@ definitions:
       "y":
         type: integer
     type: object
-  main.ScoreList:
+  model.ScoreList:
     properties:
       scores:
         items:
-          $ref: '#/definitions/main.MatchScore'
+          $ref: '#/definitions/model.MatchScore'
         type: array
     type: object
-  main.Student:
+  model.Student:
     properties:
       id:
         type: integer
       userID:
         type: integer
     type: object
-  main.UpdateLuchadorResponse:
+  model.UpdateLuchadorResponse:
     properties:
       errors:
         items:
           type: string
         type: array
       luchador:
-        $ref: '#/definitions/main.GameComponent'
+        $ref: '#/definitions/model.GameComponent'
         type: object
     type: object
-  main.User:
+  model.User:
     properties:
       id:
         type: integer
       username:
         type: string
     type: object
-  main.UserSetting:
+  model.UserSetting:
     properties:
       id:
         type: integer
@@ -333,7 +333,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/main.ScoreList'
+          $ref: '#/definitions/model.ScoreList'
           type: object
       produces:
       - application/json
@@ -341,7 +341,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.MatchScore'
+            $ref: '#/definitions/model.MatchScore'
             type: object
       security:
       - ApiKeyAuth: []
@@ -356,7 +356,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/main.Match'
+          $ref: '#/definitions/model.Match'
           type: object
       produces:
       - application/json
@@ -364,7 +364,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.Match'
+            $ref: '#/definitions/model.Match'
             type: object
       security:
       - ApiKeyAuth: []
@@ -379,7 +379,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/main.GameComponent'
+          $ref: '#/definitions/model.GameComponent'
           type: object
       produces:
       - application/json
@@ -387,7 +387,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.GameComponent'
+            $ref: '#/definitions/model.GameComponent'
             type: object
       security:
       - ApiKeyAuth: []
@@ -402,7 +402,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/main.GameDefinition'
+          $ref: '#/definitions/model.GameDefinition'
           type: object
       produces:
       - application/json
@@ -410,7 +410,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.GameDefinition'
+            $ref: '#/definitions/model.GameDefinition'
             type: object
       security:
       - ApiKeyAuth: []
@@ -424,7 +424,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/main.GameDefinition'
+          $ref: '#/definitions/model.GameDefinition'
           type: object
       produces:
       - application/json
@@ -432,7 +432,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.GameDefinition'
+            $ref: '#/definitions/model.GameDefinition'
             type: object
       security:
       - ApiKeyAuth: []
@@ -453,7 +453,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.GameDefinition'
+            $ref: '#/definitions/model.GameDefinition'
             type: object
       security:
       - ApiKeyAuth: []
@@ -474,7 +474,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.GameDefinition'
+            $ref: '#/definitions/model.GameDefinition'
             type: object
       security:
       - ApiKeyAuth: []
@@ -495,7 +495,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.Classroom'
+            $ref: '#/definitions/model.Classroom'
             type: object
       security:
       - ApiKeyAuth: []
@@ -510,7 +510,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/main.FindLuchadorWithGamedefinition'
+          $ref: '#/definitions/model.FindLuchadorWithGamedefinition'
           type: object
       produces:
       - application/json
@@ -518,7 +518,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.GameComponent'
+            $ref: '#/definitions/model.GameComponent'
             type: object
       security:
       - ApiKeyAuth: []
@@ -533,7 +533,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/main.MatchMetric'
+          $ref: '#/definitions/model.MatchMetric'
           type: object
       produces:
       - application/json
@@ -555,7 +555,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/main.MatchParticipant'
+          $ref: '#/definitions/model.MatchParticipant'
           type: object
       produces:
       - application/json
@@ -563,7 +563,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.MatchParticipant'
+            $ref: '#/definitions/model.MatchParticipant'
             type: object
       security:
       - ApiKeyAuth: []
@@ -583,7 +583,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.Match'
+            $ref: '#/definitions/model.Match'
             type: object
       security:
       - ApiKeyAuth: []
@@ -611,7 +611,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.Match'
+            $ref: '#/definitions/model.Match'
             type: object
       security:
       - ApiKeyAuth: []
@@ -627,7 +627,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/main.Classroom'
+              $ref: '#/definitions/model.Classroom'
             type: array
       security:
       - ApiKeyAuth: []
@@ -641,7 +641,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/main.Classroom'
+          $ref: '#/definitions/model.Classroom'
           type: object
       produces:
       - application/json
@@ -649,7 +649,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.Classroom'
+            $ref: '#/definitions/model.Classroom'
             type: object
       security:
       - ApiKeyAuth: []
@@ -665,7 +665,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/main.GameDefinition'
+              $ref: '#/definitions/model.GameDefinition'
             type: array
       security:
       - ApiKeyAuth: []
@@ -686,7 +686,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.GameDefinition'
+            $ref: '#/definitions/model.GameDefinition'
             type: object
       security:
       - ApiKeyAuth: []
@@ -701,7 +701,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.User'
+            $ref: '#/definitions/model.User'
             type: object
       security:
       - ApiKeyAuth: []
@@ -716,7 +716,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/main.JoinMatch'
+          $ref: '#/definitions/model.JoinMatch'
           type: object
       produces:
       - application/json
@@ -724,7 +724,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.Match'
+            $ref: '#/definitions/model.Match'
             type: object
       security:
       - ApiKeyAuth: []
@@ -739,7 +739,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.GameComponent'
+            $ref: '#/definitions/model.GameComponent'
             type: object
       security:
       - ApiKeyAuth: []
@@ -753,7 +753,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/main.GameComponent'
+          $ref: '#/definitions/model.GameComponent'
           type: object
       produces:
       - application/json
@@ -761,7 +761,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.UpdateLuchadorResponse'
+            $ref: '#/definitions/model.UpdateLuchadorResponse'
             type: object
       security:
       - ApiKeyAuth: []
@@ -783,7 +783,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/main.Config'
+              $ref: '#/definitions/model.Config'
             type: array
       security:
       - ApiKeyAuth: []
@@ -799,7 +799,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/main.Config'
+              $ref: '#/definitions/model.Config'
             type: array
       security:
       - ApiKeyAuth: []
@@ -815,7 +815,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/main.ActiveMatch'
+              $ref: '#/definitions/model.ActiveMatch'
             type: array
       security:
       - ApiKeyAuth: []
@@ -836,7 +836,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/main.GameComponent'
+              $ref: '#/definitions/model.GameComponent'
             type: array
       security:
       - ApiKeyAuth: []
@@ -856,7 +856,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.Match'
+            $ref: '#/definitions/model.Match'
             type: object
       security:
       - ApiKeyAuth: []
@@ -877,7 +877,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.JoinMatch'
+            $ref: '#/definitions/model.JoinMatch'
             type: object
       security:
       - ApiKeyAuth: []
@@ -893,7 +893,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/main.GameDefinition'
+              $ref: '#/definitions/model.GameDefinition'
             type: array
       security:
       - ApiKeyAuth: []
@@ -908,7 +908,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.UserSetting'
+            $ref: '#/definitions/model.UserSetting'
             type: object
       security:
       - ApiKeyAuth: []
@@ -922,7 +922,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/main.UserSetting'
+          $ref: '#/definitions/model.UserSetting'
           type: object
       produces:
       - application/json
@@ -930,7 +930,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.UserSetting'
+            $ref: '#/definitions/model.UserSetting'
             type: object
       security:
       - ApiKeyAuth: []

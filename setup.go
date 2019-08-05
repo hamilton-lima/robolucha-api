@@ -8,6 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	_ "gitlab.com/robolucha/robolucha-api/docs"
+	"gitlab.com/robolucha/robolucha-api/model"
 )
 
 func SetupGameDefinitionFromFolder(folderName string) {
@@ -36,6 +37,7 @@ func SetupGameDefinitionFromFolder(folderName string) {
 
 }
 
+// CreateGameDefinition definition
 func CreateGameDefinition(fileName string) {
 	bytes, err := ioutil.ReadFile(fileName)
 	if err != nil {
@@ -52,7 +54,7 @@ func CreateGameDefinition(fileName string) {
 		"filename":    fileName,
 	}).Debug("Loading gamedefinition")
 
-	var gameDefinition GameDefinition
+	var gameDefinition model.GameDefinition
 	json.Unmarshal(bytes, &gameDefinition)
 
 	foundByName := dataSource.findGameDefinitionByName(gameDefinition.Name)

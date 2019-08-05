@@ -10,6 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/test"
 )
 
@@ -36,7 +37,7 @@ func SetupClassroom(t *testing.T) {
 func TestAddClassroom(t *testing.T) {
 	SetupClassroom(t)
 	defer dataSource.db.Close()
-	classroom := Classroom{Name: "testClassroom"}
+	classroom := model.Classroom{Name: "testClassroom"}
 
 	plan, _ := json.Marshal(classroom)
 	body := string(plan)
@@ -48,7 +49,7 @@ func TestAddClassroom(t *testing.T) {
 	w := test.PerformRequestNoAuth(router, "POST", "/private/classroom", body)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var response Classroom
+	var response model.Classroom
 	json.Unmarshal(w.Body.Bytes(), &response)
 
 	log.WithFields(log.Fields{
@@ -64,7 +65,7 @@ func TestAddClassroom(t *testing.T) {
 }
 
 func AddTestClassroom(t *testing.T, name string) {
-	classroom := Classroom{Name: name}
+	classroom := model.Classroom{Name: name}
 	plan, _ := json.Marshal(classroom)
 	body := string(plan)
 
@@ -87,7 +88,7 @@ func TestGetClassroom(t *testing.T) {
 	w := test.PerformRequestNoAuth(router, "GET", "/private/classroom", "")
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var response []Classroom
+	var response []model.Classroom
 	json.Unmarshal(w.Body.Bytes(), &response)
 
 	log.WithFields(log.Fields{
@@ -117,14 +118,14 @@ func TestJoinClassroom(t *testing.T) {
 	w := test.PerformRequestNoAuth(router, "GET", "/private/classroom", "")
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var response []Classroom
+	var response []model.Classroom
 	json.Unmarshal(w.Body.Bytes(), &response)
 
 	url := fmt.Sprintf("/private/join-classroom/%v", response[1].AccessCode)
 
 	w = test.PerformRequestNoAuth(router, "POST", url, "")
 	assert.Equal(t, http.StatusOK, w.Code)
-	var joinedClassroom Classroom
+	var joinedClassroom model.Classroom
 	json.Unmarshal(w.Body.Bytes(), &joinedClassroom)
 
 	assert.Equal(t, joinedClassroom.Name, "B")
@@ -132,7 +133,7 @@ func TestJoinClassroom(t *testing.T) {
 	w = test.PerformRequestNoAuth(router, "GET", "/private/classroom", "")
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var afterJoined []Classroom
+	var afterJoined []model.Classroom
 	json.Unmarshal(w.Body.Bytes(), &afterJoined)
 
 	assert.True(t, len(afterJoined[0].Students) == 0)

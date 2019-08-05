@@ -32,7 +32,7 @@
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.ScoreList"
+                            "$ref": "#/definitions/model.ScoreList"
                         }
                     }
                 ],
@@ -41,7 +41,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.MatchScore"
+                            "$ref": "#/definitions/model.MatchScore"
                         }
                     }
                 }
@@ -69,7 +69,7 @@
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.Match"
+                            "$ref": "#/definitions/model.Match"
                         }
                     }
                 ],
@@ -78,7 +78,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.Match"
+                            "$ref": "#/definitions/model.Match"
                         }
                     }
                 }
@@ -106,7 +106,7 @@
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.GameComponent"
+                            "$ref": "#/definitions/model.GameComponent"
                         }
                     }
                 ],
@@ -115,7 +115,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.GameComponent"
+                            "$ref": "#/definitions/model.GameComponent"
                         }
                     }
                 }
@@ -143,7 +143,7 @@
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.GameDefinition"
+                            "$ref": "#/definitions/model.GameDefinition"
                         }
                     }
                 ],
@@ -152,7 +152,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.GameDefinition"
+                            "$ref": "#/definitions/model.GameDefinition"
                         }
                     }
                 }
@@ -178,7 +178,7 @@
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.GameDefinition"
+                            "$ref": "#/definitions/model.GameDefinition"
                         }
                     }
                 ],
@@ -187,7 +187,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.GameDefinition"
+                            "$ref": "#/definitions/model.GameDefinition"
                         }
                     }
                 }
@@ -221,7 +221,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.GameDefinition"
+                            "$ref": "#/definitions/model.GameDefinition"
                         }
                     }
                 }
@@ -255,7 +255,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.GameDefinition"
+                            "$ref": "#/definitions/model.GameDefinition"
                         }
                     }
                 }
@@ -289,7 +289,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.Classroom"
+                            "$ref": "#/definitions/model.Classroom"
                         }
                     }
                 }
@@ -317,7 +317,7 @@
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.FindLuchadorWithGamedefinition"
+                            "$ref": "#/definitions/model.FindLuchadorWithGamedefinition"
                         }
                     }
                 ],
@@ -326,7 +326,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.GameComponent"
+                            "$ref": "#/definitions/model.GameComponent"
                         }
                     }
                 }
@@ -354,7 +354,7 @@
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.MatchMetric"
+                            "$ref": "#/definitions/model.MatchMetric"
                         }
                     }
                 ],
@@ -390,7 +390,7 @@
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.MatchParticipant"
+                            "$ref": "#/definitions/model.MatchParticipant"
                         }
                     }
                 ],
@@ -399,7 +399,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.MatchParticipant"
+                            "$ref": "#/definitions/model.MatchParticipant"
                         }
                     }
                 }
@@ -432,7 +432,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.Match"
+                            "$ref": "#/definitions/model.Match"
                         }
                     }
                 }
@@ -479,7 +479,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.Match"
+                            "$ref": "#/definitions/model.Match"
                         }
                     }
                 }
@@ -505,7 +505,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/main.Classroom"
+                                "$ref": "#/definitions/model.Classroom"
                             }
                         }
                     }
@@ -532,7 +532,7 @@
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.Classroom"
+                            "$ref": "#/definitions/model.Classroom"
                         }
                     }
                 ],
@@ -541,7 +541,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.Classroom"
+                            "$ref": "#/definitions/model.Classroom"
                         }
                     }
                 }
@@ -567,7 +567,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/main.GameDefinition"
+                                "$ref": "#/definitions/model.GameDefinition"
                             }
                         }
                     }
@@ -602,7 +602,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.GameDefinition"
+                            "$ref": "#/definitions/model.GameDefinition"
                         }
                     }
                 }
@@ -627,7 +627,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.User"
+                            "$ref": "#/definitions/model.User"
                         }
                     }
                 }
@@ -655,7 +655,7 @@
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.JoinMatch"
+                            "$ref": "#/definitions/model.JoinMatch"
                         }
                     }
                 ],
@@ -664,7 +664,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.Match"
+                            "$ref": "#/definitions/model.Match"
                         }
                     }
                 }
@@ -689,7 +689,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.GameComponent"
+                            "$ref": "#/definitions/model.GameComponent"
                         }
                     }
                 }
@@ -715,7 +715,7 @@
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.GameComponent"
+                            "$ref": "#/definitions/model.GameComponent"
                         }
                     }
                 ],
@@ -724,7 +724,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.UpdateLuchadorResponse"
+                            "$ref": "#/definitions/model.UpdateLuchadorResponse"
                         }
                     }
                 }
@@ -759,7 +759,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/main.Config"
+                                "$ref": "#/definitions/model.Config"
                             }
                         }
                     }
@@ -786,7 +786,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/main.Config"
+                                "$ref": "#/definitions/model.Config"
                             }
                         }
                     }
@@ -813,7 +813,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/main.ActiveMatch"
+                                "$ref": "#/definitions/model.ActiveMatch"
                             }
                         }
                     }
@@ -848,7 +848,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/main.GameComponent"
+                                "$ref": "#/definitions/model.GameComponent"
                             }
                         }
                     }
@@ -882,7 +882,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.Match"
+                            "$ref": "#/definitions/model.Match"
                         }
                     }
                 }
@@ -916,7 +916,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.JoinMatch"
+                            "$ref": "#/definitions/model.JoinMatch"
                         }
                     }
                 }
@@ -942,7 +942,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/main.GameDefinition"
+                                "$ref": "#/definitions/model.GameDefinition"
                             }
                         }
                     }
@@ -968,7 +968,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.UserSetting"
+                            "$ref": "#/definitions/model.UserSetting"
                         }
                     }
                 }
@@ -994,7 +994,7 @@
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.UserSetting"
+                            "$ref": "#/definitions/model.UserSetting"
                         }
                     }
                 ],
@@ -1003,7 +1003,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/main.UserSetting"
+                            "$ref": "#/definitions/model.UserSetting"
                         }
                     }
                 }
@@ -1011,7 +1011,7 @@
         }
     },
     "definitions": {
-        "main.ActiveMatch": {
+        "model.ActiveMatch": {
             "type": "object",
             "properties": {
                 "description": {
@@ -1040,7 +1040,7 @@
                 }
             }
         },
-        "main.Classroom": {
+        "model.Classroom": {
             "type": "object",
             "properties": {
                 "accessCode": {
@@ -1058,12 +1058,12 @@
                 "students": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/main.Student"
+                        "$ref": "#/definitions/model.Student"
                     }
                 }
             }
         },
-        "main.Code": {
+        "model.Code": {
             "type": "object",
             "properties": {
                 "event": {
@@ -1083,7 +1083,7 @@
                 }
             }
         },
-        "main.Config": {
+        "model.Config": {
             "type": "object",
             "properties": {
                 "id": {
@@ -1097,7 +1097,7 @@
                 }
             }
         },
-        "main.FindLuchadorWithGamedefinition": {
+        "model.FindLuchadorWithGamedefinition": {
             "type": "object",
             "properties": {
                 "gameDefinitionID": {
@@ -1108,19 +1108,19 @@
                 }
             }
         },
-        "main.GameComponent": {
+        "model.GameComponent": {
             "type": "object",
             "properties": {
                 "codes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/main.Code"
+                        "$ref": "#/definitions/model.Code"
                     }
                 },
                 "configs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/main.Config"
+                        "$ref": "#/definitions/model.Config"
                     }
                 },
                 "gameDefinition": {
@@ -1137,7 +1137,7 @@
                 }
             }
         },
-        "main.GameDefinition": {
+        "model.GameDefinition": {
             "type": "object",
             "properties": {
                 "arenaHeight": {
@@ -1155,7 +1155,7 @@
                 "codes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/main.Code"
+                        "$ref": "#/definitions/model.Code"
                     }
                 },
                 "description": {
@@ -1176,7 +1176,7 @@
                 "gameComponents": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/main.GameComponent"
+                        "$ref": "#/definitions/model.GameComponent"
                     }
                 },
                 "id": {
@@ -1263,7 +1263,7 @@
                 "sceneComponents": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/main.SceneComponent"
+                        "$ref": "#/definitions/model.SceneComponent"
                     }
                 },
                 "sortOrder": {
@@ -1272,7 +1272,7 @@
                 "suggestedCodes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/main.Code"
+                        "$ref": "#/definitions/model.Code"
                     }
                 },
                 "turnGunSpeed": {
@@ -1286,7 +1286,7 @@
                 }
             }
         },
-        "main.JoinMatch": {
+        "model.JoinMatch": {
             "type": "object",
             "properties": {
                 "luchadorID": {
@@ -1297,7 +1297,7 @@
                 }
             }
         },
-        "main.Match": {
+        "model.Match": {
             "type": "object",
             "properties": {
                 "gameDefinitionID": {
@@ -1312,7 +1312,7 @@
                 "participants": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/main.GameComponent"
+                        "$ref": "#/definitions/model.GameComponent"
                     }
                 },
                 "timeEnd": {
@@ -1323,7 +1323,7 @@
                 }
             }
         },
-        "main.MatchMetric": {
+        "model.MatchMetric": {
             "type": "object",
             "properties": {
                 "fps": {
@@ -1343,7 +1343,7 @@
                 }
             }
         },
-        "main.MatchParticipant": {
+        "model.MatchParticipant": {
             "type": "object",
             "properties": {
                 "luchadorID": {
@@ -1354,7 +1354,7 @@
                 }
             }
         },
-        "main.MatchScore": {
+        "model.MatchScore": {
             "type": "object",
             "properties": {
                 "deaths": {
@@ -1377,7 +1377,7 @@
                 }
             }
         },
-        "main.SceneComponent": {
+        "model.SceneComponent": {
             "type": "object",
             "properties": {
                 "alpha": {
@@ -1389,7 +1389,7 @@
                 "codes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/main.Code"
+                        "$ref": "#/definitions/model.Code"
                     }
                 },
                 "colider": {
@@ -1430,18 +1430,18 @@
                 }
             }
         },
-        "main.ScoreList": {
+        "model.ScoreList": {
             "type": "object",
             "properties": {
                 "scores": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/main.MatchScore"
+                        "$ref": "#/definitions/model.MatchScore"
                     }
                 }
             }
         },
-        "main.Student": {
+        "model.Student": {
             "type": "object",
             "properties": {
                 "id": {
@@ -1452,7 +1452,7 @@
                 }
             }
         },
-        "main.UpdateLuchadorResponse": {
+        "model.UpdateLuchadorResponse": {
             "type": "object",
             "properties": {
                 "errors": {
@@ -1463,11 +1463,11 @@
                 },
                 "luchador": {
                     "type": "object",
-                    "$ref": "#/definitions/main.GameComponent"
+                    "$ref": "#/definitions/model.GameComponent"
                 }
             }
         },
-        "main.User": {
+        "model.User": {
             "type": "object",
             "properties": {
                 "id": {
@@ -1478,7 +1478,7 @@
                 }
             }
         },
-        "main.UserSetting": {
+        "model.UserSetting": {
             "type": "object",
             "properties": {
                 "id": {

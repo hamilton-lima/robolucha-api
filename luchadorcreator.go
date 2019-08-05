@@ -4,6 +4,7 @@ import (
 	"math/rand"
 
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/robolucha/robolucha-api/model"
 )
 
 var maskShape = []string{
@@ -106,9 +107,9 @@ var maskShapes = map[string][]string{
 	"eyes.shape":                   eyes,
 }
 
-func randomConfig() []Config {
+func randomConfig() []model.Config {
 
-	list := []Config{}
+	list := []model.Config{}
 
 	for _, color := range maskColors {
 		randomizedColor := NMSColor{"Black", "#000000"} //placeholder
@@ -128,7 +129,7 @@ func randomConfig() []Config {
 	return list
 }
 
-func randomName(list []Config) string {
+func randomName(list []model.Config) string {
 	var primaryColor = getFromConfigList(list, "mask.primary.color.name").Value
 	var nounList = []string{
 		"Abismo", "Comando", "Perro", "Cabeza", "Gato", "Toro", "Chupacabra", "Taco", "Soldado", "Huracán", "Rey", "Pirata",
@@ -140,18 +141,18 @@ func randomName(list []Config) string {
 	return "El " + nounList[random(len(nounList))] + " " + primaryColor + " " + adjectiveList[random(len(adjectiveList))]
 }
 
-func getFromConfigList(list []Config, key string) Config {
+func getFromConfigList(list []model.Config, key string) model.Config {
 	for i := range list {
 		if list[i].Key == key {
 			// Found!
 			return list[i]
 		}
 	}
-	return Config{}
+	return model.Config{}
 }
 
-func add2ConfigList(list []Config, key string, value string) []Config {
-	return append(list, Config{Key: key, Value: value})
+func add2ConfigList(list []model.Config, key string, value string) []model.Config {
+	return append(list, model.Config{Key: key, Value: value})
 }
 
 func randomString(list []string) string {
