@@ -14,6 +14,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/robolucha/robolucha-api/model"
 	try "gopkg.in/matryer/try.v1"
 )
 
@@ -52,7 +53,7 @@ func BuildMysqlConfig() *DBconfig {
 		args:     connection}
 }
 
-// BuildMysqlConfig creates a DBconfig for Mysql based on environment variables
+// BuildSQLLiteConfig creates a DBconfig for Mysql based on environment variables
 func BuildSQLLiteConfig(fileName string) *DBconfig {
 	return &DBconfig{
 		dialect: "sqlite3",
@@ -106,19 +107,19 @@ func NewDataSource(config *DBconfig) *DataSource {
 	}
 
 	// Migrate the schema
-	db.AutoMigrate(&User{})
-	db.AutoMigrate(&Session{})
-	db.AutoMigrate(&UserSetting{})
-	db.AutoMigrate(&Match{})
-	db.AutoMigrate(&Code{})
-	db.AutoMigrate(&Config{})
-	db.AutoMigrate(&MatchScore{})
-	db.AutoMigrate(&SceneComponent{})
-	db.AutoMigrate(&GameComponent{})
-	db.AutoMigrate(&GameDefinition{})
-	db.AutoMigrate(&MatchMetric{})
-	db.AutoMigrate(&Classroom{})
-	db.AutoMigrate(&Student{})
+	db.AutoMigrate(&model.User{})
+	db.AutoMigrate(&model.Session{})
+	db.AutoMigrate(&model.UserSetting{})
+	db.AutoMigrate(&model.Match{})
+	db.AutoMigrate(&model.Code{})
+	db.AutoMigrate(&model.Config{})
+	db.AutoMigrate(&model.MatchScore{})
+	db.AutoMigrate(&model.SceneComponent{})
+	db.AutoMigrate(&model.GameComponent{})
+	db.AutoMigrate(&model.GameDefinition{})
+	db.AutoMigrate(&model.MatchMetric{})
+	db.AutoMigrate(&model.Classroom{})
+	db.AutoMigrate(&model.Student{})
 
 	secret := os.Getenv("API_SECRET")
 
@@ -133,8 +134,8 @@ func (ds *DataSource) KeepAlive() {
 	}
 }
 
-func (ds *DataSource) findUserByEmail(email string) *User {
-	var user User
+func (ds *DataSource) findUserByEmail(email string) *model.User {
+	var user model.User
 
 	if ds.db.Where("email = ?", email).First(&user).RecordNotFound() {
 		return nil
@@ -142,9 +143,9 @@ func (ds *DataSource) findUserByEmail(email string) *User {
 	return &user
 }
 
-func (ds *DataSource) findUserBySession(UUID string) *User {
-	var session Session
-	var user User
+func (ds *DataSource) findUserBySession(UUID string) *model.User {
+	var session model.Session
+	var user model.User
 
 	if ds.db.Where("UUID = ?", UUID).First(&session).RecordNotFound() {
 		return nil
@@ -158,14 +159,14 @@ func (ds *DataSource) findUserBySession(UUID string) *User {
 }
 
 // Create if doesnt exist
-func (ds *DataSource) findUserSettingByUser(user *User) *UserSetting {
-	var settings UserSetting
-	ds.db.Where(&UserSetting{UserID: user.ID}).FirstOrCreate(&settings)
+func (ds *DataSource) findUserSettingByUser(user *model.User) *model.UserSetting {
+	var settings model.UserSetting
+	ds.db.Where(&model.UserSetting{UserID: user.ID}).FirstOrCreate(&settings)
 	return &settings
 }
 
-func (ds *DataSource) updateUserSetting(settings *UserSetting) *UserSetting {
-	var current UserSetting
+func (ds *DataSource) updateUserSetting(settings *model.UserSetting) *model.UserSetting {
+	var current model.UserSetting
 	if ds.db.First(&current, settings.ID).RecordNotFound() {
 		return nil
 	}
@@ -180,9 +181,9 @@ func (ds *DataSource) updateUserSetting(settings *UserSetting) *UserSetting {
 	return &current
 }
 
-func (ds *DataSource) createUser(u User) *User {
-	user := User{Username: u.Username}
-	ds.db.Where(&User{Username: u.Username}).FirstOrCreate(&user)
+func (ds *DataSource) createUser(name string) *model.User {
+	user := model.User{Username: name}
+	ds.db.Where(&model.User{Username: name}).FirstOrCreate(&user)
 
 	log.WithFields(log.Fields{
 		"id":       user.ID,
@@ -198,8 +199,8 @@ func (ds *DataSource) createHash(key string) string {
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-func (ds *DataSource) createMatch(gameDefinitionID uint) *Match {
-	match := Match{
+func (ds *DataSource) createMatch(gameDefinitionID uint) *model.Match {
+	match := model.Match{
 		TimeStart:        time.Now(),
 		GameDefinitionID: gameDefinitionID,
 	}
@@ -214,8 +215,8 @@ func (ds *DataSource) createMatch(gameDefinitionID uint) *Match {
 	return &match
 }
 
-func (ds *DataSource) createLuchador(l *GameComponent) *GameComponent {
-	luchador := GameComponent{
+func (ds *DataSource) createLuchador(l *model.GameComponent) *model.GameComponent {
+	luchador := model.GameComponent{
 		UserID:  l.UserID,
 		Name:    l.Name,
 		Codes:   l.Codes,
@@ -231,9 +232,9 @@ func (ds *DataSource) createLuchador(l *GameComponent) *GameComponent {
 	return &luchador
 }
 
-func (ds *DataSource) findLuchador(user *User) *GameComponent {
-	var luchador GameComponent
-	if ds.db.Preload("Codes").Preload("Configs").Where(&GameComponent{UserID: user.ID}).First(&luchador).RecordNotFound() {
+func (ds *DataSource) findLuchador(user *model.User) *model.GameComponent {
+	var luchador model.GameComponent
+	if ds.db.Preload("Codes").Preload("Configs").Where(&model.GameComponent{UserID: user.ID}).First(&luchador).RecordNotFound() {
 		return nil
 	}
 
@@ -244,8 +245,8 @@ func (ds *DataSource) findLuchador(user *User) *GameComponent {
 	return &luchador
 }
 
-func (ds *DataSource) findLuchadorByIDNoPreload(id uint) *GameComponent {
-	var luchador GameComponent
+func (ds *DataSource) findLuchadorByIDNoPreload(id uint) *model.GameComponent {
+	var luchador model.GameComponent
 	if ds.db.First(&luchador, id).RecordNotFound() {
 		return nil
 	}
@@ -257,7 +258,7 @@ func (ds *DataSource) findLuchadorByIDNoPreload(id uint) *GameComponent {
 	return &luchador
 }
 
-func (ds *DataSource) updateLuchador(component *GameComponent) *GameComponent {
+func (ds *DataSource) updateLuchador(component *model.GameComponent) *model.GameComponent {
 	current := ds.findLuchadorByID(component.ID)
 	if current == nil {
 		return nil
@@ -276,7 +277,7 @@ func (ds *DataSource) updateLuchador(component *GameComponent) *GameComponent {
 	return current
 }
 
-func applyConfigChanges(original []Config, updated []Config) []Config {
+func applyConfigChanges(original []model.Config, updated []model.Config) []model.Config {
 	for i, configOriginal := range original {
 		for _, configUpdated := range updated {
 			if configOriginal.Key == configUpdated.Key {
@@ -289,9 +290,9 @@ func applyConfigChanges(original []Config, updated []Config) []Config {
 	return original
 }
 
-func (ds *DataSource) findActiveMultiplayerMatches() *[]Match {
+func (ds *DataSource) findActiveMultiplayerMatches() *[]model.Match {
 
-	var matches []Match
+	var matches []model.Match
 	ds.db.
 		Joins("left join game_definitions on matches.game_definition_id = game_definitions.id").
 		Where("game_definitions.type = ?", GAMEDEFINITION_TYPE_MULTIPLAYER).
@@ -305,9 +306,9 @@ func (ds *DataSource) findActiveMultiplayerMatches() *[]Match {
 	return &matches
 }
 
-func (ds *DataSource) findActiveMatches() *[]Match {
+func (ds *DataSource) findActiveMatches() *[]model.Match {
 
-	var matches []Match
+	var matches []model.Match
 	ds.db.Where("time_end < time_start").Order("time_start desc").Find(&matches)
 
 	log.WithFields(log.Fields{
@@ -317,10 +318,10 @@ func (ds *DataSource) findActiveMatches() *[]Match {
 	return &matches
 }
 
-func (ds *DataSource) findActiveMatchesByGameDefinitionAndParticipant(gameDefinition *GameDefinition, gameComponent *GameComponent) *Match {
+func (ds *DataSource) findActiveMatchesByGameDefinitionAndParticipant(gameDefinition *model.GameDefinition, gameComponent *model.GameComponent) *model.Match {
 
-	var matches []Match
-	ds.db.Preload("Participants").Where(&Match{GameDefinitionID: gameDefinition.ID}).Where("time_end < time_start").Find(&matches)
+	var matches []model.Match
+	ds.db.Preload("Participants").Where(&model.Match{GameDefinitionID: gameDefinition.ID}).Where("time_end < time_start").Find(&matches)
 
 	log.WithFields(log.Fields{
 		"matches": matches,
@@ -337,11 +338,11 @@ func (ds *DataSource) findActiveMatchesByGameDefinitionAndParticipant(gameDefini
 	return nil
 }
 
-func (ds *DataSource) findMaskConfig(id uint) *[]Config {
+func (ds *DataSource) findMaskConfig(id uint) *[]model.Config {
 
-	var component GameComponent
-	if ds.db.Preload("Configs").Where(&GameComponent{ID: id}).First(&component).RecordNotFound() {
-		var configs []Config
+	var component model.GameComponent
+	if ds.db.Preload("Configs").Where(&model.GameComponent{ID: id}).First(&component).RecordNotFound() {
+		var configs []model.Config
 		return &configs
 	}
 
@@ -356,10 +357,10 @@ func (ds *DataSource) findMaskConfig(id uint) *[]Config {
 	return &component.Configs
 }
 
-func (ds *DataSource) findMatch(id uint) *Match {
+func (ds *DataSource) findMatch(id uint) *model.Match {
 
-	var match Match
-	ds.db.Preload("Participants").Where(&Match{ID: id}).First(&match)
+	var match model.Match
+	ds.db.Preload("Participants").Where(&model.Match{ID: id}).First(&match)
 
 	log.WithFields(log.Fields{
 		"id":    id,
@@ -369,9 +370,9 @@ func (ds *DataSource) findMatch(id uint) *Match {
 	return &match
 }
 
-func (ds *DataSource) findLuchadorByID(luchadorID uint) *GameComponent {
-	var luchador GameComponent
-	if ds.db.Preload("Codes").Preload("Configs").Where(&GameComponent{ID: luchadorID}).First(&luchador).RecordNotFound() {
+func (ds *DataSource) findLuchadorByID(luchadorID uint) *model.GameComponent {
+	var luchador model.GameComponent
+	if ds.db.Preload("Codes").Preload("Configs").Where(&model.GameComponent{ID: luchadorID}).First(&luchador).RecordNotFound() {
 		return nil
 	}
 
@@ -382,9 +383,9 @@ func (ds *DataSource) findLuchadorByID(luchadorID uint) *GameComponent {
 	return &luchador
 }
 
-func (ds *DataSource) findLuchadorByName(name string) *GameComponent {
-	var luchador GameComponent
-	if ds.db.Where(&GameComponent{Name: name}).First(&luchador).RecordNotFound() {
+func (ds *DataSource) findLuchadorByName(name string) *model.GameComponent {
+	var luchador model.GameComponent
+	if ds.db.Where(&model.GameComponent{Name: name}).First(&luchador).RecordNotFound() {
 		return nil
 	}
 
@@ -395,9 +396,9 @@ func (ds *DataSource) findLuchadorByName(name string) *GameComponent {
 	return &luchador
 }
 
-func (ds *DataSource) findLuchadorByNamePreload(name string) *GameComponent {
-	var luchador GameComponent
-	if ds.db.Preload("Codes").Preload("Configs").Where(&GameComponent{Name: name}).First(&luchador).RecordNotFound() {
+func (ds *DataSource) findLuchadorByNamePreload(name string) *model.GameComponent {
+	var luchador model.GameComponent
+	if ds.db.Preload("Codes").Preload("Configs").Where(&model.GameComponent{Name: name}).First(&luchador).RecordNotFound() {
 		return nil
 	}
 
@@ -408,8 +409,8 @@ func (ds *DataSource) findLuchadorByNamePreload(name string) *GameComponent {
 	return &luchador
 }
 
-func (ds *DataSource) NameExist(ID uint, name string) bool {
-	var luchador GameComponent
+func (ds *DataSource) nameExist(ID uint, name string) bool {
+	var luchador model.GameComponent
 	result := !ds.db.Where("id <> ? AND name = ?", ID, name).First(&luchador).RecordNotFound()
 
 	log.WithFields(log.Fields{
@@ -420,9 +421,9 @@ func (ds *DataSource) NameExist(ID uint, name string) bool {
 	return result
 }
 
-func (ds *DataSource) addMatchParticipant(mp *MatchParticipant) *MatchParticipant {
+func (ds *DataSource) addMatchParticipant(mp *model.MatchParticipant) *model.MatchParticipant {
 
-	var match *Match
+	var match *model.Match
 	match = ds.findMatch(mp.MatchID)
 	if match == nil {
 		log.WithFields(log.Fields{
@@ -431,7 +432,7 @@ func (ds *DataSource) addMatchParticipant(mp *MatchParticipant) *MatchParticipan
 		return nil
 	}
 
-	var component *GameComponent
+	var component *model.GameComponent
 	component = ds.findLuchadorByIDNoPreload(mp.LuchadorID)
 	if component == nil {
 		log.WithFields(log.Fields{
@@ -447,14 +448,14 @@ func (ds *DataSource) addMatchParticipant(mp *MatchParticipant) *MatchParticipan
 				"luchadorID": mp.LuchadorID,
 			}).Warning("Luchador is already in the match")
 
-			return &(MatchParticipant{MatchID: mp.MatchID, LuchadorID: mp.LuchadorID})
+			return &(model.MatchParticipant{MatchID: mp.MatchID, LuchadorID: mp.LuchadorID})
 		}
 	}
 
 	match.Participants = append(match.Participants, *component)
 	ds.db.Save(&match)
 
-	matchPartipant := MatchParticipant{
+	matchPartipant := model.MatchParticipant{
 		LuchadorID: component.ID,
 		MatchID:    match.ID,
 	}
@@ -466,7 +467,7 @@ func (ds *DataSource) addMatchParticipant(mp *MatchParticipant) *MatchParticipan
 	return &matchPartipant
 }
 
-func (ds *DataSource) endMatch(match *Match) *Match {
+func (ds *DataSource) endMatch(match *model.Match) *model.Match {
 
 	ds.db.Model(&match).Update("time_end", match.TimeEnd)
 
@@ -477,12 +478,12 @@ func (ds *DataSource) endMatch(match *Match) *Match {
 	return match
 }
 
-func (ds *DataSource) findLuchadorConfigsByMatchID(id uint) *[]GameComponent {
+func (ds *DataSource) findLuchadorConfigsByMatchID(id uint) *[]model.GameComponent {
 
-	match := Match{}
+	match := model.Match{}
 	ds.db.First(&match, "id = ?", id)
 
-	var participants []GameComponent
+	var participants []model.GameComponent
 	ds.db.Model(&match).Related(&participants, "Participants").Preload("Configs")
 
 	log.WithFields(log.Fields{
@@ -494,10 +495,10 @@ func (ds *DataSource) findLuchadorConfigsByMatchID(id uint) *[]GameComponent {
 	return &participants
 }
 
-func (ds *DataSource) getMatchScoresByMatchID(id uint) *[]MatchScore {
+func (ds *DataSource) getMatchScoresByMatchID(id uint) *[]model.MatchScore {
 
-	result := []MatchScore{}
-	ds.db.Where(&MatchScore{MatchID: id}).Find(&result)
+	result := []model.MatchScore{}
+	ds.db.Where(&model.MatchScore{MatchID: id}).Find(&result)
 
 	for _, val := range result {
 		log.WithFields(log.Fields{
@@ -510,14 +511,14 @@ func (ds *DataSource) getMatchScoresByMatchID(id uint) *[]MatchScore {
 	return &result
 }
 
-func (ds *DataSource) addMatchScores(ms *ScoreList) *ScoreList {
+func (ds *DataSource) addMatchScores(ms *model.ScoreList) *model.ScoreList {
 
 	log.WithFields(log.Fields{
 		"action":    "start",
 		"scorelist": ms,
 	}).Info("addMatchScores")
 
-	var match *Match = nil
+	var match *model.Match = nil
 
 	for _, score := range ms.Scores {
 
@@ -536,7 +537,7 @@ func (ds *DataSource) addMatchScores(ms *ScoreList) *ScoreList {
 			}).Info("addMatchScores")
 		}
 
-		var component *GameComponent
+		var component *model.GameComponent
 		component = ds.findLuchadorByID(score.LuchadorID)
 		if component == nil {
 			log.WithFields(log.Fields{
@@ -550,7 +551,7 @@ func (ds *DataSource) addMatchScores(ms *ScoreList) *ScoreList {
 			"luchador": component,
 		}).Info("addMatchScores")
 
-		score := MatchScore{
+		score := model.MatchScore{
 			LuchadorID: component.ID,
 			MatchID:    match.ID,
 			Kills:      score.Kills,
@@ -574,7 +575,7 @@ func (ds *DataSource) addMatchScores(ms *ScoreList) *ScoreList {
 	return ms
 }
 
-func (ds *DataSource) updateGameDefinition(input *GameDefinition) *GameDefinition {
+func (ds *DataSource) updateGameDefinition(input *model.GameDefinition) *model.GameDefinition {
 
 	gameDefinition := ds.findGameDefinitionByName(input.Name)
 
@@ -703,11 +704,11 @@ func (ds *DataSource) updateGameDefinition(input *GameDefinition) *GameDefinitio
 
 }
 
-func (ds *DataSource) createGameDefinition(g *GameDefinition) *GameDefinition {
+func (ds *DataSource) createGameDefinition(g *model.GameDefinition) *model.GameDefinition {
 
-	gameDefinition := GameDefinition{}
+	gameDefinition := model.GameDefinition{}
 	copier.Copy(&gameDefinition, &g)
-	for n, _ := range g.GameComponents {
+	for n := range g.GameComponents {
 		g.GameComponents[n].Configs = randomConfig()
 	}
 
@@ -720,8 +721,8 @@ func (ds *DataSource) createGameDefinition(g *GameDefinition) *GameDefinition {
 	return &gameDefinition
 }
 
-func (ds *DataSource) findGameDefinition(id uint) *GameDefinition {
-	var gameDefinition GameDefinition
+func (ds *DataSource) findGameDefinition(id uint) *model.GameDefinition {
+	var gameDefinition model.GameDefinition
 
 	if ds.db.
 		Preload("GameComponents").
@@ -731,7 +732,7 @@ func (ds *DataSource) findGameDefinition(id uint) *GameDefinition {
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
-		Where(&GameDefinition{ID: id}).
+		Where(&model.GameDefinition{ID: id}).
 		First(&gameDefinition).
 		RecordNotFound() {
 
@@ -757,8 +758,8 @@ func (ds *DataSource) findGameDefinition(id uint) *GameDefinition {
 	return &gameDefinition
 }
 
-func (ds *DataSource) findGameDefinitionByName(name string) *GameDefinition {
-	var gameDefinition GameDefinition
+func (ds *DataSource) findGameDefinitionByName(name string) *model.GameDefinition {
+	var gameDefinition model.GameDefinition
 
 	if ds.db.
 		Preload("GameComponents").
@@ -768,7 +769,7 @@ func (ds *DataSource) findGameDefinitionByName(name string) *GameDefinition {
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
-		Where(&GameDefinition{Name: name}).
+		Where(&model.GameDefinition{Name: name}).
 		First(&gameDefinition).
 		RecordNotFound() {
 
@@ -795,8 +796,8 @@ func (ds *DataSource) findGameDefinitionByName(name string) *GameDefinition {
 	return &gameDefinition
 }
 
-func (ds *DataSource) findAllGameDefinition() *[]GameDefinition {
-	var gameDefinitions []GameDefinition
+func (ds *DataSource) findAllGameDefinition() *[]model.GameDefinition {
+	var gameDefinitions []model.GameDefinition
 
 	ds.db.
 		Preload("GameComponents").
@@ -813,7 +814,7 @@ func (ds *DataSource) findAllGameDefinition() *[]GameDefinition {
 		"gameDefinitions": gameDefinitions,
 	}).Debug("findTutorialGameDefinition before array checks")
 
-	for i, _ := range gameDefinitions {
+	for i := range gameDefinitions {
 		resetGameDefinitionArrays(&gameDefinitions[i])
 	}
 
@@ -824,8 +825,8 @@ func (ds *DataSource) findAllGameDefinition() *[]GameDefinition {
 	return &gameDefinitions
 }
 
-func (ds *DataSource) findTutorialGameDefinition() *[]GameDefinition {
-	var gameDefinitions []GameDefinition
+func (ds *DataSource) findTutorialGameDefinition() *[]model.GameDefinition {
+	var gameDefinitions []model.GameDefinition
 
 	ds.db.
 		Preload("GameComponents").
@@ -835,7 +836,7 @@ func (ds *DataSource) findTutorialGameDefinition() *[]GameDefinition {
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
-		Where(&GameDefinition{Type: GAMEDEFINITION_TYPE_TUTORIAL}).
+		Where(&model.GameDefinition{Type: GAMEDEFINITION_TYPE_TUTORIAL}).
 		Order("sort_order").
 		Find(&gameDefinitions)
 
@@ -854,27 +855,27 @@ func (ds *DataSource) findTutorialGameDefinition() *[]GameDefinition {
 	return &gameDefinitions
 }
 
-func resetGameDefinitionArrays(gameDefinition *GameDefinition) {
+func resetGameDefinitionArrays(gameDefinition *model.GameDefinition) {
 	if gameDefinition.GameComponents == nil {
-		gameDefinition.GameComponents = make([]GameComponent, 0)
+		gameDefinition.GameComponents = make([]model.GameComponent, 0)
 	}
 
 	if gameDefinition.SceneComponents == nil {
-		gameDefinition.SceneComponents = make([]SceneComponent, 0)
+		gameDefinition.SceneComponents = make([]model.SceneComponent, 0)
 	}
 
 	if gameDefinition.Codes == nil {
-		gameDefinition.Codes = make([]Code, 0)
+		gameDefinition.Codes = make([]model.Code, 0)
 	}
 
 	if gameDefinition.LuchadorSuggestedCodes == nil {
-		gameDefinition.LuchadorSuggestedCodes = make([]Code, 0)
+		gameDefinition.LuchadorSuggestedCodes = make([]model.Code, 0)
 	}
 }
 
-func (ds *DataSource) addMatchMetric(m *MatchMetric) *MatchMetric {
+func (ds *DataSource) addMatchMetric(m *model.MatchMetric) *model.MatchMetric {
 
-	metric := MatchMetric{}
+	metric := model.MatchMetric{}
 	copier.Copy(&metric, &m)
 	ds.db.Create(&metric)
 
@@ -886,14 +887,14 @@ func (ds *DataSource) addMatchMetric(m *MatchMetric) *MatchMetric {
 }
 
 // TODO: remove this
-var accessCodeCounter int64 = 0
+var accessCodeCounter int64
 
-func (ds *DataSource) addClassroom(c *Classroom) *Classroom {
+func (ds *DataSource) addClassroom(c *model.Classroom) *model.Classroom {
 
 	now := fmt.Sprintf("%X", time.Now().Unix()+accessCodeCounter)
 	accessCodeCounter = accessCodeCounter + 1
 
-	classroom := Classroom{
+	classroom := model.Classroom{
 		Name:       c.Name,
 		OwnerID:    c.OwnerID,
 		AccessCode: now,
@@ -904,7 +905,7 @@ func (ds *DataSource) addClassroom(c *Classroom) *Classroom {
 	}).Debug("addClassroom")
 
 	ds.db.Create(&classroom)
-	classroom.Students = make([]Student, 0)
+	classroom.Students = make([]model.Student, 0)
 
 	log.WithFields(log.Fields{
 		"classroom": classroom,
@@ -913,12 +914,12 @@ func (ds *DataSource) addClassroom(c *Classroom) *Classroom {
 	return &classroom
 }
 
-func (ds *DataSource) findAllClassroom(user *User) *[]Classroom {
-	var result []Classroom
+func (ds *DataSource) findAllClassroom(user *model.User) *[]model.Classroom {
+	var result []model.Classroom
 
 	ds.db.
 		Preload("Students").
-		Where(&Classroom{OwnerID: user.ID}).
+		Where(&model.Classroom{OwnerID: user.ID}).
 		Order("name").
 		Find(&result)
 
@@ -933,12 +934,12 @@ func (ds *DataSource) findAllClassroom(user *User) *[]Classroom {
 	return &result
 }
 
-func (ds *DataSource) joinClassroom(user *User, accessCode string) *Classroom {
-	var result Classroom
-	student := Student{UserID: user.ID}
+func (ds *DataSource) joinClassroom(user *model.User, accessCode string) *model.Classroom {
+	var result model.Classroom
+	student := model.Student{UserID: user.ID}
 
 	if ds.db.Preload("Students").
-		Where(&Classroom{AccessCode: accessCode}).
+		Where(&model.Classroom{AccessCode: accessCode}).
 		First(&result).
 		RecordNotFound() {
 
@@ -971,56 +972,53 @@ func (ds *DataSource) joinClassroom(user *User, accessCode string) *Classroom {
 	return &result
 }
 
-func (ds *DataSource) findAvailableMatch(user *User) *[]AvailableMatch {
+func (ds *DataSource) findAvailableMatch(user *model.User) *[]model.AvailableMatch {
 
-	var availableMatch AvailableMatch
+	var availableMatch []model.AvailableMatch
 
-	db.Model(&availableMatch).Association("Languages").Find(&languages)
+	// db.Model(&availableMatch).Association("Languages").Find(&languages)
 
+	// var classrooms []int
 
+	// var allClassrooms []Classroom
+	// ds.db.
+	// 	Preload("Students").
+	// 	Find(&allClassrooms)
 
-	var classrooms []int
+	// for i, classroom range classrooms {
+	// 	result = append(result)
+	// 	}
 
-	var allClassrooms []Classroom
-	ds.db.
-		Preload("Students").
-		Find(&allClassrooms)
+	// if ds.db.Preload("Students").
+	// 	Where(&Classroom{AccessCode: accessCode}).
+	// 	First(&result).
+	// 	RecordNotFound() {
 
-	for i, classroom range classrooms {
-		result = append(result)
-		}
-	
-	if ds.db.Preload("Students").
-		Where(&Classroom{AccessCode: accessCode}).
-		First(&result).
-		RecordNotFound() {
+	// 	log.WithFields(log.Fields{
+	// 		"accessCode": accessCode,
+	// 	}).Info("classroom not found")
 
-		log.WithFields(log.Fields{
-			"accessCode": accessCode,
-		}).Info("classroom not found")
+	// 	return nil
+	// }
 
-		return nil
-	}
+	// if ds.db.
+	// 	Where(&student).
+	// 	First(&student).
+	// 	RecordNotFound() {
 
-	if ds.db.
-		Where(&student).
-		First(&student).
-		RecordNotFound() {
+	// 	log.WithFields(log.Fields{
+	// 		"userID": user.ID,
+	// 	}).Info("student not found will create")
 
-		log.WithFields(log.Fields{
-			"userID": user.ID,
-		}).Info("student not found will create")
+	// 	ds.db.Create(&student)
+	// }
 
-		ds.db.Create(&student)
-	}
+	// result.Students = append(result.Students, student)
+	// ds.db.Save(&result)
 
-	result.Students = append(result.Students, student)
-	ds.db.Save(&result)
+	// log.WithFields(log.Fields{
+	// 	"classroom": result,
+	// }).Debug("joinClassroom")
 
-	log.WithFields(log.Fields{
-		"classroom": result,
-	}).Debug("joinClassroom")
-
-	return &result
+	return &availableMatch
 }
-

@@ -15,6 +15,7 @@ require (
 	github.com/jinzhu/copier v0.0.0-20180308034124-7e38e58719c3
 	github.com/jinzhu/gorm v1.9.9
 	github.com/matryer/try v0.0.0-20161228173917-9ac251b645a2 // indirect
+	github.com/mattn/go-sqlite3 v1.11.0 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/stretchr/testify v1.3.0
 	github.com/swaggo/gin-swagger v1.1.0

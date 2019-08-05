@@ -13,13 +13,14 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/test"
 )
 
 var router *gin.Engine
 var mockPublisher *test.MockPublisher
 
-func Setup(t *testing.T) *GameComponent {
+func Setup(t *testing.T) *model.GameComponent {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.WarnLevel)
@@ -42,9 +43,9 @@ func Setup(t *testing.T) *GameComponent {
 	return &luchador
 }
 
-func GetLuchador(t *testing.T) GameComponent {
+func GetLuchador(t *testing.T) model.GameComponent {
 	getLuchador := test.PerformRequestNoAuth(router, "GET", "/private/luchador", "")
-	var luchador GameComponent
+	var luchador model.GameComponent
 	json.Unmarshal(getLuchador.Body.Bytes(), &luchador)
 	return luchador
 }
@@ -63,7 +64,7 @@ func TestLuchadorUpdateDuplicatedNameSameUser(t *testing.T) {
 	w := test.PerformRequestNoAuth(router, "PUT", "/private/luchador", body2)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var response UpdateLuchadorResponse
+	var response model.UpdateLuchadorResponse
 	json.Unmarshal(w.Body.Bytes(), &response)
 
 	log.WithFields(log.Fields{
@@ -120,8 +121,8 @@ func TestLuchadorUpdateRandomMask(t *testing.T) {
 	defer dataSource.db.Close()
 
 	// assign new random Configs to update the luchador
-	var originalConfigs []Config = luchador.Configs
-	updatedConfigs := make([]Config, len(originalConfigs))
+	var originalConfigs []model.Config = luchador.Configs
+	updatedConfigs := make([]model.Config, len(originalConfigs))
 
 	for n, config := range originalConfigs {
 		updatedConfigs[n].Key = config.Key
@@ -136,7 +137,7 @@ func TestLuchadorUpdateRandomMask(t *testing.T) {
 	w := test.PerformRequestNoAuth(router, "PUT", "/private/luchador", body2)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var response UpdateLuchadorResponse
+	var response model.UpdateLuchadorResponse
 	json.Unmarshal(w.Body.Bytes(), &response)
 
 	log.WithFields(log.Fields{

@@ -7,12 +7,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/test"
 
 	log "github.com/sirupsen/logrus"
 )
 
-func UpdateLuchador(t *testing.T, router *gin.Engine, luchador *GameComponent) UpdateLuchadorResponse {
+// UpdateLuchador definition
+func UpdateLuchador(t *testing.T, router *gin.Engine, luchador *model.GameComponent) model.UpdateLuchadorResponse {
 	plan, _ := json.Marshal(luchador)
 	body := string(plan)
 
@@ -23,7 +25,7 @@ func UpdateLuchador(t *testing.T, router *gin.Engine, luchador *GameComponent) U
 	w := test.PerformRequestNoAuth(router, "PUT", "/private/luchador", body)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var response UpdateLuchadorResponse
+	var response model.UpdateLuchadorResponse
 	json.Unmarshal(w.Body.Bytes(), &response)
 
 	log.WithFields(log.Fields{
@@ -33,7 +35,8 @@ func UpdateLuchador(t *testing.T, router *gin.Engine, luchador *GameComponent) U
 	return response
 }
 
-func AssertConfigMatch(t *testing.T, a []Config, b []Config) {
+// AssertConfigMatch definition
+func AssertConfigMatch(t *testing.T, a []model.Config, b []model.Config) {
 	for _, configA := range a {
 		found := false
 		for _, configB := range b {
@@ -51,7 +54,8 @@ func AssertConfigMatch(t *testing.T, a []Config, b []Config) {
 	}
 }
 
-func CountChangesConfigMatch(t *testing.T, a []Config, b []Config) int {
+// CountChangesConfigMatch definition
+func CountChangesConfigMatch(t *testing.T, a []model.Config, b []model.Config) int {
 	counter := 0
 	for _, configA := range a {
 		found := false
