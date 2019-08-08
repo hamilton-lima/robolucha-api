@@ -120,6 +120,7 @@ func NewDataSource(config *DBconfig) *DataSource {
 	db.AutoMigrate(&model.MatchMetric{})
 	db.AutoMigrate(&model.Classroom{})
 	db.AutoMigrate(&model.Student{})
+	db.AutoMigrate(&model.AvailableMatch{})
 
 	secret := os.Getenv("API_SECRET")
 
@@ -972,53 +973,21 @@ func (ds *DataSource) joinClassroom(user *model.User, accessCode string) *model.
 	return &result
 }
 
-func (ds *DataSource) findAvailableMatch(user *model.User) *[]model.AvailableMatch {
+func (ds *DataSource) findPublicAvailableMatch() *[]model.AvailableMatch {
+	return ds.findAvailableMatchByClassroomID(0)
+}
 
-	var availableMatch []model.AvailableMatch
+func (ds *DataSource) findAvailableMatchByClassroomID(id uint) *[]model.AvailableMatch {
 
-	// db.Model(&availableMatch).Association("Languages").Find(&languages)
+	var result []model.AvailableMatch
 
-	// var classrooms []int
+	ds.db.
+		Where("classroom_id == ?", id).
+		Find(&result)
 
-	// var allClassrooms []Classroom
-	// ds.db.
-	// 	Preload("Students").
-	// 	Find(&allClassrooms)
+	log.WithFields(log.Fields{
+		"availableMatch": result,
+	}).Debug("findAvailableMatchByClassroomID")
 
-	// for i, classroom range classrooms {
-	// 	result = append(result)
-	// 	}
-
-	// if ds.db.Preload("Students").
-	// 	Where(&Classroom{AccessCode: accessCode}).
-	// 	First(&result).
-	// 	RecordNotFound() {
-
-	// 	log.WithFields(log.Fields{
-	// 		"accessCode": accessCode,
-	// 	}).Info("classroom not found")
-
-	// 	return nil
-	// }
-
-	// if ds.db.
-	// 	Where(&student).
-	// 	First(&student).
-	// 	RecordNotFound() {
-
-	// 	log.WithFields(log.Fields{
-	// 		"userID": user.ID,
-	// 	}).Info("student not found will create")
-
-	// 	ds.db.Create(&student)
-	// }
-
-	// result.Students = append(result.Students, student)
-	// ds.db.Save(&result)
-
-	// log.WithFields(log.Fields{
-	// 	"classroom": result,
-	// }).Debug("joinClassroom")
-
-	return &availableMatch
+	return &result
 }
