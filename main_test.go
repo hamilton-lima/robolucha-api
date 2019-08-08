@@ -633,3 +633,55 @@ func TestPOSTMatchMetric(t *testing.T) {
 	assert.Equal(t, metric.Players, afterSave.Players)
 	assert.Equal(t, metric.GameDefinitionID, afterSave.GameDefinitionID)
 }
+
+func TestGetPublicAvailableMatch(t *testing.T) {
+	SetupMain(t)
+	os.Remove(test.DB_NAME)
+	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
+	defer dataSource.db.Close()
+
+	// create classroom
+	classroom := model.Classroom{
+		Name: faker.Word(),
+	}
+	dataSource.db.Create(&classroom)
+
+	// create activeMatch related to the classroom
+	availableMatch := model.AvailableMatch{
+		Name:        faker.Word(),
+		ClassroomID: classroom.ID,
+	}
+	dataSource.db.Create(&availableMatch)
+
+	// create activeMatch without classroom
+	publicAvailableMatch := model.AvailableMatch{
+		Name: faker.Word(),
+	}
+	dataSource.db.Create(&publicAvailableMatch)
+
+	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
+
+	// search public available matches
+	w := test.PerformRequestNoAuth(router, "GET", "/private/available-match-public", "")
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var result []model.AvailableMatch
+	json.Unmarshal(w.Body.Bytes(), &result)
+
+	assert.Assert(t, len(result) == 1)
+	assert.Assert(t, result[0].ID == publicAvailableMatch.ID)
+	assert.Assert(t, result[0].Name == publicAvailableMatch.Name)
+
+	// search  available matches by classroom
+	url := fmt.Sprintf("/private/available-match-classroom/%v", classroom.ID)
+	w = test.PerformRequestNoAuth(router, "GET", url, "")
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var result2 []model.AvailableMatch
+	json.Unmarshal(w.Body.Bytes(), &result2)
+
+	assert.Assert(t, len(result2) == 1)
+	assert.Assert(t, result2[0].ID == availableMatch.ID)
+	assert.Assert(t, result2[0].Name == availableMatch.Name)
+
+}

@@ -147,6 +147,8 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.GET("/classroom", getClassroom)
 		privateAPI.POST("/classroom", addClassroom)
 		privateAPI.POST("/join-classroom/:accessCode", joinClassroom)
+		privateAPI.GET("/available-match-public", getPublicAvailableMatch)
+		privateAPI.GET("/available-match-classroom/:classroom", getClassroomAvailableMatch)
 
 	}
 
@@ -1275,4 +1277,52 @@ func joinClassroom(c *gin.Context) {
 	}).Info("classroom")
 
 	c.JSON(http.StatusOK, classroom)
+}
+
+// getPublicAvailableMatch godoc
+// @Summary find all public available matches
+// @Accept json
+// @Produce json
+// @Success 200 200 {array} model.AvailableMatch
+// @Security ApiKeyAuth
+// @Router /private/available-match-public [get]
+func getPublicAvailableMatch(c *gin.Context) {
+	result := dataSource.findPublicAvailableMatch()
+
+	log.WithFields(log.Fields{
+		"result": result,
+	}).Info("getPublicAvailableMatch")
+
+	c.JSON(http.StatusOK, result)
+}
+
+// getClassroomAvailableMatch godoc
+// @Summary find available matches by classroom
+// @Accept json
+// @Produce json
+// @Param id path int true "Classroom id"
+// @Success 200 200 {object} model.AvailableMatch
+// @Security ApiKeyAuth
+// @Router /private/available-match-classroom/{classroom} [get]
+func getClassroomAvailableMatch(c *gin.Context) {
+
+	id := c.Param("classroom")
+	aid, err := strconv.Atoi(id)
+	if err != nil {
+		log.Info("Invalid ID")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"id": aid,
+	}).Info("getClassroomAvailableMatch")
+
+	result := dataSource.findAvailableMatchByClassroomID(uint(aid))
+
+	log.WithFields(log.Fields{
+		"result": result,
+	}).Info("getPublicAvailableMatch")
+
+	c.JSON(http.StatusOK, result)
 }

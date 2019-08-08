@@ -242,7 +242,7 @@ type AvailableMatch struct {
 	DeletedAt        *time.Time `json:"-" faker:"-"`
 	Name             string     `json:"name"`
 	GameDefinitionID uint       `json:"gameDefinitionID"`
-	Classroom        *Classroom `gorm:"many2many:available_match_classrooms" json:"classroom"`
+	ClassroomID      uint       `json:"classroomID"`
 }
 
 //UpdateLuchadorResponse data structure

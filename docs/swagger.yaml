@@ -19,6 +19,17 @@ definitions:
       type:
         type: string
     type: object
+  model.AvailableMatch:
+    properties:
+      classroomID:
+        type: integer
+      gameDefinitionID:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   model.Classroom:
     properties:
       accessCode:
@@ -616,6 +627,43 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: create Match
+  /private/available-match-classroom/{classroom}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Classroom id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.AvailableMatch'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: find available matches by classroom
+  /private/available-match-public:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.AvailableMatch'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: find all public available matches
   /private/classroom:
     get:
       consumes:

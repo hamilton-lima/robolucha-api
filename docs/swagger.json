@@ -485,6 +485,67 @@
                 }
             }
         },
+        "/private/available-match-classroom/{classroom}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find available matches by classroom",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Classroom id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.AvailableMatch"
+                        }
+                    }
+                }
+            }
+        },
+        "/private/available-match-public": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find all public available matches",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.AvailableMatch"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/private/classroom": {
             "get": {
                 "security": [
@@ -1036,6 +1097,23 @@
                     "type": "string"
                 },
                 "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.AvailableMatch": {
+            "type": "object",
+            "properties": {
+                "classroomID": {
+                    "type": "integer"
+                },
+                "gameDefinitionID": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
                 }
             }
