@@ -137,13 +137,13 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.GET("/mask-random", getRandomMaskConfig)
 		privateAPI.PUT("/user/setting", updateUserSetting)
 		privateAPI.GET("/user/setting", findUserSetting)
-		privateAPI.GET("/match", getActiveMatches)
+		// privateAPI.GET("/match", getActiveMatches)
 		privateAPI.GET("/match-single", getMatch)
 		privateAPI.GET("/match-config", getLuchadorConfigsForCurrentMatch)
 		privateAPI.POST("/join-match", joinMatch)
 		privateAPI.GET("/game-definition-id/:id", getGameDefinitionByID)
 		privateAPI.GET("/game-definition-all", getGameDefinition)
-		privateAPI.POST("/start-tutorial-match/:name", startTutorialMatch)
+		// privateAPI.POST("/start-tutorial-match/:name", startTutorialMatch)
 		privateAPI.GET("/classroom", getClassroom)
 		privateAPI.POST("/classroom", addClassroom)
 		privateAPI.POST("/join-classroom/:accessCode", joinClassroom)
@@ -411,6 +411,9 @@ func startMatch(c *gin.Context) {
 	c.JSON(http.StatusOK, match)
 }
 
+// TODO: part of this logic will be moved to the runner to define if there is an match and if the
+// is already in that
+
 // startTutorialMatch godoc
 // @Summary create Match and publish
 // @Accept json
@@ -419,54 +422,55 @@ func startMatch(c *gin.Context) {
 // @Success 200 {object} model.JoinMatch
 // @Security ApiKeyAuth
 // @Router /private/start-tutorial-match/{name} [post]
-func startTutorialMatch(c *gin.Context) {
+// func startTutorialMatch(c *gin.Context) {
 
-	name := c.Param("name")
+// 	// TODO: remove this
+// 	name := c.Param("name")
 
-	log.WithFields(log.Fields{
-		"name": name,
-	}).Info("startTutorialMatch")
+// 	log.WithFields(log.Fields{
+// 		"name": name,
+// 	}).Info("startTutorialMatch")
 
-	gameDefinition := dataSource.findGameDefinitionByName(name)
-	if gameDefinition == nil {
-		log.Info("Invalid gamedefinition name")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
+// 	gameDefinition := dataSource.findGameDefinitionByName(name)
+// 	if gameDefinition == nil {
+// 		log.Info("Invalid gamedefinition name")
+// 		c.AbortWithStatus(http.StatusBadRequest)
+// 		return
+// 	}
 
-	user := userFromContext(c)
+// 	user := userFromContext(c)
 
-	luchador := dataSource.findLuchador(user)
-	if luchador == nil {
-		log.WithFields(log.Fields{
-			"user": user,
-		}).Error("Error getting luchador for the current user")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
+// 	luchador := dataSource.findLuchador(user)
+// 	if luchador == nil {
+// 		log.WithFields(log.Fields{
+// 			"user": user,
+// 		}).Error("Error getting luchador for the current user")
+// 		c.AbortWithStatus(http.StatusBadRequest)
+// 		return
+// 	}
 
-	match := dataSource.findActiveMatchesByGameDefinitionAndParticipant(gameDefinition, luchador)
-	// not found will create
-	if match == nil {
-		match = dataSource.createMatch(gameDefinition.ID)
-		if match == nil {
-			log.Error("Invalid Match when saving")
-			c.AbortWithStatus(http.StatusBadRequest)
-			return
-		}
-	}
+// 	match := dataSource.findActiveMatchesByGameDefinitionAndParticipant(gameDefinition, luchador)
+// 	// not found will create
+// 	if match == nil {
+// 		match = dataSource.createMatch(gameDefinition.ID)
+// 		if match == nil {
+// 			log.Error("Invalid Match when saving")
+// 			c.AbortWithStatus(http.StatusBadRequest)
+// 			return
+// 		}
+// 	}
 
-	result := model.JoinMatch{MatchID: match.ID, LuchadorID: luchador.ID}
-	// publish event to run the match
-	resultJSON, _ := json.Marshal(result)
-	publisher.Publish("start.match", string(resultJSON))
+// 	result := model.JoinMatch{MatchID: match.ID, LuchadorID: luchador.ID}
+// 	// publish event to run the match
+// 	resultJSON, _ := json.Marshal(result)
+// 	publisher.Publish("start.match", string(resultJSON))
 
-	log.WithFields(log.Fields{
-		"createMatch": result,
-	}).Info("created match")
+// 	log.WithFields(log.Fields{
+// 		"createMatch": result,
+// 	}).Info("created match")
 
-	c.JSON(http.StatusOK, result)
-}
+// 	c.JSON(http.StatusOK, result)
+// }
 
 // getUser godoc
 // @Summary find The current user information
@@ -821,6 +825,8 @@ func createGameComponent(c *gin.Context) {
 	c.JSON(http.StatusOK, luchador)
 }
 
+// TODO: remove this, this logic will be replaced by find AVAILABLE matches
+
 // getActiveMatches godoc
 // @Summary find active matches
 // @Accept json
@@ -828,50 +834,50 @@ func createGameComponent(c *gin.Context) {
 // @Success 200 {array} model.ActiveMatch
 // @Security ApiKeyAuth
 // @Router /private/match [get]
-func getActiveMatches(c *gin.Context) {
+// func getActiveMatches(c *gin.Context) {
 
-	var result []model.ActiveMatch
+// 	var result []model.ActiveMatch
 
-	// multiplayer matches
-	matches := *dataSource.findActiveMultiplayerMatches()
-	for _, match := range matches {
-		gameDefinition := dataSource.findGameDefinition(match.GameDefinitionID)
-		add := model.ActiveMatch{
-			MatchID:     match.ID,
-			Name:        gameDefinition.Name,
-			Label:       gameDefinition.Label,
-			Description: gameDefinition.Description,
-			Type:        gameDefinition.Type,
-			SortOrder:   gameDefinition.SortOrder,
-			Duration:    gameDefinition.Duration,
-			TimeStart:   match.TimeStart,
-		}
+// 	// multiplayer matches
+// 	matches := *dataSource.findActiveMultiplayerMatches()
+// 	for _, match := range matches {
+// 		gameDefinition := dataSource.findGameDefinition(match.GameDefinitionID)
+// 		add := model.ActiveMatch{
+// 			MatchID:     match.ID,
+// 			Name:        gameDefinition.Name,
+// 			Label:       gameDefinition.Label,
+// 			Description: gameDefinition.Description,
+// 			Type:        gameDefinition.Type,
+// 			SortOrder:   gameDefinition.SortOrder,
+// 			Duration:    gameDefinition.Duration,
+// 			TimeStart:   match.TimeStart,
+// 		}
 
-		result = append(result, add)
-	}
+// 		result = append(result, add)
+// 	}
 
-	// gamedefinitions
-	gameDefinitions := *dataSource.findTutorialGameDefinition()
-	for _, gameDefinition := range gameDefinitions {
-		add := model.ActiveMatch{
-			MatchID:     0,
-			Name:        gameDefinition.Name,
-			Label:       gameDefinition.Label,
-			Description: gameDefinition.Description,
-			Type:        gameDefinition.Type,
-			SortOrder:   gameDefinition.SortOrder,
-			Duration:    gameDefinition.Duration,
-		}
+// 	// gamedefinitions
+// 	gameDefinitions := *dataSource.findTutorialGameDefinition()
+// 	for _, gameDefinition := range gameDefinitions {
+// 		add := model.ActiveMatch{
+// 			MatchID:     0,
+// 			Name:        gameDefinition.Name,
+// 			Label:       gameDefinition.Label,
+// 			Description: gameDefinition.Description,
+// 			Type:        gameDefinition.Type,
+// 			SortOrder:   gameDefinition.SortOrder,
+// 			Duration:    gameDefinition.Duration,
+// 		}
 
-		result = append(result, add)
-	}
+// 		result = append(result, add)
+// 	}
 
-	log.WithFields(log.Fields{
-		"matches": result,
-	}).Info("getActiveMatches")
+// 	log.WithFields(log.Fields{
+// 		"matches": result,
+// 	}).Info("getActiveMatches")
 
-	c.JSON(http.StatusOK, &result)
-}
+// 	c.JSON(http.StatusOK, &result)
+// }
 
 // getMatchInternal godoc
 // @Summary find one match

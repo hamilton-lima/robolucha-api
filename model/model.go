@@ -44,25 +44,8 @@ type ActiveMatch struct {
 	TimeStart   time.Time `json:"timeStart"`
 }
 
-// Match definition
-type Match struct {
-	ID               uint            `gorm:"primary_key" json:"id"`
-	CreatedAt        time.Time       `json:"-"`
-	UpdatedAt        time.Time       `json:"-"`
-	DeletedAt        *time.Time      `json:"-" faker:"-"`
-	TimeStart        time.Time       `json:"timeStart"`
-	TimeEnd          time.Time       `json:"timeEnd"`
-	LastTimeAlive    time.Time       `json:"lastTimeAlive"`
-	GameDefinitionID uint            `json:"gameDefinitionID"`
-	Participants     []GameComponent `gorm:"many2many:match_participants" json:"participants"`
-}
-
-// GameDefinition definition
-type GameDefinition struct {
-	ID                            uint             `gorm:"primary_key" json:"id" faker:"-"`
-	CreatedAt                     time.Time        `json:"-"`
-	UpdatedAt                     time.Time        `json:"-"`
-	DeletedAt                     *time.Time       `json:"-" faker:"-"`
+// GameDefinitionData definition
+type GameDefinitionData struct {
 	Duration                      uint64           `json:"duration"`
 	MinParticipants               uint             `json:"minParticipants"`
 	MaxParticipants               uint             `json:"maxParticipants"`
@@ -106,6 +89,28 @@ type GameDefinition struct {
 	SceneComponents               []SceneComponent `json:"sceneComponents"`
 	Codes                         []Code           `gorm:"many2many:gamedefinition_codes" json:"codes"`
 	LuchadorSuggestedCodes        []Code           `gorm:"many2many:gamedefinition_suggestedcodes" json:"suggestedCodes"`
+}
+
+// Match definition
+type Match struct {
+	ID            uint            `gorm:"primary_key" json:"id"`
+	CreatedAt     time.Time       `json:"-"`
+	UpdatedAt     time.Time       `json:"-"`
+	DeletedAt     *time.Time      `json:"-" faker:"-"`
+	TimeStart     time.Time       `json:"timeStart"`
+	TimeEnd       time.Time       `json:"timeEnd"`
+	LastTimeAlive time.Time       `json:"lastTimeAlive"`
+	Participants  []GameComponent `gorm:"many2many:match_participants" json:"participants"`
+	GameDefinitionData
+}
+
+// GameDefinition definition
+type GameDefinition struct {
+	ID        uint       `gorm:"primary_key" json:"id" faker:"-"`
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
+	DeletedAt *time.Time `json:"-" faker:"-"`
+	GameDefinitionData
 }
 
 // SceneComponent definition

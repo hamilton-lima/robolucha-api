@@ -202,9 +202,11 @@ func (ds *DataSource) createHash(key string) string {
 
 func (ds *DataSource) createMatch(gameDefinitionID uint) *model.Match {
 	match := model.Match{
-		TimeStart:        time.Now(),
-		GameDefinitionID: gameDefinitionID,
+		TimeStart: time.Now(),
 	}
+
+	gameDefinition := ds.findGameDefinition(gameDefinitionID)
+	copier.Copy(&match, &gameDefinition)
 
 	ds.db.Create(&match)
 
@@ -319,25 +321,28 @@ func (ds *DataSource) findActiveMatches() *[]model.Match {
 	return &matches
 }
 
-func (ds *DataSource) findActiveMatchesByGameDefinitionAndParticipant(gameDefinition *model.GameDefinition, gameComponent *model.GameComponent) *model.Match {
+// TODO: part of this logic will be moved to the runner to define if there is an match and if the
+// is already in that
 
-	var matches []model.Match
-	ds.db.Preload("Participants").Where(&model.Match{GameDefinitionID: gameDefinition.ID}).Where("time_end < time_start").Find(&matches)
+// func (ds *DataSource) findActiveMatchesByGameDefinitionAndParticipant(gameDefinition *model.GameDefinition, gameComponent *model.GameComponent) *model.Match {
 
-	log.WithFields(log.Fields{
-		"matches": matches,
-	}).Info("findActiveMatchesByGameDefinitionAndParticipant")
+// 	var matches []model.Match
+// 	ds.db.Preload("Participants").Where(&model.Match{GameDefinitionID: gameDefinition.ID}).Where("time_end < time_start").Find(&matches)
 
-	for _, match := range matches {
-		for _, participant := range match.Participants {
-			if participant.ID == gameComponent.ID {
-				return &match
-			}
-		}
-	}
+// 	log.WithFields(log.Fields{
+// 		"matches": matches,
+// 	}).Info("findActiveMatchesByGameDefinitionAndParticipant")
 
-	return nil
-}
+// 	for _, match := range matches {
+// 		for _, participant := range match.Participants {
+// 			if participant.ID == gameComponent.ID {
+// 				return &match
+// 			}
+// 		}
+// 	}
+
+// 	return nil
+// }
 
 func (ds *DataSource) findMaskConfig(id uint) *[]model.Config {
 
@@ -761,6 +766,8 @@ func (ds *DataSource) findGameDefinition(id uint) *model.GameDefinition {
 
 func (ds *DataSource) findGameDefinitionByName(name string) *model.GameDefinition {
 	var gameDefinition model.GameDefinition
+	var filter model.GameDefinition
+	filter.Name = name
 
 	if ds.db.
 		Preload("GameComponents").
@@ -770,7 +777,7 @@ func (ds *DataSource) findGameDefinitionByName(name string) *model.GameDefinitio
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
-		Where(&model.GameDefinition{Name: name}).
+		Where(&filter).
 		First(&gameDefinition).
 		RecordNotFound() {
 
@@ -829,6 +836,9 @@ func (ds *DataSource) findAllGameDefinition() *[]model.GameDefinition {
 func (ds *DataSource) findTutorialGameDefinition() *[]model.GameDefinition {
 	var gameDefinitions []model.GameDefinition
 
+	var filter model.GameDefinition
+	filter.Type = GAMEDEFINITION_TYPE_TUTORIAL
+
 	ds.db.
 		Preload("GameComponents").
 		Preload("GameComponents.Codes").
@@ -837,7 +847,7 @@ func (ds *DataSource) findTutorialGameDefinition() *[]model.GameDefinition {
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
-		Where(&model.GameDefinition{Type: GAMEDEFINITION_TYPE_TUTORIAL}).
+		Where(&filter).
 		Order("sort_order").
 		Find(&gameDefinitions)
 
