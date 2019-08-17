@@ -46,15 +46,16 @@ type ActiveMatch struct {
 
 // Match definition
 type Match struct {
-	ID               uint            `gorm:"primary_key" json:"id"`
-	CreatedAt        time.Time       `json:"-"`
-	UpdatedAt        time.Time       `json:"-"`
-	DeletedAt        *time.Time      `json:"-" faker:"-"`
-	TimeStart        time.Time       `json:"timeStart"`
-	TimeEnd          time.Time       `json:"timeEnd"`
-	LastTimeAlive    time.Time       `json:"lastTimeAlive"`
-	GameDefinitionID uint            `json:"gameDefinitionID"`
-	Participants     []GameComponent `gorm:"many2many:match_participants" json:"participants"`
+	ID                 uint            `gorm:"primary_key" json:"id"`
+	CreatedAt          time.Time       `json:"-"`
+	UpdatedAt          time.Time       `json:"-"`
+	DeletedAt          *time.Time      `json:"-" faker:"-"`
+	TimeStart          time.Time       `json:"timeStart"`
+	TimeEnd            time.Time       `json:"timeEnd"`
+	LastTimeAlive      time.Time       `json:"lastTimeAlive"`
+	GameDefinitionID   uint            `json:"gameDefinitionID"`
+	GameDefinitionData string          `gorm:"size:125000" json:"-"`
+	Participants       []GameComponent `gorm:"many2many:match_participants" json:"participants"`
 }
 
 // GameDefinition definition

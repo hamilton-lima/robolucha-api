@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -201,9 +202,15 @@ func (ds *DataSource) createHash(key string) string {
 }
 
 func (ds *DataSource) createMatch(gameDefinitionID uint) *model.Match {
+
+	gameDefinition := ds.findGameDefinition(gameDefinitionID)
+	output, _ := json.Marshal(gameDefinition)
+	gameDefinitionData := string(output)
+
 	match := model.Match{
-		TimeStart:        time.Now(),
-		GameDefinitionID: gameDefinitionID,
+		TimeStart:          time.Now(),
+		GameDefinitionID:   gameDefinitionID,
+		GameDefinitionData: gameDefinitionData,
 	}
 
 	ds.db.Create(&match)
