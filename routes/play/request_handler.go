@@ -1,5 +1,9 @@
 package play
 
+import (
+	"sync"
+)
+
 // Request definition
 type Request struct {
 	data string
@@ -18,6 +22,7 @@ type internalRequest struct {
 // RequestHandler definition
 type RequestHandler struct {
 	input chan internalRequest
+	wait  sync.WaitGroup
 }
 
 // BuildRequestHandler creates an instance of the request handler
@@ -26,17 +31,24 @@ func BuildRequestHandler() *RequestHandler {
 		input: make(chan internalRequest),
 	}
 
-	go handler.listen()
+	// starts the listener and notify main goroutine to wait
+	// using the waitgroup from the handler
+	go func() {
+		for {
+			handler.wait.Add(1)
+			go handler.process()
+			handler.wait.Wait()
+		}
+	}()
+
 	return &handler
 }
 
-func (handler *RequestHandler) listen() {
-	for {
-		// process one by one
-		next := <-handler.input
-		// adds the response to the output channel
-		next.output <- Response{data: next.data.data}
-	}
+// process handles one request from the handler.input channel
+func (handler *RequestHandler) process() {
+	next := <-handler.input
+	next.output <- Response{data: next.data.data}
+	handler.wait.Done()
 }
 
 // Send definition
