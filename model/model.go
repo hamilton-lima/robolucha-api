@@ -54,6 +54,7 @@ type Match struct {
 	TimeEnd            time.Time       `json:"timeEnd"`
 	LastTimeAlive      time.Time       `json:"lastTimeAlive"`
 	GameDefinitionID   uint            `json:"gameDefinitionID"`
+	AvailableMatchID   uint            `json:"availableMatchID"`
 	GameDefinitionData string          `gorm:"size:125000" json:"-"`
 	Participants       []GameComponent `gorm:"many2many:match_participants" json:"participants"`
 }

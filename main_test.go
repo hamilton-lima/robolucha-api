@@ -15,6 +15,7 @@ import (
 
 	"github.com/bxcodec/faker/v3"
 	// "github.com/stretchr/testify/assert"
+	"gitlab.com/robolucha/robolucha-api/datasource"
 	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/test"
 	"gotest.tools/assert"
@@ -25,17 +26,18 @@ func SetupMain(t *testing.T) {
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.WarnLevel)
 	os.Setenv("GIN_MODE", "release")
+
+	os.Remove(test.DB_NAME)
+	ds = datasource.NewDataSource(datasource.BuildSQLLiteConfig(test.DB_NAME))
 }
 
 func TestCreateMatch(t *testing.T) {
 	SetupMain(t)
-	os.Remove(test.DB_NAME)
-	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
-	defer dataSource.db.Close()
+	defer ds.DB.Close()
 
 	gd := BuildDefaultGameDefinition()
 	gd.Name = "FOOBAR"
-	dataSource.createGameDefinition(&gd)
+	ds.CreateGameDefinition(&gd)
 
 	url := fmt.Sprintf("/internal/start-match/%v", gd.Name)
 
@@ -47,16 +49,14 @@ func TestCreateMatch(t *testing.T) {
 
 func TestCreateTutorialMatch(t *testing.T) {
 	SetupMain(t)
-	os.Remove(test.DB_NAME)
-	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
-	defer dataSource.db.Close()
+	defer ds.DB.Close()
 
 	mockPublisher = &test.MockPublisher{}
 	publisher = mockPublisher
 
 	gd := BuildDefaultGameDefinition()
 	gd.Name = "FOOBAR"
-	dataSource.createGameDefinition(&gd)
+	ds.CreateGameDefinition(&gd)
 
 	url := fmt.Sprintf("/private/start-tutorial-match/%v", gd.Name)
 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
@@ -76,7 +76,7 @@ func TestCreateTutorialMatch(t *testing.T) {
 	var publisherResult *model.JoinMatch
 	json.Unmarshal([]byte(mockPublisher.LastMessage), &publisherResult)
 
-	match := (*dataSource.findActiveMatches())[0]
+	match := (*ds.FindActiveMatches())[0]
 
 	assert.Equal(t, match.ID, publisherResult.MatchID)
 	assert.Equal(t, luchador.ID, publisherResult.LuchadorID)
@@ -125,7 +125,7 @@ func TestCreateTutorialMatch(t *testing.T) {
 	var thirdPublisherResult *model.JoinMatch
 	json.Unmarshal([]byte(mockPublisher.LastMessage), &thirdPublisherResult)
 
-	thirdCallMatch := (*dataSource.findActiveMatches())[0]
+	thirdCallMatch := (*ds.FindActiveMatches())[0]
 
 	log.WithFields(log.Fields{
 		"thirdApiResult":       thirdAPIResult,
@@ -148,17 +148,15 @@ func TestCreateTutorialMatch(t *testing.T) {
 
 func TestUpdateGameDefinition(t *testing.T) {
 	SetupMain(t)
-	os.Remove(test.DB_NAME)
-	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
-	defer dataSource.db.Close()
+	defer ds.DB.Close()
 
 	mockPublisher = &test.MockPublisher{}
 	publisher = mockPublisher
 
 	gd, _, _ := fakeGameDefinition(t, "FOOBAR", "tutorial", 10)
-	created := dataSource.createGameDefinition(&gd)
+	created := ds.CreateGameDefinition(&gd)
 
-	queryResult := dataSource.findGameDefinitionByName(gd.Name)
+	queryResult := ds.FindGameDefinitionByName(gd.Name)
 	assert.Equal(t, created.ID, queryResult.ID)
 
 	log.WithFields(log.Fields{
@@ -252,9 +250,7 @@ func TestUpdateGameDefinition(t *testing.T) {
 
 func TestCreateGameComponent(t *testing.T) {
 	SetupMain(t)
-	os.Remove(test.DB_NAME)
-	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
-	defer dataSource.db.Close()
+	defer ds.DB.Close()
 
 	plan, _ := ioutil.ReadFile("test-data/create-gamecomponent1.json")
 	body := string(plan)
@@ -284,13 +280,13 @@ func TestCreateGameComponent(t *testing.T) {
 		"luchador.ID": luchador2.ID,
 	}).Debug("Second call to create game component")
 
-	luchadorFromDB := dataSource.findLuchadorByID(luchador2.ID)
+	luchadorFromDB := ds.FindLuchadorByID(luchador2.ID)
 	log.WithFields(log.Fields{
 		"luchador.configs": luchadorFromDB.Configs,
 	}).Debug("configs from luchador")
 
 	// all the Mask config items should be present
-	for _, color := range maskColors {
+	for _, color := range model.MaskColors {
 		found := false
 		for _, config := range luchadorFromDB.Configs {
 			if config.Key == color {
@@ -304,7 +300,7 @@ func TestCreateGameComponent(t *testing.T) {
 		}).Debug("Color found in luchador config")
 	}
 
-	for shape, _ := range maskShapes {
+	for shape, _ := range model.MaskShapes {
 		found := false
 		for _, config := range luchadorFromDB.Configs {
 			if config.Key == shape {
@@ -325,21 +321,19 @@ func TestCreateGameComponent(t *testing.T) {
 
 func TestAddScores(t *testing.T) {
 	SetupMain(t)
-	os.Remove(test.DB_NAME)
-	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
-	defer dataSource.db.Close()
+	defer ds.DB.Close()
 
-	luchador1 := dataSource.createLuchador(&model.GameComponent{Name: "foo"})
-	luchador2 := dataSource.createLuchador(&model.GameComponent{Name: "bar"})
-	luchador3 := dataSource.createLuchador(&model.GameComponent{Name: "dee"})
+	luchador1 := ds.CreateLuchador(&model.GameComponent{Name: "foo"})
+	luchador2 := ds.CreateLuchador(&model.GameComponent{Name: "bar"})
+	luchador3 := ds.CreateLuchador(&model.GameComponent{Name: "dee"})
 
 	gd := BuildDefaultGameDefinition()
-	dataSource.createGameDefinition(&gd)
+	ds.CreateGameDefinition(&gd)
 
-	match := dataSource.createMatch(gd.ID)
-	dataSource.addMatchParticipant(&model.MatchParticipant{LuchadorID: luchador1.ID, MatchID: match.ID})
-	dataSource.addMatchParticipant(&model.MatchParticipant{LuchadorID: luchador2.ID, MatchID: match.ID})
-	dataSource.addMatchParticipant(&model.MatchParticipant{LuchadorID: luchador3.ID, MatchID: match.ID})
+	match := ds.CreateMatch(gd.ID)
+	ds.AddMatchParticipant(&model.MatchParticipant{LuchadorID: luchador1.ID, MatchID: match.ID})
+	ds.AddMatchParticipant(&model.MatchParticipant{LuchadorID: luchador2.ID, MatchID: match.ID})
+	ds.AddMatchParticipant(&model.MatchParticipant{LuchadorID: luchador3.ID, MatchID: match.ID})
 
 	matchID := fmt.Sprintf("%v", match.ID)
 	luchador1ID := fmt.Sprintf("%v", luchador1.ID)
@@ -360,7 +354,7 @@ func TestAddScores(t *testing.T) {
 
 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
 	w := test.PerformRequest(router, "POST", "/internal/add-match-scores", body, test.API_KEY)
-	resultScores := dataSource.getMatchScoresByMatchID(match.ID)
+	resultScores := ds.GetMatchScoresByMatchID(match.ID)
 	assert.Equal(t, 3, len(*resultScores))
 	assert.Equal(t, http.StatusOK, w.Code)
 
@@ -402,10 +396,7 @@ func getConfigs(t *testing.T, router *gin.Engine, id uint) []model.Config {
 
 func TestCreateGameDefinition(t *testing.T) {
 	SetupMain(t)
-
-	os.Remove(test.DB_NAME)
-	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
-	defer dataSource.db.Close()
+	defer ds.DB.Close()
 
 	resultFake, body, err := fakeGameDefinition(t, faker.Word(), faker.Word(), 0)
 	assert.Assert(t, err == nil)
@@ -420,10 +411,7 @@ func TestCreateGameDefinition(t *testing.T) {
 }
 func TestGETGameDefinition(t *testing.T) {
 	SetupMain(t)
-
-	os.Remove(test.DB_NAME)
-	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
-	defer dataSource.db.Close()
+	defer ds.DB.Close()
 
 	definition1 := createTestGameDefinition(t, faker.Word(), 0)
 	definition2 := createTestGameDefinition(t, faker.Word(), 0)
@@ -443,18 +431,15 @@ func TestGETGameDefinition(t *testing.T) {
 
 func TestFindMultiplayerMatch(t *testing.T) {
 	SetupMain(t)
+	defer ds.DB.Close()
 
-	os.Remove(test.DB_NAME)
-	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
-	defer dataSource.db.Close()
-
-	definition1 := createTestGameDefinition(t, GAMEDEFINITION_TYPE_TUTORIAL, 20)
-	definition2 := createTestGameDefinition(t, GAMEDEFINITION_TYPE_MULTIPLAYER, 10)
+	definition1 := createTestGameDefinition(t, model.GAMEDEFINITION_TYPE_TUTORIAL, 20)
+	definition2 := createTestGameDefinition(t, model.GAMEDEFINITION_TYPE_MULTIPLAYER, 10)
 	definition3 := createTestGameDefinition(t, faker.Word(), 1)
 
-	dataSource.createMatch(definition1.ID)
-	match := dataSource.createMatch(definition2.ID)
-	dataSource.createMatch(definition3.ID)
+	ds.CreateMatch(definition1.ID)
+	match := ds.CreateMatch(definition2.ID)
+	ds.CreateMatch(definition3.ID)
 
 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
 	w := test.PerformRequestNoAuth(router, "GET", "/private/match", "")
@@ -465,7 +450,7 @@ func TestFindMultiplayerMatch(t *testing.T) {
 
 	assert.Assert(t, matches[0].MatchID == match.ID)
 
-	gameDefinitions := *dataSource.findTutorialGameDefinition()
+	gameDefinitions := *ds.FindTutorialGameDefinition()
 
 	// all the tutorial gamedefinitions and the active multiplayer matches
 	assert.Assert(t, len(matches) == len(gameDefinitions)+1)
@@ -473,13 +458,10 @@ func TestFindMultiplayerMatch(t *testing.T) {
 
 func TestFindTutorialGameDefinition(t *testing.T) {
 	SetupMain(t)
+	defer ds.DB.Close()
 
-	os.Remove(test.DB_NAME)
-	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
-	defer dataSource.db.Close()
-
-	definition1 := createTestGameDefinition(t, GAMEDEFINITION_TYPE_TUTORIAL, 20)
-	definition2 := createTestGameDefinition(t, GAMEDEFINITION_TYPE_TUTORIAL, 10)
+	definition1 := createTestGameDefinition(t, model.GAMEDEFINITION_TYPE_TUTORIAL, 20)
+	definition2 := createTestGameDefinition(t, model.GAMEDEFINITION_TYPE_TUTORIAL, 10)
 	definition3 := createTestGameDefinition(t, faker.Word(), 1)
 
 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
@@ -561,7 +543,7 @@ func fakeGameDefinition(t *testing.T, name string, typeName string, sortOrder ui
 			// gameDefinition.GameComponents[i].Codes[n].ID = 0
 		}
 
-		gameDefinition.GameComponents[i].Configs = randomConfig()
+		gameDefinition.GameComponents[i].Configs = model.RandomConfig()
 	}
 
 	for i, _ := range gameDefinition.SceneComponents {
@@ -605,9 +587,7 @@ func fakeGameDefinition(t *testing.T, name string, typeName string, sortOrder ui
 
 func TestPOSTMatchMetric(t *testing.T) {
 	SetupMain(t)
-	os.Remove(test.DB_NAME)
-	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
-	defer dataSource.db.Close()
+	defer ds.DB.Close()
 
 	var metric *model.MatchMetric
 	err := faker.FakeData(&metric)
@@ -624,7 +604,7 @@ func TestPOSTMatchMetric(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var afterSave model.MatchMetric
-	dataSource.db.First(&afterSave)
+	ds.DB.First(&afterSave)
 
 	assert.Assert(t, &afterSave != nil)
 
@@ -636,28 +616,26 @@ func TestPOSTMatchMetric(t *testing.T) {
 
 func TestGetPublicAvailableMatch(t *testing.T) {
 	SetupMain(t)
-	os.Remove(test.DB_NAME)
-	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
-	defer dataSource.db.Close()
+	defer ds.DB.Close()
 
 	// create classroom
 	classroom := model.Classroom{
 		Name: faker.Word(),
 	}
-	dataSource.db.Create(&classroom)
+	ds.DB.Create(&classroom)
 
 	// create activeMatch related to the classroom
 	availableMatch := model.AvailableMatch{
 		Name:        faker.Word(),
 		ClassroomID: classroom.ID,
 	}
-	dataSource.db.Create(&availableMatch)
+	ds.DB.Create(&availableMatch)
 
 	// create activeMatch without classroom
 	publicAvailableMatch := model.AvailableMatch{
 		Name: faker.Word(),
 	}
-	dataSource.db.Create(&publicAvailableMatch)
+	ds.DB.Create(&publicAvailableMatch)
 
 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
 

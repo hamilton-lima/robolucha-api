@@ -11,6 +11,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/robolucha/robolucha-api/model"
+	"gitlab.com/robolucha/robolucha-api/datasource"
 	"gitlab.com/robolucha/robolucha-api/test"
 )
 
@@ -26,7 +27,7 @@ func SetupClassroom(t *testing.T) {
 			"error": err,
 		}).Error("error removing TEST database")
 	}
-	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
+	ds = datasource.NewDataSource(datasource.BuildSQLLiteConfig(test.DB_NAME))
 
 	mockPublisher = &test.MockPublisher{}
 	publisher = mockPublisher
@@ -36,7 +37,7 @@ func SetupClassroom(t *testing.T) {
 
 func TestAddClassroom(t *testing.T) {
 	SetupClassroom(t)
-	defer dataSource.db.Close()
+	defer ds.DB.Close()
 	classroom := model.Classroom{Name: "testClassroom"}
 
 	plan, _ := json.Marshal(classroom)
@@ -79,7 +80,7 @@ func AddTestClassroom(t *testing.T, name string) {
 
 func TestGetClassroom(t *testing.T) {
 	SetupClassroom(t)
-	defer dataSource.db.Close()
+	defer ds.DB.Close()
 
 	AddTestClassroom(t, "A")
 	AddTestClassroom(t, "B")
@@ -109,7 +110,7 @@ func TestGetClassroom(t *testing.T) {
 
 func TestJoinClassroom(t *testing.T) {
 	SetupClassroom(t)
-	defer dataSource.db.Close()
+	defer ds.DB.Close()
 
 	AddTestClassroom(t, "A")
 	AddTestClassroom(t, "B")

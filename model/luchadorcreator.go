@@ -1,10 +1,9 @@
-package main
+package model
 
 import (
 	"math/rand"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/robolucha/robolucha-api/model"
 )
 
 var maskShape = []string{
@@ -87,7 +86,7 @@ var eyes = []string{
 	"olho0001.png",
 	"olho0002.png"}
 
-var maskColors = []string{
+var MaskColors = []string{
 	"mask.primary.color",
 	"mask.secondary.color",
 	"mask.decoration.top.color",
@@ -98,7 +97,7 @@ var maskColors = []string{
 	"ankle.color",
 	"skin.color"}
 
-var maskShapes = map[string][]string{
+var MaskShapes = map[string][]string{
 	"mask.shape":                   maskShape,
 	"mask.decoration.top.shape":    ornamentTop,
 	"mask.decoration.bottom.shape": ornamentBottom,
@@ -107,18 +106,19 @@ var maskShapes = map[string][]string{
 	"eyes.shape":                   eyes,
 }
 
-func randomConfig() []model.Config {
+// RandomConfig creates a random Luchador Config
+func RandomConfig() []Config {
 
-	list := []model.Config{}
+	list := []Config{}
 
-	for _, color := range maskColors {
+	for _, color := range MaskColors {
 		randomizedColor := NMSColor{"Black", "#000000"} //placeholder
 		randomizedColor = randomColor()
 		list = add2ConfigList(list, color, randomizedColor.hex)
 		list = add2ConfigList(list, color+".name", randomizedColor.name)
 	}
 
-	for shape, options := range maskShapes {
+	for shape, options := range MaskShapes {
 		list = add2ConfigList(list, shape, randomString(options))
 	}
 
@@ -129,7 +129,7 @@ func randomConfig() []model.Config {
 	return list
 }
 
-func randomName(list []model.Config) string {
+func RandomName(list []Config) string {
 	var primaryColor = getFromConfigList(list, "mask.primary.color.name").Value
 	var nounList = []string{
 		"Abismo", "Comando", "Perro", "Cabeza", "Gato", "Toro", "Chupacabra", "Taco", "Soldado", "Huracán", "Rey", "Pirata",
@@ -141,18 +141,18 @@ func randomName(list []model.Config) string {
 	return "El " + nounList[random(len(nounList))] + " " + primaryColor + " " + adjectiveList[random(len(adjectiveList))]
 }
 
-func getFromConfigList(list []model.Config, key string) model.Config {
+func getFromConfigList(list []Config, key string) Config {
 	for i := range list {
 		if list[i].Key == key {
 			// Found!
 			return list[i]
 		}
 	}
-	return model.Config{}
+	return Config{}
 }
 
-func add2ConfigList(list []model.Config, key string, value string) []model.Config {
-	return append(list, model.Config{Key: key, Value: value})
+func add2ConfigList(list []Config, key string, value string) []Config {
+	return append(list, Config{Key: key, Value: value})
 }
 
 func randomString(list []string) string {

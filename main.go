@@ -25,13 +25,15 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"gitlab.com/robolucha/robolucha-api/auth"
+	"gitlab.com/robolucha/robolucha-api/datasource"
 	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/routes/play"
+	"gitlab.com/robolucha/robolucha-api/setup"
 
 	_ "gitlab.com/robolucha/robolucha-api/docs"
 )
 
-var dataSource *DataSource
+var ds *datasource.DataSource
 var publisher Publisher
 var playRequestHandler play.RequestHandler
 
@@ -43,13 +45,13 @@ func main() {
 
 	log.Info("Robolucha API, start.")
 
-	dataSource = NewDataSource(BuildMysqlConfig())
-	defer dataSource.db.Close()
+	ds = datasource.NewDataSource(datasource.BuildMysqlConfig())
+	defer ds.DB.Close()
 
 	publisher = &RedisPublisher{}
-	go dataSource.KeepAlive()
+	go ds.KeepAlive()
 
-	playRequestHandler := play.Listen()
+	// playRequestHandler := play.Listen()
 
 	if len(os.Args) < 2 {
 		log.Error("Missing gamedefinition folder parameter")
@@ -57,7 +59,7 @@ func main() {
 	}
 
 	gameDefinitionFolder := os.Args[1]
-	SetupGameDefinitionFromFolder(gameDefinitionFolder)
+	setup.SetupGameDefinitionFromFolder(gameDefinitionFolder, ds)
 
 	port := os.Getenv("API_PORT")
 	if len(port) == 0 {
@@ -208,7 +210,7 @@ func SessionIsValid() gin.HandlerFunc {
 			}).Info("User Authorized")
 		}
 
-		user := dataSource.createUser(sessionUser.Username)
+		user := ds.CreateUser(sessionUser.Username)
 		c.Set("user", user)
 	}
 }
@@ -216,7 +218,7 @@ func SessionIsValid() gin.HandlerFunc {
 // SessionAllwaysValid test function for local development
 func SessionAllwaysValid() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user := dataSource.createUser("test")
+		user := ds.CreateUser("test")
 		c.Set("user", user)
 	}
 }
@@ -251,7 +253,7 @@ func findUserSetting(c *gin.Context) {
 	log.Info("Finding userSetting")
 	user := userFromContext(c)
 
-	userSetting := dataSource.findUserSettingByUser(user)
+	userSetting := ds.FindUserSettingByUser(user)
 
 	log.WithFields(log.Fields{
 		"userSetting": userSetting,
@@ -282,7 +284,7 @@ func updateUserSetting(c *gin.Context) {
 		"userSetting": userSetting,
 	}).Info("Updating userSetting")
 
-	userSetting = dataSource.updateUserSetting(userSetting)
+	userSetting = ds.UpdateUserSetting(userSetting)
 
 	if userSetting == nil {
 		log.Info("Invalid User setting when saving, missing ID?")
@@ -322,7 +324,7 @@ func createGameDefinition(c *gin.Context) {
 		"gameDefinition": gameDefinition,
 	}).Info("createGameDefinition")
 
-	createResult := dataSource.createGameDefinition(gameDefinition)
+	createResult := ds.CreateGameDefinition(gameDefinition)
 	if createResult == nil {
 		log.Error("Invalid GameDefinition when saving")
 		c.AbortWithStatus(http.StatusBadRequest)
@@ -330,7 +332,7 @@ func createGameDefinition(c *gin.Context) {
 	}
 
 	// load all the fields
-	result := dataSource.findGameDefinition(createResult.ID)
+	result := ds.FindGameDefinition(createResult.ID)
 
 	log.WithFields(log.Fields{
 		"gameDefinition": result,
@@ -365,7 +367,7 @@ func updateGameDefinition(c *gin.Context) {
 		"gameDefinition": gameDefinition,
 	}).Info("updateGameDefinition")
 
-	result := dataSource.updateGameDefinition(gameDefinition)
+	result := ds.UpdateGameDefinition(gameDefinition)
 	if result == nil {
 		log.Error("Invalid GameDefinition when updating")
 		c.AbortWithStatus(http.StatusBadRequest)
@@ -391,14 +393,14 @@ func startMatch(c *gin.Context) {
 		"name": name,
 	}).Info("startMatch")
 
-	gameDefinition := dataSource.findGameDefinitionByName(name)
+	gameDefinition := ds.FindGameDefinitionByName(name)
 	if gameDefinition == nil {
 		log.Info("Invalid gamedefinition name")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
-	match := dataSource.createMatch(gameDefinition.ID)
+	match := ds.CreateMatch(gameDefinition.ID)
 	if match == nil {
 		log.Error("Invalid Match when saving")
 		c.AbortWithStatus(http.StatusBadRequest)
@@ -406,7 +408,7 @@ func startMatch(c *gin.Context) {
 	}
 
 	// load all the fields
-	match = dataSource.findMatch(match.ID)
+	match = ds.FindMatch(match.ID)
 
 	log.WithFields(log.Fields{
 		"createMatch": match,
@@ -431,7 +433,7 @@ func startTutorialMatch(c *gin.Context) {
 		"name": name,
 	}).Info("startTutorialMatch")
 
-	gameDefinition := dataSource.findGameDefinitionByName(name)
+	gameDefinition := ds.FindGameDefinitionByName(name)
 	if gameDefinition == nil {
 		log.Info("Invalid gamedefinition name")
 		c.AbortWithStatus(http.StatusBadRequest)
@@ -440,7 +442,7 @@ func startTutorialMatch(c *gin.Context) {
 
 	user := userFromContext(c)
 
-	luchador := dataSource.findLuchador(user)
+	luchador := ds.FindLuchador(user)
 	if luchador == nil {
 		log.WithFields(log.Fields{
 			"user": user,
@@ -449,10 +451,10 @@ func startTutorialMatch(c *gin.Context) {
 		return
 	}
 
-	match := dataSource.findActiveMatchesByGameDefinitionAndParticipant(gameDefinition, luchador)
+	match := ds.FindActiveMatchesByGameDefinitionAndParticipant(gameDefinition, luchador)
 	// not found will create
 	if match == nil {
-		match = dataSource.createMatch(gameDefinition.ID)
+		match = ds.CreateMatch(gameDefinition.ID)
 		if match == nil {
 			log.Error("Invalid Match when saving")
 			c.AbortWithStatus(http.StatusBadRequest)
@@ -495,7 +497,7 @@ func getLuchador(c *gin.Context) {
 	user := userFromContext(c)
 	var luchador *model.GameComponent
 
-	luchador = dataSource.findLuchador(user)
+	luchador = ds.FindLuchador(user)
 	log.WithFields(log.Fields{
 		"luchador": luchador,
 		"user.id":  user.ID,
@@ -507,13 +509,13 @@ func getLuchador(c *gin.Context) {
 			Name:   fmt.Sprintf("Luchador%d", user.ID),
 		}
 
-		luchador.Configs = randomConfig()
-		luchador.Name = randomName(luchador.Configs)
+		luchador.Configs = model.RandomConfig()
+		luchador.Name = model.RandomName(luchador.Configs)
 		log.WithFields(log.Fields{
 			"getLuchador": luchador,
 		}).Info("creating luchador")
 
-		luchador = dataSource.createLuchador(luchador)
+		luchador = ds.CreateLuchador(luchador)
 
 		if luchador == nil {
 			log.Error("Invalid Luchador when saving")
@@ -563,7 +565,7 @@ func updateLuchador(c *gin.Context) {
 		response.Errors = append(response.Errors, "Luchador name length should be less or equal to 40 characters")
 	}
 
-	if dataSource.nameExist(luchador.ID, luchador.Name) {
+	if ds.NameExist(luchador.ID, luchador.Name) {
 		response.Errors = append(response.Errors, "Luchador with this name already exists")
 	}
 
@@ -585,7 +587,7 @@ func updateLuchador(c *gin.Context) {
 	}).Debug("updateLuchador")
 
 	// validate if the luchador is the same from the user
-	currentLuchador := dataSource.findLuchador(user)
+	currentLuchador := ds.FindLuchador(user)
 	log.WithFields(log.Fields{
 		"luchador": luchador,
 		"user.ID":  user.ID,
@@ -597,7 +599,7 @@ func updateLuchador(c *gin.Context) {
 		return
 	}
 
-	response.Luchador = dataSource.updateLuchador(luchador)
+	response.Luchador = ds.UpdateLuchador(luchador)
 
 	if response.Luchador == nil {
 		log.Info("Invalid Luchador when saving, missing ID?")
@@ -632,7 +634,7 @@ func cleanName(name string) string {
 // @Router /private/tutorial [get]
 func getTutorialGameDefinition(c *gin.Context) {
 
-	tutorials := dataSource.findTutorialGameDefinition()
+	tutorials := ds.FindTutorialGameDefinition()
 
 	log.WithFields(log.Fields{
 		"tutorials": tutorials,
@@ -663,7 +665,7 @@ func getMaskConfig(c *gin.Context) {
 		"id": aid,
 	}).Info("getMaskConfig")
 
-	configs := dataSource.findMaskConfig(uint(aid))
+	configs := ds.FindMaskConfig(uint(aid))
 
 	log.WithFields(log.Fields{
 		"configs": configs,
@@ -688,7 +690,7 @@ func getGameDefinitionByName(c *gin.Context) {
 		"name": name,
 	}).Info("getGameDefinition")
 
-	gameDefinition := dataSource.findGameDefinitionByName(name)
+	gameDefinition := ds.FindGameDefinitionByName(name)
 
 	log.WithFields(log.Fields{
 		"gameDefinition": gameDefinition,
@@ -731,7 +733,7 @@ func getGameDefinitionByID(c *gin.Context) {
 		"id": aid,
 	}).Info("getGameDefinitionByID")
 
-	gameDefinition := dataSource.findGameDefinition(uint(aid))
+	gameDefinition := ds.FindGameDefinition(uint(aid))
 
 	log.WithFields(log.Fields{
 		"gameDefinition": gameDefinition,
@@ -749,7 +751,7 @@ func getGameDefinitionByID(c *gin.Context) {
 // @Router /private/game-definition-all [get]
 func getGameDefinition(c *gin.Context) {
 
-	result := dataSource.findAllGameDefinition()
+	result := ds.FindAllGameDefinition()
 
 	log.WithFields(log.Fields{
 		"result": result,
@@ -768,7 +770,7 @@ func getGameDefinition(c *gin.Context) {
 func getRandomMaskConfig(c *gin.Context) {
 
 	log.Info("getRandomMaskConfig")
-	configs := randomConfig()
+	configs := model.RandomConfig()
 
 	log.WithFields(log.Fields{
 		"configs": configs,
@@ -802,17 +804,17 @@ func createGameComponent(c *gin.Context) {
 
 	// validate if the luchador is the same from the user
 
-	found := dataSource.findLuchadorByName(luchador.Name)
+	found := ds.FindLuchadorByName(luchador.Name)
 
 	if found == nil {
 		log.Info("Luchador not found, will create")
-		luchador.Configs = randomConfig()
+		luchador.Configs = model.RandomConfig()
 		log.WithFields(log.Fields{
 			"configs": luchador.Configs,
 		}).Info("Random config assigned to luchador")
 
-		luchador = dataSource.createLuchador(luchador)
-		luchador = dataSource.findLuchadorByID(luchador.ID)
+		luchador = ds.CreateLuchador(luchador)
+		luchador = ds.FindLuchadorByID(luchador.ID)
 	} else {
 		luchador = found
 	}
@@ -837,9 +839,9 @@ func getActiveMatches(c *gin.Context) {
 	var result []model.ActiveMatch
 
 	// multiplayer matches
-	matches := *dataSource.findActiveMultiplayerMatches()
+	matches := *ds.FindActiveMultiplayerMatches()
 	for _, match := range matches {
-		gameDefinition := dataSource.findGameDefinition(match.GameDefinitionID)
+		gameDefinition := ds.FindGameDefinition(match.GameDefinitionID)
 		add := model.ActiveMatch{
 			MatchID:     match.ID,
 			Name:        gameDefinition.Name,
@@ -855,7 +857,7 @@ func getActiveMatches(c *gin.Context) {
 	}
 
 	// gamedefinitions
-	gameDefinitions := *dataSource.findTutorialGameDefinition()
+	gameDefinitions := *ds.FindTutorialGameDefinition()
 	for _, gameDefinition := range gameDefinitions {
 		add := model.ActiveMatch{
 			MatchID:     0,
@@ -914,7 +916,7 @@ func getMatch(c *gin.Context) {
 		"matchID": matchID,
 	}).Info("getMatch")
 
-	match := dataSource.findMatch(matchID)
+	match := ds.FindMatch(matchID)
 
 	log.WithFields(log.Fields{
 		"match": match,
@@ -947,7 +949,7 @@ func getLuchadorConfigsForCurrentMatch(c *gin.Context) {
 
 	var result *[]model.GameComponent
 
-	result = dataSource.findLuchadorConfigsByMatchID(matchID)
+	result = ds.FindLuchadorConfigsByMatchID(matchID)
 	log.WithFields(log.Fields{
 		"result": result,
 	}).Debug("getLuchadorConfigsForCurrentMatch")
@@ -976,7 +978,7 @@ func joinMatch(c *gin.Context) {
 	user := userFromContext(c)
 
 	var luchador *model.GameComponent
-	luchador = dataSource.findLuchador(user)
+	luchador = ds.FindLuchador(user)
 	if luchador == nil {
 		log.WithFields(log.Fields{
 			"user": user,
@@ -989,7 +991,7 @@ func joinMatch(c *gin.Context) {
 	joinMatch.LuchadorID = luchador.ID
 
 	var match *model.Match
-	match = dataSource.findMatch(joinMatch.MatchID)
+	match = ds.FindMatch(joinMatch.MatchID)
 	if match == nil {
 		log.WithFields(log.Fields{
 			"user": user,
@@ -1031,7 +1033,7 @@ func getLuchadorByIDAndGamedefinitionID(c *gin.Context) {
 	}
 
 	var luchador *model.GameComponent
-	luchador = dataSource.findLuchadorByID(parameters.LuchadorID)
+	luchador = ds.FindLuchadorByID(parameters.LuchadorID)
 
 	if luchador == nil {
 		log.WithFields(log.Fields{
@@ -1084,7 +1086,7 @@ func addMatchPartipant(c *gin.Context) {
 		return
 	}
 
-	matchParticipant := dataSource.addMatchParticipant(matchParticipantRequest)
+	matchParticipant := ds.AddMatchParticipant(matchParticipantRequest)
 	if matchParticipant == nil {
 		log.WithFields(log.Fields{
 			"matchParticipant": matchParticipantRequest,
@@ -1119,7 +1121,7 @@ func endMatch(c *gin.Context) {
 		return
 	}
 
-	match := dataSource.endMatch(matchRequest)
+	match := ds.EndMatch(matchRequest)
 	if match == nil {
 		log.WithFields(log.Fields{
 			"match": matchRequest,
@@ -1153,7 +1155,7 @@ func addMatchScores(c *gin.Context) {
 		return
 	}
 
-	score := dataSource.addMatchScores(scoreRequest)
+	score := ds.AddMatchScores(scoreRequest)
 	if score == nil {
 		log.WithFields(log.Fields{
 			"score": scoreRequest,
@@ -1186,7 +1188,7 @@ func addMatchMetric(c *gin.Context) {
 		return
 	}
 
-	result := dataSource.addMatchMetric(metric)
+	result := ds.AddMatchMetric(metric)
 	if result == nil {
 		log.WithFields(log.Fields{
 			"metric": metric,
@@ -1211,7 +1213,7 @@ func addMatchMetric(c *gin.Context) {
 // @Router /private/classroom [get]
 func getClassroom(c *gin.Context) {
 	user := userFromContext(c)
-	result := dataSource.findAllClassroom(user)
+	result := ds.FindAllClassroom(user)
 
 	log.WithFields(log.Fields{
 		"result": result,
@@ -1241,7 +1243,7 @@ func addClassroom(c *gin.Context) {
 
 	classroom.OwnerID = user.ID
 
-	result := dataSource.addClassroom(classroom)
+	result := ds.AddClassroom(classroom)
 	if result == nil {
 		log.WithFields(log.Fields{
 			"classroom": classroom,
@@ -1274,7 +1276,7 @@ func joinClassroom(c *gin.Context) {
 		"accessCode": accessCode,
 	}).Info("joinClassroom")
 
-	classroom := dataSource.joinClassroom(user, accessCode)
+	classroom := ds.JoinClassroom(user, accessCode)
 
 	log.WithFields(log.Fields{
 		"classroom": classroom,
@@ -1291,7 +1293,7 @@ func joinClassroom(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /private/available-match-public [get]
 func getPublicAvailableMatch(c *gin.Context) {
-	result := dataSource.findPublicAvailableMatch()
+	result := ds.FindPublicAvailableMatch()
 
 	log.WithFields(log.Fields{
 		"result": result,
@@ -1322,7 +1324,7 @@ func getClassroomAvailableMatch(c *gin.Context) {
 		"id": aid,
 	}).Info("getClassroomAvailableMatch")
 
-	result := dataSource.findAvailableMatchByClassroomID(uint(aid))
+	result := ds.FindAvailableMatchByClassroomID(uint(aid))
 
 	log.WithFields(log.Fields{
 		"result": result,

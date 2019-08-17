@@ -1,4 +1,4 @@
-package main
+package setup
 
 import (
 	"encoding/json"
@@ -7,11 +7,12 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	"gitlab.com/robolucha/robolucha-api/datasource"
 	_ "gitlab.com/robolucha/robolucha-api/docs"
 	"gitlab.com/robolucha/robolucha-api/model"
 )
 
-func SetupGameDefinitionFromFolder(folderName string) {
+func SetupGameDefinitionFromFolder(folderName string, ds *datasource.DataSource) {
 
 	log.WithFields(log.Fields{
 		"folderName": folderName,
@@ -32,13 +33,13 @@ func SetupGameDefinitionFromFolder(folderName string) {
 			"filename": fullPath,
 		}).Info("Loading gamedefinition")
 
-		CreateGameDefinition(fullPath)
+		CreateGameDefinition(fullPath, ds)
 	}
 
 }
 
 // CreateGameDefinition definition
-func CreateGameDefinition(fileName string) {
+func CreateGameDefinition(fileName string, ds *datasource.DataSource) {
 	bytes, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		log.WithFields(log.Fields{
@@ -57,14 +58,14 @@ func CreateGameDefinition(fileName string) {
 	var gameDefinition model.GameDefinition
 	json.Unmarshal(bytes, &gameDefinition)
 
-	foundByName := dataSource.findGameDefinitionByName(gameDefinition.Name)
+	foundByName := ds.FindGameDefinitionByName(gameDefinition.Name)
 	if foundByName != nil {
 		log.WithFields(log.Fields{
 			"gameDefinition": gameDefinition,
 			"filename":       fileName,
 		}).Info("gamedefinition already EXISTS")
 	} else {
-		createResult := dataSource.createGameDefinition(&gameDefinition)
+		createResult := ds.CreateGameDefinition(&gameDefinition)
 		log.WithFields(log.Fields{
 			"gameDefinition": createResult,
 			"filename":       fileName,
