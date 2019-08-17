@@ -6,38 +6,36 @@ import (
 
 // Request definition
 type Request struct {
-	data string
+	Data string
 }
 
 // Response definition
 type Response struct {
-	data string
+	Data string
 }
 
-type internalRequest struct {
-	data   Request
+type message struct {
+	input  Request
 	output chan Response
 }
 
 // RequestHandler definition
 type RequestHandler struct {
-	input chan internalRequest
-	wait  sync.WaitGroup
+	messages chan message
+	wait     sync.WaitGroup
 }
 
-// BuildRequestHandler creates an instance of the request handler
-func BuildRequestHandler() *RequestHandler {
+// Listen starts to process the input channel and returns the instance
+func Listen() *RequestHandler {
 	handler := RequestHandler{
-		input: make(chan internalRequest),
+		messages: make(chan message),
 	}
 
-	// starts the listener and notify main goroutine to wait
-	// using the waitgroup from the handler
+	// notify main goroutine to wait using the waitgroup from the handler
+	handler.wait.Add(1)
 	go func() {
 		for {
-			handler.wait.Add(1)
 			go handler.process()
-			handler.wait.Wait()
 		}
 	}()
 
@@ -46,20 +44,20 @@ func BuildRequestHandler() *RequestHandler {
 
 // process handles one request from the handler.input channel
 func (handler *RequestHandler) process() {
-	next := <-handler.input
-	next.output <- Response{data: next.data.data}
-	handler.wait.Done()
+	select {
+	case next := <-handler.messages:
+		next.output <- Response{Data: next.input.Data}
+	}
 }
 
 // Send definition
-func (handler *RequestHandler) Send(input Request) chan Response {
+func (handler *RequestHandler) Send(request Request) chan Response {
 	response := make(chan Response)
 
-	request := internalRequest{
-		data:   input,
+	handler.messages <- message{
+		input:  request,
 		output: response,
 	}
 
-	handler.input <- request
-	return request.output
+	return response
 }

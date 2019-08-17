@@ -26,12 +26,14 @@ import (
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"gitlab.com/robolucha/robolucha-api/auth"
 	"gitlab.com/robolucha/robolucha-api/model"
+	"gitlab.com/robolucha/robolucha-api/routes/play"
 
 	_ "gitlab.com/robolucha/robolucha-api/docs"
 )
 
 var dataSource *DataSource
 var publisher Publisher
+var playRequestHandler play.RequestHandler
 
 func main() {
 	log.SetFormatter(&log.JSONFormatter{})
@@ -46,6 +48,8 @@ func main() {
 
 	publisher = &RedisPublisher{}
 	go dataSource.KeepAlive()
+
+	playRequestHandler := play.Listen()
 
 	if len(os.Args) < 2 {
 		log.Error("Missing gamedefinition folder parameter")
