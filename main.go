@@ -387,37 +387,37 @@ func updateGameDefinition(c *gin.Context) {
 // @Success 200 {object} model.Match
 // @Security ApiKeyAuth
 // @Router /internal/start-match/{name} [post]
-func startMatch(c *gin.Context) {
+// func startMatch(c *gin.Context) {
 
-	name := c.Param("name")
+// 	name := c.Param("name")
 
-	log.WithFields(log.Fields{
-		"name": name,
-	}).Info("startMatch")
+// 	log.WithFields(log.Fields{
+// 		"name": name,
+// 	}).Info("startMatch")
 
-	gameDefinition := ds.FindGameDefinitionByName(name)
-	if gameDefinition == nil {
-		log.Info("Invalid gamedefinition name")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
+// 	gameDefinition := ds.FindGameDefinitionByName(name)
+// 	if gameDefinition == nil {
+// 		log.Info("Invalid gamedefinition name")
+// 		c.AbortWithStatus(http.StatusBadRequest)
+// 		return
+// 	}
 
-	match := ds.CreateMatch(gameDefinition.ID)
-	if match == nil {
-		log.Error("Invalid Match when saving")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
+// 	match := ds.CreateMatch(gameDefinition.ID)
+// 	if match == nil {
+// 		log.Error("Invalid Match when saving")
+// 		c.AbortWithStatus(http.StatusBadRequest)
+// 		return
+// 	}
 
-	// load all the fields
-	match = ds.FindMatch(match.ID)
+// 	// load all the fields
+// 	match = ds.FindMatch(match.ID)
 
-	log.WithFields(log.Fields{
-		"createMatch": match,
-	}).Info("created match")
+// 	log.WithFields(log.Fields{
+// 		"createMatch": match,
+// 	}).Info("created match")
 
-	c.JSON(http.StatusOK, match)
-}
+// 	c.JSON(http.StatusOK, match)
+// }
 
 // startTutorialMatch godoc
 // @Summary create Match and publish

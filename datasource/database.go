@@ -200,28 +200,6 @@ func (ds *DataSource) createHash(key string) string {
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-func (ds *DataSource) CreateMatch(gameDefinitionID uint) *model.Match {
-
-	gameDefinition := ds.FindGameDefinition(gameDefinitionID)
-	output, _ := json.Marshal(gameDefinition)
-	gameDefinitionData := string(output)
-
-	match := model.Match{
-		TimeStart:          time.Now(),
-		GameDefinitionID:   gameDefinitionID,
-		GameDefinitionData: gameDefinitionData,
-	}
-
-	ds.DB.Create(&match)
-
-	log.WithFields(log.Fields{
-		"match.id":         match.ID,
-		"gameDefinitionID": gameDefinitionID,
-	}).Info("Match created")
-
-	return &match
-}
-
 func (ds *DataSource) CreateLuchador(l *model.GameComponent) *model.GameComponent {
 	luchador := model.GameComponent{
 		UserID:  l.UserID,
@@ -892,4 +870,3 @@ func (ds *DataSource) AddMatchMetric(m *model.MatchMetric) *model.MatchMetric {
 
 	return &metric
 }
-

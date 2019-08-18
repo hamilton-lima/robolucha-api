@@ -68,7 +68,53 @@ func (handler *RequestHandler) process() {
 func buildResponse(next message) Response {
 	availableMatch := next.input.Data
 
-	match := Match{MatchID: availableMatch.ID}
+	match := findActiveMatch(availableMatch)
+	if match == nil {
+		createMatch(availableMatch)
+		// send message to start match
+		// send message to join
+	} else {
+		// send message to join
+	}
+
 	result := Response{Data: &match}
 	return result
+}
+
+func findActiveMatch(availableMatch *model.AvailableMatch) *model.Match {
+
+	var match model.Match
+	ds.DB.
+		Where("game_definition_id = ?", availableMatch.ID).
+		Where("time_end < time_start").
+		Order("time_start desc").First(&match)
+
+	log.WithFields(log.Fields{
+		"match": match,
+	}).Info("findActiveMatch")
+
+	return match
+}
+
+func createMatch(availableMatch *model.AvailableMatch) *model.Match {
+
+	gameDefinition := ds.FindGameDefinition(availableMatch.gameDefinitionID)
+	output, _ := json.Marshal(gameDefinition)
+	gameDefinitionData := string(output)
+
+	match := model.Match{
+		TimeStart:          time.Now(),
+		GameDefinitionID:   gameDefinitionID,
+		GameDefinitionData: gameDefinitionData,
+		AvailableMatchID: availableMatch.ID
+	}
+
+	ds.DB.Create(&match)
+
+	log.WithFields(log.Fields{
+		"match.id":         match.ID,
+		"match": match,
+	}).Info("Match created")
+
+	return &match
 }
