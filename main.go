@@ -27,6 +27,8 @@ import (
 	"gitlab.com/robolucha/robolucha-api/auth"
 	"gitlab.com/robolucha/robolucha-api/datasource"
 	"gitlab.com/robolucha/robolucha-api/model"
+	"gitlab.com/robolucha/robolucha-api/pubsub"
+	"gitlab.com/robolucha/robolucha-api/routes"
 	"gitlab.com/robolucha/robolucha-api/routes/play"
 	"gitlab.com/robolucha/robolucha-api/setup"
 
@@ -34,8 +36,7 @@ import (
 )
 
 var ds *datasource.DataSource
-var publisher Publisher
-var playRequestHandler play.RequestHandler
+var publisher pubsub.Publisher
 
 func main() {
 	log.SetFormatter(&log.JSONFormatter{})
@@ -48,10 +49,8 @@ func main() {
 	ds = datasource.NewDataSource(datasource.BuildMysqlConfig())
 	defer ds.DB.Close()
 
-	publisher = &RedisPublisher{}
+	publisher = &pubsub.RedisPublisher{}
 	go ds.KeepAlive()
-
-	// playRequestHandler := play.Listen()
 
 	if len(os.Args) < 2 {
 		log.Error("Missing gamedefinition folder parameter")
@@ -157,6 +156,9 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.GET("/available-match-classroom/:classroom", getClassroomAvailableMatch)
 
 	}
+
+	playRouter := play.Init(ds, publisher)
+	routes.Use(privateAPI, playRouter)
 
 	return router
 }
