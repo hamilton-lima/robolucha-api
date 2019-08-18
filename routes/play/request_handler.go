@@ -1,17 +1,18 @@
 package play
 
 import (
+	"gitlab.com/robolucha/robolucha-api/model"
 	"sync"
 )
 
 // Request definition
 type Request struct {
-	Data string
+	Data *model.AvailableMatch
 }
 
 // Response definition
 type Response struct {
-	Data string
+	Data *Match
 }
 
 type message struct {
@@ -35,19 +36,12 @@ func Listen() *RequestHandler {
 	handler.wait.Add(1)
 	go func() {
 		for {
+			handler.wait.Add(1)
 			go handler.process()
 		}
 	}()
 
 	return &handler
-}
-
-// process handles one request from the handler.input channel
-func (handler *RequestHandler) process() {
-	select {
-	case next := <-handler.messages:
-		next.output <- Response{Data: next.input.Data}
-	}
 }
 
 // Send definition
@@ -60,4 +54,21 @@ func (handler *RequestHandler) Send(request Request) chan Response {
 	}
 
 	return response
+}
+
+// process handles one request from the handler.input channel
+func (handler *RequestHandler) process() {
+	select {
+	case next := <-handler.messages:
+		next.output <- buildResponse(next)
+	}
+	handler.wait.Done()
+}
+
+func buildResponse(next message) Response {
+	availableMatch := next.input.Data
+
+	match := Match{MatchID: availableMatch.ID}
+	result := Response{Data: &match}
+	return result
 }
