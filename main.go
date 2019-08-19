@@ -26,6 +26,7 @@ import (
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"gitlab.com/robolucha/robolucha-api/auth"
 	"gitlab.com/robolucha/robolucha-api/datasource"
+	"gitlab.com/robolucha/robolucha-api/httphelper"
 	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/pubsub"
 	"gitlab.com/robolucha/robolucha-api/routes"
@@ -120,7 +121,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		internalAPI.POST("/game-definition", createGameDefinition)
 		internalAPI.PUT("/game-definition", updateGameDefinition)
 
-		internalAPI.POST("/start-match/:name", startMatch)
+		// internalAPI.POST("/start-match/:name", startMatch)
 		internalAPI.POST("/game-component", createGameComponent)
 		internalAPI.POST("/luchador", getLuchadorByIDAndGamedefinitionID)
 		internalAPI.POST("/match-participant", addMatchPartipant)
@@ -148,7 +149,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.POST("/join-match", joinMatch)
 		privateAPI.GET("/game-definition-id/:id", getGameDefinitionByID)
 		privateAPI.GET("/game-definition-all", getGameDefinition)
-		privateAPI.POST("/start-tutorial-match/:name", startTutorialMatch)
+		// privateAPI.POST("/start-tutorial-match/:name", startTutorialMatch)
 		privateAPI.GET("/classroom", getClassroom)
 		privateAPI.POST("/classroom", addClassroom)
 		privateAPI.POST("/join-classroom/:accessCode", joinClassroom)
@@ -161,12 +162,6 @@ func createRouter(internalAPIKey string, logRequestBody string,
 	routes.Use(privateAPI, playRouter)
 
 	return router
-}
-
-func userFromContext(c *gin.Context) *model.User {
-	val, _ := c.Get("user")
-	user := val.(*model.User)
-	return user
 }
 
 // SessionValidatorFactory definition
@@ -253,7 +248,7 @@ func KeyIsValid(key string) gin.HandlerFunc {
 func findUserSetting(c *gin.Context) {
 
 	log.Info("Finding userSetting")
-	user := userFromContext(c)
+	user := httphelper.UserFromContext(c)
 
 	userSetting := ds.FindUserSettingByUser(user)
 
@@ -427,54 +422,54 @@ func updateGameDefinition(c *gin.Context) {
 // @Success 200 {object} model.JoinMatch
 // @Security ApiKeyAuth
 // @Router /private/start-tutorial-match/{name} [post]
-func startTutorialMatch(c *gin.Context) {
+// func startTutorialMatch(c *gin.Context) {
 
-	name := c.Param("name")
+// 	name := c.Param("name")
 
-	log.WithFields(log.Fields{
-		"name": name,
-	}).Info("startTutorialMatch")
+// 	log.WithFields(log.Fields{
+// 		"name": name,
+// 	}).Info("startTutorialMatch")
 
-	gameDefinition := ds.FindGameDefinitionByName(name)
-	if gameDefinition == nil {
-		log.Info("Invalid gamedefinition name")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
+// 	gameDefinition := ds.FindGameDefinitionByName(name)
+// 	if gameDefinition == nil {
+// 		log.Info("Invalid gamedefinition name")
+// 		c.AbortWithStatus(http.StatusBadRequest)
+// 		return
+// 	}
 
-	user := userFromContext(c)
+// 	user := httphelper.UserFromContext(c)
 
-	luchador := ds.FindLuchador(user)
-	if luchador == nil {
-		log.WithFields(log.Fields{
-			"user": user,
-		}).Error("Error getting luchador for the current user")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
+// 	luchador := ds.FindLuchador(user)
+// 	if luchador == nil {
+// 		log.WithFields(log.Fields{
+// 			"user": user,
+// 		}).Error("Error getting luchador for the current user")
+// 		c.AbortWithStatus(http.StatusBadRequest)
+// 		return
+// 	}
 
-	match := ds.FindActiveMatchesByGameDefinitionAndParticipant(gameDefinition, luchador)
-	// not found will create
-	if match == nil {
-		match = ds.CreateMatch(gameDefinition.ID)
-		if match == nil {
-			log.Error("Invalid Match when saving")
-			c.AbortWithStatus(http.StatusBadRequest)
-			return
-		}
-	}
+// 	match := ds.FindActiveMatchesByGameDefinitionAndParticipant(gameDefinition, luchador)
+// 	// not found will create
+// 	if match == nil {
+// 		match = ds.CreateMatch(gameDefinition.ID)
+// 		if match == nil {
+// 			log.Error("Invalid Match when saving")
+// 			c.AbortWithStatus(http.StatusBadRequest)
+// 			return
+// 		}
+// 	}
 
-	result := model.JoinMatch{MatchID: match.ID, LuchadorID: luchador.ID}
-	// publish event to run the match
-	resultJSON, _ := json.Marshal(result)
-	publisher.Publish("start.match", string(resultJSON))
+// 	result := model.JoinMatch{MatchID: match.ID, LuchadorID: luchador.ID}
+// 	// publish event to run the match
+// 	resultJSON, _ := json.Marshal(result)
+// 	publisher.Publish("start.match", string(resultJSON))
 
-	log.WithFields(log.Fields{
-		"createMatch": result,
-	}).Info("created match")
+// 	log.WithFields(log.Fields{
+// 		"createMatch": result,
+// 	}).Info("created match")
 
-	c.JSON(http.StatusOK, result)
-}
+// 	c.JSON(http.StatusOK, result)
+// }
 
 // getUser godoc
 // @Summary find The current user information
@@ -484,7 +479,7 @@ func startTutorialMatch(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /private/get-user [get]
 func getUser(c *gin.Context) {
-	user := userFromContext(c)
+	user := httphelper.UserFromContext(c)
 	c.JSON(http.StatusOK, user)
 }
 
@@ -496,7 +491,7 @@ func getUser(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /private/luchador [get]
 func getLuchador(c *gin.Context) {
-	user := userFromContext(c)
+	user := httphelper.UserFromContext(c)
 	var luchador *model.GameComponent
 
 	luchador = ds.FindLuchador(user)
@@ -546,7 +541,7 @@ func getLuchador(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /private/luchador [put]
 func updateLuchador(c *gin.Context) {
-	user := userFromContext(c)
+	user := httphelper.UserFromContext(c)
 	response := model.UpdateLuchadorResponse{Errors: []string{}}
 
 	var luchador *model.GameComponent
@@ -977,7 +972,7 @@ func joinMatch(c *gin.Context) {
 		return
 	}
 
-	user := userFromContext(c)
+	user := httphelper.UserFromContext(c)
 
 	var luchador *model.GameComponent
 	luchador = ds.FindLuchador(user)
@@ -1214,7 +1209,7 @@ func addMatchMetric(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /private/classroom [get]
 func getClassroom(c *gin.Context) {
-	user := userFromContext(c)
+	user := httphelper.UserFromContext(c)
 	result := ds.FindAllClassroom(user)
 
 	log.WithFields(log.Fields{
@@ -1233,7 +1228,7 @@ func getClassroom(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /private/classroom [post]
 func addClassroom(c *gin.Context) {
-	user := userFromContext(c)
+	user := httphelper.UserFromContext(c)
 
 	var classroom *model.Classroom
 	err := c.BindJSON(&classroom)
@@ -1272,7 +1267,7 @@ func addClassroom(c *gin.Context) {
 func joinClassroom(c *gin.Context) {
 
 	accessCode := c.Param("accessCode")
-	user := userFromContext(c)
+	user := httphelper.UserFromContext(c)
 
 	log.WithFields(log.Fields{
 		"accessCode": accessCode,

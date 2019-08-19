@@ -3,7 +3,6 @@ package datasource
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"os"
 	"time"

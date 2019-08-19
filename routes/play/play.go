@@ -6,34 +6,31 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gitlab.com/robolucha/robolucha-api/datasource"
+	"gitlab.com/robolucha/robolucha-api/httphelper"
 	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/pubsub"
 )
 
 var requestHandler *RequestHandler
-var ds *datasource.DataSource
-var publisher pubsub.Publisher
 
 // Init receive database and message queue objects
 func Init(_ds *datasource.DataSource, _publisher pubsub.Publisher) *Router {
-	ds = _ds
-	publisher = _publisher
-	requestHandler = Listen()
+	requestHandler = Listen(_ds, _publisher)
 
-	return &Router{}
+	return &Router{ds: _ds,
+		publisher: _publisher,
+	}
 }
 
 // Router definition
-type Router struct{}
+type Router struct {
+	ds        *datasource.DataSource
+	publisher pubsub.Publisher
+}
 
 // Setup definition
 func (router *Router) Setup(group *gin.RouterGroup) {
 	group.POST("/play", play)
-}
-
-// Match definition
-type Match struct {
-	MatchID uint `json:"matchID"`
 }
 
 // play godoc
@@ -41,7 +38,7 @@ type Match struct {
 // @Accept json
 // @Produce json
 // @Param request body model.AvailableMatch true "AvailableMatch"
-// @Success 200 {object} play.Match
+// @Success 200 {object} model.Match
 // @Security ApiKeyAuth
 // @Router /internal/play [post]
 func play(c *gin.Context) {
@@ -61,13 +58,14 @@ func play(c *gin.Context) {
 		"AvailableMatch": input,
 	}).Info("play()")
 
-	wait := requestHandler.Send(Request{Data: input})
+	user := httphelper.UserFromContext(c)
+
+	wait := requestHandler.Send(Request{User: user, AvailableMatch: input})
 	response := <-wait
-	result := response.Data
 
 	log.WithFields(log.Fields{
-		"Match": result,
+		"Match": response.Match,
 	}).Info("play()")
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, response.Match)
 }

@@ -2,12 +2,13 @@ package httphelper
 
 import (
 	"errors"
-	"strconv"
-
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/robolucha/robolucha-api/model"
+	"strconv"
 )
 
+// GetIntegerParam gets an integer parameter from request and validate
 func GetIntegerParam(c *gin.Context, paramName string, context string) (uint, error) {
 
 	parameter := c.Query(paramName)
@@ -24,4 +25,11 @@ func GetIntegerParam(c *gin.Context, paramName string, context string) (uint, er
 
 	result := uint(i32)
 	return result, nil
+}
+
+// UserFromContext get the current user from the request context
+func UserFromContext(c *gin.Context) *model.User {
+	val, _ := c.Get("user")
+	user := val.(*model.User)
+	return user
 }
