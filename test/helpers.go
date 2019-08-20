@@ -9,7 +9,7 @@ import (
 )
 
 const API_KEY = "123456"
-const DB_NAME = "./test-data/robolucha-api-test.db"
+const DB_NAME = "robolucha-api-test.db"
 
 func PerformRequest(r http.Handler, method, path string, body string, authorization string) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest(method, path, bytes.NewBufferString(body))

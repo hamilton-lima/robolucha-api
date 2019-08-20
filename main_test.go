@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -31,120 +30,120 @@ func SetupMain(t *testing.T) {
 	ds = datasource.NewDataSource(datasource.BuildSQLLiteConfig(test.DB_NAME))
 }
 
-func TestCreateMatch(t *testing.T) {
-	SetupMain(t)
-	defer ds.DB.Close()
+// func TestCreateMatch(t *testing.T) {
+// 	SetupMain(t)
+// 	defer ds.DB.Close()
 
-	gd := BuildDefaultGameDefinition()
-	gd.Name = "FOOBAR"
-	ds.CreateGameDefinition(&gd)
+// 	gd := BuildDefaultGameDefinition()
+// 	gd.Name = "FOOBAR"
+// 	ds.CreateGameDefinition(&gd)
 
-	url := fmt.Sprintf("/internal/start-match/%v", gd.Name)
+// 	url := fmt.Sprintf("/internal/start-match/%v", gd.Name)
 
-	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
-	w := test.PerformRequest(router, "POST", url, "", test.API_KEY)
-	assert.Equal(t, http.StatusOK, w.Code)
+// 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
+// 	w := test.PerformRequest(router, "POST", url, "", test.API_KEY)
+// 	assert.Equal(t, http.StatusOK, w.Code)
 
-}
+// }
 
-func TestCreateTutorialMatch(t *testing.T) {
-	SetupMain(t)
-	defer ds.DB.Close()
+// func TestCreateTutorialMatch(t *testing.T) {
+// 	SetupMain(t)
+// 	defer ds.DB.Close()
 
-	mockPublisher = &test.MockPublisher{}
-	publisher = mockPublisher
+// 	mockPublisher = &test.MockPublisher{}
+// 	publisher = mockPublisher
 
-	gd := BuildDefaultGameDefinition()
-	gd.Name = "FOOBAR"
-	ds.CreateGameDefinition(&gd)
+// 	gd := BuildDefaultGameDefinition()
+// 	gd.Name = "FOOBAR"
+// 	ds.CreateGameDefinition(&gd)
 
-	url := fmt.Sprintf("/private/start-tutorial-match/%v", gd.Name)
-	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
+// 	url := fmt.Sprintf("/private/start-tutorial-match/%v", gd.Name)
+// 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
 
-	// force the luchador creation for the current user
-	luchadorResponse := test.PerformRequestNoAuth(router, "GET", "/private/luchador", "")
-	assert.Equal(t, http.StatusOK, luchadorResponse.Code)
-	var luchador model.GameComponent
-	json.Unmarshal(luchadorResponse.Body.Bytes(), &luchador)
+// 	// force the luchador creation for the current user
+// 	luchadorResponse := test.PerformRequestNoAuth(router, "GET", "/private/luchador", "")
+// 	assert.Equal(t, http.StatusOK, luchadorResponse.Code)
+// 	var luchador model.GameComponent
+// 	json.Unmarshal(luchadorResponse.Body.Bytes(), &luchador)
 
-	w := test.PerformRequest(router, "POST", url, "", test.API_KEY)
-	assert.Equal(t, http.StatusOK, w.Code)
+// 	w := test.PerformRequest(router, "POST", url, "", test.API_KEY)
+// 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var apiResult *model.JoinMatch
-	json.Unmarshal(w.Body.Bytes(), &apiResult)
+// 	var apiResult *model.JoinMatch
+// 	json.Unmarshal(w.Body.Bytes(), &apiResult)
 
-	var publisherResult *model.JoinMatch
-	json.Unmarshal([]byte(mockPublisher.LastMessage), &publisherResult)
+// 	var publisherResult *model.JoinMatch
+// 	json.Unmarshal([]byte(mockPublisher.LastMessage), &publisherResult)
 
-	match := (*ds.FindActiveMatches())[0]
+// 	match := (*ds.FindActiveMatches())[0]
 
-	assert.Equal(t, match.ID, publisherResult.MatchID)
-	assert.Equal(t, luchador.ID, publisherResult.LuchadorID)
-	assert.Equal(t, match.ID, apiResult.MatchID)
-	assert.Equal(t, luchador.ID, apiResult.LuchadorID)
+// 	assert.Equal(t, match.ID, publisherResult.MatchID)
+// 	assert.Equal(t, luchador.ID, publisherResult.LuchadorID)
+// 	assert.Equal(t, match.ID, apiResult.MatchID)
+// 	assert.Equal(t, luchador.ID, apiResult.LuchadorID)
 
-	// add participant
-	matchParticipant := model.MatchParticipant{LuchadorID: luchador.ID, MatchID: match.ID}
-	body, _ := json.Marshal(matchParticipant)
+// 	// add participant
+// 	matchParticipant := model.MatchParticipant{LuchadorID: luchador.ID, MatchID: match.ID}
+// 	body, _ := json.Marshal(matchParticipant)
 
-	w = test.PerformRequest(router, "POST", "/internal/match-participant", string(body), test.API_KEY)
-	assert.Equal(t, http.StatusOK, w.Code)
+// 	w = test.PerformRequest(router, "POST", "/internal/match-participant", string(body), test.API_KEY)
+// 	assert.Equal(t, http.StatusOK, w.Code)
 
-	// no messsage should be sent to the publisher if the match exists
-	mockPublisher.LastMessage = "EMPTY"
+// 	// no messsage should be sent to the publisher if the match exists
+// 	mockPublisher.LastMessage = "EMPTY"
 
-	//call again and expect the same matchID
-	w = test.PerformRequest(router, "POST", url, "", test.API_KEY)
-	assert.Equal(t, http.StatusOK, w.Code)
+// 	//call again and expect the same matchID
+// 	w = test.PerformRequest(router, "POST", url, "", test.API_KEY)
+// 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var secondApiResult *model.JoinMatch
-	json.Unmarshal(w.Body.Bytes(), &secondApiResult)
+// 	var secondApiResult *model.JoinMatch
+// 	json.Unmarshal(w.Body.Bytes(), &secondApiResult)
 
-	assert.Equal(t, match.ID, secondApiResult.MatchID)
-	assert.Equal(t, luchador.ID, secondApiResult.LuchadorID)
+// 	assert.Equal(t, match.ID, secondApiResult.MatchID)
+// 	assert.Equal(t, luchador.ID, secondApiResult.LuchadorID)
 
-	// even if the match exists should send the message to start
-	// the runner should only start ONCE
-	var publisherResult2 *model.JoinMatch
-	json.Unmarshal([]byte(mockPublisher.LastMessage), &publisherResult2)
-	assert.Equal(t, match.ID, publisherResult2.MatchID)
-	assert.Equal(t, luchador.ID, publisherResult2.LuchadorID)
+// 	// even if the match exists should send the message to start
+// 	// the runner should only start ONCE
+// 	var publisherResult2 *model.JoinMatch
+// 	json.Unmarshal([]byte(mockPublisher.LastMessage), &publisherResult2)
+// 	assert.Equal(t, match.ID, publisherResult2.MatchID)
+// 	assert.Equal(t, luchador.ID, publisherResult2.LuchadorID)
 
-	// end match and call again expecting to have a new match
-	match.TimeEnd = time.Now()
-	body, _ = json.Marshal(match)
-	w = test.PerformRequest(router, "PUT", "/internal/end-match", string(body), test.API_KEY)
-	assert.Equal(t, http.StatusOK, w.Code)
+// 	// end match and call again expecting to have a new match
+// 	match.TimeEnd = time.Now()
+// 	body, _ = json.Marshal(match)
+// 	w = test.PerformRequest(router, "PUT", "/internal/end-match", string(body), test.API_KEY)
+// 	assert.Equal(t, http.StatusOK, w.Code)
 
-	w = test.PerformRequest(router, "POST", url, "", test.API_KEY)
-	assert.Equal(t, http.StatusOK, w.Code)
+// 	w = test.PerformRequest(router, "POST", url, "", test.API_KEY)
+// 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var thirdAPIResult *model.JoinMatch
-	json.Unmarshal(w.Body.Bytes(), &thirdAPIResult)
+// 	var thirdAPIResult *model.JoinMatch
+// 	json.Unmarshal(w.Body.Bytes(), &thirdAPIResult)
 
-	var thirdPublisherResult *model.JoinMatch
-	json.Unmarshal([]byte(mockPublisher.LastMessage), &thirdPublisherResult)
+// 	var thirdPublisherResult *model.JoinMatch
+// 	json.Unmarshal([]byte(mockPublisher.LastMessage), &thirdPublisherResult)
 
-	thirdCallMatch := (*ds.FindActiveMatches())[0]
+// 	thirdCallMatch := (*ds.FindActiveMatches())[0]
 
-	log.WithFields(log.Fields{
-		"thirdApiResult":       thirdAPIResult,
-		"thirdPublisherResult": thirdPublisherResult,
-		"thirdCallMatch":       thirdCallMatch,
-		"step":                 "Third call",
-	}).Debug("TestCreateTutorialMatch")
+// 	log.WithFields(log.Fields{
+// 		"thirdApiResult":       thirdAPIResult,
+// 		"thirdPublisherResult": thirdPublisherResult,
+// 		"thirdCallMatch":       thirdCallMatch,
+// 		"step":                 "Third call",
+// 	}).Debug("TestCreateTutorialMatch")
 
-	assert.Equal(t, thirdCallMatch.ID, thirdAPIResult.MatchID)
-	assert.Equal(t, luchador.ID, thirdAPIResult.LuchadorID)
+// 	assert.Equal(t, thirdCallMatch.ID, thirdAPIResult.MatchID)
+// 	assert.Equal(t, luchador.ID, thirdAPIResult.LuchadorID)
 
-	assert.Equal(t, thirdCallMatch.ID, thirdPublisherResult.MatchID)
-	assert.Equal(t, luchador.ID, thirdPublisherResult.LuchadorID)
+// 	assert.Equal(t, thirdCallMatch.ID, thirdPublisherResult.MatchID)
+// 	assert.Equal(t, luchador.ID, thirdPublisherResult.LuchadorID)
 
-	// make sure it created a new match
-	assert.Assert(t, match.ID != thirdAPIResult.MatchID)
-	assert.Assert(t, match.ID != thirdPublisherResult.MatchID)
+// 	// make sure it created a new match
+// 	assert.Assert(t, match.ID != thirdAPIResult.MatchID)
+// 	assert.Assert(t, match.ID != thirdPublisherResult.MatchID)
 
-}
+// }
 
 func TestUpdateGameDefinition(t *testing.T) {
 	SetupMain(t)
@@ -319,69 +318,69 @@ func TestCreateGameComponent(t *testing.T) {
 	AssertConfigMatch(t, luchadorFromDB.Configs, configsFromDB)
 }
 
-func TestAddScores(t *testing.T) {
-	SetupMain(t)
-	defer ds.DB.Close()
+// func TestAddScores(t *testing.T) {
+// 	SetupMain(t)
+// 	defer ds.DB.Close()
 
-	luchador1 := ds.CreateLuchador(&model.GameComponent{Name: "foo"})
-	luchador2 := ds.CreateLuchador(&model.GameComponent{Name: "bar"})
-	luchador3 := ds.CreateLuchador(&model.GameComponent{Name: "dee"})
+// 	luchador1 := ds.CreateLuchador(&model.GameComponent{Name: "foo"})
+// 	luchador2 := ds.CreateLuchador(&model.GameComponent{Name: "bar"})
+// 	luchador3 := ds.CreateLuchador(&model.GameComponent{Name: "dee"})
 
-	gd := BuildDefaultGameDefinition()
-	ds.CreateGameDefinition(&gd)
+// 	gd := BuildDefaultGameDefinition()
+// 	ds.CreateGameDefinition(&gd)
 
-	match := ds.CreateMatch(gd.ID)
-	ds.AddMatchParticipant(&model.MatchParticipant{LuchadorID: luchador1.ID, MatchID: match.ID})
-	ds.AddMatchParticipant(&model.MatchParticipant{LuchadorID: luchador2.ID, MatchID: match.ID})
-	ds.AddMatchParticipant(&model.MatchParticipant{LuchadorID: luchador3.ID, MatchID: match.ID})
+// 	match := ds.CreateMatch(gd.ID)
+// 	ds.AddMatchParticipant(&model.MatchParticipant{LuchadorID: luchador1.ID, MatchID: match.ID})
+// 	ds.AddMatchParticipant(&model.MatchParticipant{LuchadorID: luchador2.ID, MatchID: match.ID})
+// 	ds.AddMatchParticipant(&model.MatchParticipant{LuchadorID: luchador3.ID, MatchID: match.ID})
 
-	matchID := fmt.Sprintf("%v", match.ID)
-	luchador1ID := fmt.Sprintf("%v", luchador1.ID)
-	luchador2ID := fmt.Sprintf("%v", luchador2.ID)
-	luchador3ID := fmt.Sprintf("%v", luchador3.ID)
+// 	matchID := fmt.Sprintf("%v", match.ID)
+// 	luchador1ID := fmt.Sprintf("%v", luchador1.ID)
+// 	luchador2ID := fmt.Sprintf("%v", luchador2.ID)
+// 	luchador3ID := fmt.Sprintf("%v", luchador3.ID)
 
-	plan, _ := ioutil.ReadFile("test-data/add-match-scores.json")
-	body := string(plan)
+// 	plan, _ := ioutil.ReadFile("test-data/add-match-scores.json")
+// 	body := string(plan)
 
-	body = strings.Replace(body, "{{.matchID}}", matchID, -1)
-	body = strings.Replace(body, "{{.luchadorID1}}", luchador1ID, -1)
-	body = strings.Replace(body, "{{.luchadorID2}}", luchador2ID, -1)
-	body = strings.Replace(body, "{{.luchadorID3}}", luchador3ID, -1)
+// 	body = strings.Replace(body, "{{.matchID}}", matchID, -1)
+// 	body = strings.Replace(body, "{{.luchadorID1}}", luchador1ID, -1)
+// 	body = strings.Replace(body, "{{.luchadorID2}}", luchador2ID, -1)
+// 	body = strings.Replace(body, "{{.luchadorID3}}", luchador3ID, -1)
 
-	log.WithFields(log.Fields{
-		"body": body,
-	}).Debug("TestAddScores")
+// 	log.WithFields(log.Fields{
+// 		"body": body,
+// 	}).Debug("TestAddScores")
 
-	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
-	w := test.PerformRequest(router, "POST", "/internal/add-match-scores", body, test.API_KEY)
-	resultScores := ds.GetMatchScoresByMatchID(match.ID)
-	assert.Equal(t, 3, len(*resultScores))
-	assert.Equal(t, http.StatusOK, w.Code)
+// 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
+// 	w := test.PerformRequest(router, "POST", "/internal/add-match-scores", body, test.API_KEY)
+// 	resultScores := ds.GetMatchScoresByMatchID(match.ID)
+// 	assert.Equal(t, 3, len(*resultScores))
+// 	assert.Equal(t, http.StatusOK, w.Code)
 
-	// parse request body in object to validate the result
-	var scoreList model.ScoreList
-	json.Unmarshal([]byte(body), &scoreList)
+// 	// parse request body in object to validate the result
+// 	var scoreList model.ScoreList
+// 	json.Unmarshal([]byte(body), &scoreList)
 
-	// check if all data was saved correctly
-	for _, scoreFromBody := range scoreList.Scores {
-		found := false
-		for _, scoreFromDB := range *resultScores {
-			if scoreFromBody.LuchadorID == scoreFromDB.LuchadorID &&
-				scoreFromBody.Kills == scoreFromDB.Kills &&
-				scoreFromBody.Deaths == scoreFromDB.Deaths &&
-				scoreFromBody.Score == scoreFromDB.Score {
+// 	// check if all data was saved correctly
+// 	for _, scoreFromBody := range scoreList.Scores {
+// 		found := false
+// 		for _, scoreFromDB := range *resultScores {
+// 			if scoreFromBody.LuchadorID == scoreFromDB.LuchadorID &&
+// 				scoreFromBody.Kills == scoreFromDB.Kills &&
+// 				scoreFromBody.Deaths == scoreFromDB.Deaths &&
+// 				scoreFromBody.Score == scoreFromDB.Score {
 
-				found = true
-				break
-			}
-		}
-		assert.Assert(t, found)
-		log.WithFields(log.Fields{
-			"score-from-body": scoreFromBody,
-		}).Debug("TestAddScores")
-	}
+// 				found = true
+// 				break
+// 			}
+// 		}
+// 		assert.Assert(t, found)
+// 		log.WithFields(log.Fields{
+// 			"score-from-body": scoreFromBody,
+// 		}).Debug("TestAddScores")
+// 	}
 
-}
+// }
 
 func getConfigs(t *testing.T, router *gin.Engine, id uint) []model.Config {
 
@@ -429,32 +428,32 @@ func TestGETGameDefinition(t *testing.T) {
 	assert.Assert(t, definition1.ID != definition2.ID)
 }
 
-func TestFindMultiplayerMatch(t *testing.T) {
-	SetupMain(t)
-	defer ds.DB.Close()
+// func TestFindMultiplayerMatch(t *testing.T) {
+// 	SetupMain(t)
+// 	defer ds.DB.Close()
 
-	definition1 := createTestGameDefinition(t, model.GAMEDEFINITION_TYPE_TUTORIAL, 20)
-	definition2 := createTestGameDefinition(t, model.GAMEDEFINITION_TYPE_MULTIPLAYER, 10)
-	definition3 := createTestGameDefinition(t, faker.Word(), 1)
+// 	definition1 := createTestGameDefinition(t, model.GAMEDEFINITION_TYPE_TUTORIAL, 20)
+// 	definition2 := createTestGameDefinition(t, model.GAMEDEFINITION_TYPE_MULTIPLAYER, 10)
+// 	definition3 := createTestGameDefinition(t, faker.Word(), 1)
 
-	ds.CreateMatch(definition1.ID)
-	match := ds.CreateMatch(definition2.ID)
-	ds.CreateMatch(definition3.ID)
+// 	ds.CreateMatch(definition1.ID)
+// 	match := ds.CreateMatch(definition2.ID)
+// 	ds.CreateMatch(definition3.ID)
 
-	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
-	w := test.PerformRequestNoAuth(router, "GET", "/private/match", "")
-	assert.Equal(t, http.StatusOK, w.Code)
+// 	router := createRouter(test.API_KEY, "true", SessionAllwaysValid)
+// 	w := test.PerformRequestNoAuth(router, "GET", "/private/match", "")
+// 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var matches []model.ActiveMatch
-	json.Unmarshal(w.Body.Bytes(), &matches)
+// 	var matches []model.ActiveMatch
+// 	json.Unmarshal(w.Body.Bytes(), &matches)
 
-	assert.Assert(t, matches[0].MatchID == match.ID)
+// 	assert.Assert(t, matches[0].MatchID == match.ID)
 
-	gameDefinitions := *ds.FindTutorialGameDefinition()
+// 	gameDefinitions := *ds.FindTutorialGameDefinition()
 
-	// all the tutorial gamedefinitions and the active multiplayer matches
-	assert.Assert(t, len(matches) == len(gameDefinitions)+1)
-}
+// 	// all the tutorial gamedefinitions and the active multiplayer matches
+// 	assert.Assert(t, len(matches) == len(gameDefinitions)+1)
+// }
 
 func TestFindTutorialGameDefinition(t *testing.T) {
 	SetupMain(t)

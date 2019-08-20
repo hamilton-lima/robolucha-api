@@ -1,14 +1,41 @@
 package play_test
 
 import (
+	"os"
+
+	log "github.com/sirupsen/logrus"
+
+	"gitlab.com/robolucha/robolucha-api/datasource"
 	"gitlab.com/robolucha/robolucha-api/model"
+	"gitlab.com/robolucha/robolucha-api/pubsub"
 	"gitlab.com/robolucha/robolucha-api/routes/play"
+	"gitlab.com/robolucha/robolucha-api/test"
 	"gotest.tools/assert"
 	"testing"
 )
 
+var mockPublisher *test.MockPublisher
+var ds *datasource.DataSource
+var publisher pubsub.Publisher
+
+func Setup(t *testing.T) {
+	log.SetFormatter(&log.JSONFormatter{})
+	log.SetOutput(os.Stdout)
+	log.SetLevel(log.WarnLevel)
+	os.Setenv("GIN_MODE", "release")
+
+	os.Remove(test.DB_NAME)
+	ds = datasource.NewDataSource(datasource.BuildSQLLiteConfig(test.DB_NAME))
+
+	mockPublisher = &test.MockPublisher{}
+	publisher = mockPublisher
+}
+
 func TestPlayRequestHandler(t *testing.T) {
-	handler := play.Listen()
+	Setup(t)
+	defer ds.DB.Close()
+
+	handler := play.Listen(ds, publisher)
 
 	s1 := handler.Send(play.Request{AvailableMatch: &model.AvailableMatch{ID: 42}})
 	s2 := handler.Send(play.Request{AvailableMatch: &model.AvailableMatch{ID: 43}})
