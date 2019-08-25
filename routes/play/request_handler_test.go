@@ -16,6 +16,7 @@ import (
 )
 
 var ds *datasource.DataSource
+var mockPublisher *test.MockPublisher
 var publisher pubsub.Publisher
 var router *gin.Engine
 
@@ -28,7 +29,8 @@ func Setup(t *testing.T) {
 	os.Remove(test.DB_NAME)
 	ds = datasource.NewDataSource(datasource.BuildSQLLiteConfig(test.DB_NAME))
 
-	publisher = &test.MockPublisher{}
+	mockPublisher = &test.MockPublisher{}
+	publisher = mockPublisher
 }
 
 func TestPlayRequestHandler(t *testing.T) {
@@ -49,6 +51,12 @@ func TestPlayRequestHandler(t *testing.T) {
 
 	r1 := <-s1
 	r2 := <-s2
+
+	startMatchMessages := mockPublisher.Messages["start.match"]
+	joinMatchMessages := mockPublisher.Messages["join.match"]
+
+	assert.Equal(t, len(startMatchMessages), 1)
+	assert.Equal(t, len(joinMatchMessages), 2)
 
 	assert.Equal(t, uint(42), r1.Match.AvailableMatchID)
 	assert.Equal(t, uint(42), r2.Match.AvailableMatchID)

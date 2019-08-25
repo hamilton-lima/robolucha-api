@@ -31,8 +31,10 @@ func PerformRequestNoAuth(r http.Handler, method, path string, body string) *htt
 type MockPublisher struct {
 	LastMessage string
 	LastChannel string
+	Messages    map[string][]string
 }
 
+// Publish saves the messages in the memory and in lastMessage/Channel
 func (mock *MockPublisher) Publish(channel string, message string) {
 	mock.LastChannel = channel
 	mock.LastMessage = message
@@ -40,5 +42,11 @@ func (mock *MockPublisher) Publish(channel string, message string) {
 	log.WithFields(log.Fields{
 		"channel": channel,
 		"message": message,
-	}).Debug("mock publisher")
+	}).Info("mock publisher")
+
+	if mock.Messages == nil {
+		mock.Messages = make(map[string][]string)
+	}
+
+	mock.Messages[channel] = append(mock.Messages[channel], message)
 }
