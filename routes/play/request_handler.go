@@ -13,7 +13,7 @@ import (
 // Request definition
 type Request struct {
 	AvailableMatch *model.AvailableMatch
-	User           *model.User
+	LuchadorID     uint
 }
 
 // Response definition
@@ -81,9 +81,9 @@ func (handler *RequestHandler) buildResponse(next message) Response {
 	if match == nil {
 		match = handler.createMatch(next.input.AvailableMatch)
 		handler.publishStartMatch(match)
-		handler.publishJoinMatch(match, next.input.User)
+		handler.publishJoinMatch(match, next.input.LuchadorID)
 	} else {
-		handler.publishJoinMatch(match, next.input.User)
+		handler.publishJoinMatch(match, next.input.LuchadorID)
 	}
 
 	result := Response{Match: match}
@@ -133,9 +133,31 @@ func (handler *RequestHandler) createMatch(availableMatch *model.AvailableMatch)
 }
 
 func (handler *RequestHandler) publishStartMatch(match *model.Match) {
+	// publish event to run the match
+	resultJSON, _ := json.Marshal(match)
+	result := string(resultJSON)
+	handler.publisher.Publish("start.match", result)
+
+	log.WithFields(log.Fields{
+		"start.match": result,
+	}).Info("publishStartMatch")
 
 }
 
-func (handler *RequestHandler) publishJoinMatch(match *model.Match, user *model.User) {
+func (handler *RequestHandler) publishJoinMatch(match *model.Match, luchadorID uint) {
+
+	join := model.JoinMatch{
+		MatchID:    match.ID,
+		LuchadorID: luchadorID,
+	}
+
+	// publish event to run the match
+	resultJSON, _ := json.Marshal(join)
+	result := string(resultJSON)
+	handler.publisher.Publish("join.match", result)
+
+	log.WithFields(log.Fields{
+		"join.match": result,
+	}).Info("publishJoinMatch")
 
 }

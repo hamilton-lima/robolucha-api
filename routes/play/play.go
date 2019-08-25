@@ -59,8 +59,13 @@ func play(c *gin.Context) {
 	}).Info("play()")
 
 	user := httphelper.UserFromContext(c)
+	luchador := requestHandler.ds.FindLuchador(user)
+	log.WithFields(log.Fields{
+		"luchador": luchador,
+		"user.id":  user.ID,
+	}).Info("publishJoinMatch()")
 
-	wait := requestHandler.Send(Request{User: user, AvailableMatch: input})
+	wait := requestHandler.Send(Request{LuchadorID: luchador.ID, AvailableMatch: input})
 	response := <-wait
 
 	log.WithFields(log.Fields{
