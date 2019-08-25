@@ -21,7 +21,7 @@ var publisher pubsub.Publisher
 func Setup(t *testing.T) {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stdout)
-	log.SetLevel(log.WarnLevel)
+	log.SetLevel(log.InfoLevel)
 	os.Setenv("GIN_MODE", "release")
 
 	os.Remove(test.DB_NAME)
@@ -35,19 +35,26 @@ func TestPlayRequestHandler(t *testing.T) {
 	Setup(t)
 	defer ds.DB.Close()
 
+	gd := model.BuildDefaultGameDefinition()
+	gd.Name = "FOOBAR"
+	ds.CreateGameDefinition(&gd)
+
+	am1 := model.AvailableMatch{ID: 42, GameDefinitionID: gd.ID}
+	am3 := model.AvailableMatch{ID: 3, GameDefinitionID: gd.ID}
+
 	handler := play.Listen(ds, publisher)
 
-	s1 := handler.Send(play.Request{AvailableMatch: &model.AvailableMatch{ID: 42}})
-	s2 := handler.Send(play.Request{AvailableMatch: &model.AvailableMatch{ID: 43}})
+	s1 := handler.Send(play.Request{AvailableMatch: &am1})
+	s2 := handler.Send(play.Request{AvailableMatch: &am1})
 
 	r1 := <-s1
 	r2 := <-s2
 
-	assert.Equal(t, uint(42), r1.Match.ID)
-	assert.Equal(t, uint(43), r2.Match.ID)
+	assert.Equal(t, uint(42), r1.Match.AvailableMatchID)
+	assert.Equal(t, uint(42), r2.Match.AvailableMatchID)
 
-	s3 := handler.Send(play.Request{AvailableMatch: &model.AvailableMatch{ID: 3}})
+	s3 := handler.Send(play.Request{AvailableMatch: &am3})
 	r3 := <-s3
-	assert.Equal(t, uint(3), r3.Match.ID)
+	assert.Equal(t, uint(3), r3.Match.AvailableMatchID)
 
 }

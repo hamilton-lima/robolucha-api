@@ -92,18 +92,21 @@ func (handler *RequestHandler) buildResponse(next message) Response {
 
 func (handler *RequestHandler) findActiveMatch(availableMatch *model.AvailableMatch) *model.Match {
 
-	var match *model.Match
+	var match model.Match
 
-	handler.ds.DB.
-		Where("game_definition_id = ?", availableMatch.ID).
+	if handler.ds.DB.
+		Where("available_match_id = ?", availableMatch.ID).
 		Where("time_end < time_start").
-		Order("time_start desc").First(&match)
+		Order("time_start desc").First(&match).
+		RecordNotFound() {
+		return nil
+	}
 
 	log.WithFields(log.Fields{
 		"match": match,
 	}).Info("findActiveMatch")
 
-	return match
+	return &match
 }
 
 func (handler *RequestHandler) createMatch(availableMatch *model.AvailableMatch) *model.Match {
