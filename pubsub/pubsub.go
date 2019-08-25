@@ -1,4 +1,4 @@
-package main
+package pubsub
 
 import (
 	"fmt"
@@ -9,10 +9,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Publisher definition
 type Publisher interface {
 	Publish(channel string, message string)
 }
 
+// RedisPublisher definition
 type RedisPublisher struct {
 }
 

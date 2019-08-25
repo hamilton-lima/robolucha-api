@@ -15,7 +15,7 @@ func check(e error) {
 }
 func TestGenerateSampleGameDefinition(t *testing.T) {
 
-	gd := BuildDefaultGameDefinition()
+	gd := model.BuildDefaultGameDefinition()
 
 	gd.Name = "ALL-AGAINST-ALL"
 	gd.Label = "All against all"

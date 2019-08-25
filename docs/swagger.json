@@ -438,6 +438,43 @@
                 }
             }
         },
+        "/internal/play": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "request to play a match",
+                "parameters": [
+                    {
+                        "description": "AvailableMatch",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.AvailableMatch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/play.Match"
+                        }
+                    }
+                }
+            }
+        },
         "/internal/ready": {
             "get": {
                 "security": [
@@ -1378,6 +1415,9 @@
         "model.Match": {
             "type": "object",
             "properties": {
+                "availableMatchID": {
+                    "type": "integer"
+                },
                 "gameDefinitionID": {
                     "type": "integer"
                 },
@@ -1566,6 +1606,14 @@
                     "type": "string"
                 },
                 "userID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "play.Match": {
+            "type": "object",
+            "properties": {
+                "matchID": {
                     "type": "integer"
                 }
             }

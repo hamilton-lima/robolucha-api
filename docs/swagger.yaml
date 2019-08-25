@@ -201,6 +201,8 @@ definitions:
     type: object
   model.Match:
     properties:
+      availableMatchID:
+        type: integer
       gameDefinitionID:
         type: integer
       id:
@@ -324,6 +326,11 @@ definitions:
       lastOption:
         type: string
       userID:
+        type: integer
+    type: object
+  play.Match:
+    properties:
+      matchID:
         type: integer
     type: object
 host: http://local.robolucha.com:5000
@@ -599,6 +606,29 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: find one match
+  /internal/play:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: AvailableMatch
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.AvailableMatch'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/play.Match'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: request to play a match
   /internal/ready:
     get:
       responses:

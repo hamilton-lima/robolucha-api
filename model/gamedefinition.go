@@ -1,11 +1,9 @@
-package main
-
-import "gitlab.com/robolucha/robolucha-api/model"
+package model
 
 // BuildDefaultGameDefinition
-func BuildDefaultGameDefinition() model.GameDefinition {
+func BuildDefaultGameDefinition() GameDefinition {
 
-	gd := model.GameDefinition{}
+	gd := GameDefinition{}
 	gd.Duration = 1200000
 	gd.MinParticipants = 2
 	gd.MaxParticipants = 20
@@ -43,10 +41,10 @@ func BuildDefaultGameDefinition() model.GameDefinition {
 	gd.RespawnAngle = 0
 	gd.RespawnGunAngle = 0
 
-	gd.GameComponents = make([]model.GameComponent, 0)
-	gd.SceneComponents = make([]model.SceneComponent, 0)
-	gd.Codes = make([]model.Code, 0)
-	gd.LuchadorSuggestedCodes = make([]model.Code, 0)
+	gd.GameComponents = make([]GameComponent, 0)
+	gd.SceneComponents = make([]SceneComponent, 0)
+	gd.Codes = make([]Code, 0)
+	gd.LuchadorSuggestedCodes = make([]Code, 0)
 
 	return gd
 

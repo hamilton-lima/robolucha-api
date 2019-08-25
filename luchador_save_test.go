@@ -13,6 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/robolucha/robolucha-api/datasource"
 	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/test"
 )
@@ -32,7 +33,7 @@ func Setup(t *testing.T) *model.GameComponent {
 			"error": err,
 		}).Error("error removing TEST database")
 	}
-	dataSource = NewDataSource(BuildSQLLiteConfig(test.DB_NAME))
+	ds = datasource.NewDataSource(datasource.BuildSQLLiteConfig(test.DB_NAME))
 
 	mockPublisher = &test.MockPublisher{}
 	publisher = mockPublisher
@@ -52,7 +53,7 @@ func GetLuchador(t *testing.T) model.GameComponent {
 
 func TestLuchadorUpdateDuplicatedNameSameUser(t *testing.T) {
 	luchador := Setup(t)
-	defer dataSource.db.Close()
+	defer ds.DB.Close()
 
 	plan2, _ := json.Marshal(luchador)
 	body2 := string(plan2)
@@ -79,7 +80,7 @@ func TestLuchadorUpdateDuplicatedNameSameUser(t *testing.T) {
 
 func TestLuchadorUpdateLongName(t *testing.T) {
 	luchador := Setup(t)
-	defer dataSource.db.Close()
+	defer ds.DB.Close()
 
 	luchador.Name = "123456789 123456789 123456789 123456789 A"
 	response := UpdateLuchador(t, router, luchador)
@@ -88,7 +89,7 @@ func TestLuchadorUpdateLongName(t *testing.T) {
 
 func TestLuchadorUpdateEmptyAndSmallNames(t *testing.T) {
 	luchador := Setup(t)
-	defer dataSource.db.Close()
+	defer ds.DB.Close()
 
 	// then try a too large name
 	luchador.Name = "A"
@@ -98,7 +99,7 @@ func TestLuchadorUpdateEmptyAndSmallNames(t *testing.T) {
 
 func TestLuchadorUpdateName(t *testing.T) {
 	luchador := Setup(t)
-	defer dataSource.db.Close()
+	defer ds.DB.Close()
 
 	// first try to change to a valid name
 	luchador.Name = "lucharito"
@@ -118,7 +119,7 @@ func TestLuchadorUpdateName(t *testing.T) {
 func TestLuchadorUpdateRandomMask(t *testing.T) {
 	rand.Seed(time.Now().UTC().UnixNano())
 	luchador := Setup(t)
-	defer dataSource.db.Close()
+	defer ds.DB.Close()
 
 	// assign new random Configs to update the luchador
 	var originalConfigs []model.Config = luchador.Configs

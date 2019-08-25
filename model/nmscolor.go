@@ -1,4 +1,4 @@
-package main
+package model
 
 //NMSColor is a struct which contains the name and the Hex Code of the colors available.
 type NMSColor struct {

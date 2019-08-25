@@ -25,13 +25,19 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"gitlab.com/robolucha/robolucha-api/auth"
+	"gitlab.com/robolucha/robolucha-api/datasource"
+	"gitlab.com/robolucha/robolucha-api/httphelper"
 	"gitlab.com/robolucha/robolucha-api/model"
+	"gitlab.com/robolucha/robolucha-api/pubsub"
+	"gitlab.com/robolucha/robolucha-api/routes"
+	"gitlab.com/robolucha/robolucha-api/routes/play"
+	"gitlab.com/robolucha/robolucha-api/setup"
 
 	_ "gitlab.com/robolucha/robolucha-api/docs"
 )
 
-var dataSource *DataSource
-var publisher Publisher
+var ds *datasource.DataSource
+var publisher pubsub.Publisher
 
 func main() {
 	log.SetFormatter(&log.JSONFormatter{})
@@ -41,11 +47,11 @@ func main() {
 
 	log.Info("Robolucha API, start.")
 
-	dataSource = NewDataSource(BuildMysqlConfig())
-	defer dataSource.db.Close()
+	ds = datasource.NewDataSource(datasource.BuildMysqlConfig())
+	defer ds.DB.Close()
 
-	publisher = &RedisPublisher{}
-	go dataSource.KeepAlive()
+	publisher = &pubsub.RedisPublisher{}
+	go ds.KeepAlive()
 
 	if len(os.Args) < 2 {
 		log.Error("Missing gamedefinition folder parameter")
@@ -53,7 +59,7 @@ func main() {
 	}
 
 	gameDefinitionFolder := os.Args[1]
-	SetupGameDefinitionFromFolder(gameDefinitionFolder)
+	setup.SetupGameDefinitionFromFolder(gameDefinitionFolder, ds)
 
 	port := os.Getenv("API_PORT")
 	if len(port) == 0 {
@@ -115,7 +121,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		internalAPI.POST("/game-definition", createGameDefinition)
 		internalAPI.PUT("/game-definition", updateGameDefinition)
 
-		internalAPI.POST("/start-match/:name", startMatch)
+		// internalAPI.POST("/start-match/:name", startMatch)
 		internalAPI.POST("/game-component", createGameComponent)
 		internalAPI.POST("/luchador", getLuchadorByIDAndGamedefinitionID)
 		internalAPI.POST("/match-participant", addMatchPartipant)
@@ -143,7 +149,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.POST("/join-match", joinMatch)
 		privateAPI.GET("/game-definition-id/:id", getGameDefinitionByID)
 		privateAPI.GET("/game-definition-all", getGameDefinition)
-		privateAPI.POST("/start-tutorial-match/:name", startTutorialMatch)
+		// privateAPI.POST("/start-tutorial-match/:name", startTutorialMatch)
 		privateAPI.GET("/classroom", getClassroom)
 		privateAPI.POST("/classroom", addClassroom)
 		privateAPI.POST("/join-classroom/:accessCode", joinClassroom)
@@ -152,13 +158,10 @@ func createRouter(internalAPIKey string, logRequestBody string,
 
 	}
 
-	return router
-}
+	playRouter := play.Init(ds, publisher)
+	routes.Use(privateAPI, playRouter)
 
-func userFromContext(c *gin.Context) *model.User {
-	val, _ := c.Get("user")
-	user := val.(*model.User)
-	return user
+	return router
 }
 
 // SessionValidatorFactory definition
@@ -204,7 +207,7 @@ func SessionIsValid() gin.HandlerFunc {
 			}).Info("User Authorized")
 		}
 
-		user := dataSource.createUser(sessionUser.Username)
+		user := ds.CreateUser(sessionUser.Username)
 		c.Set("user", user)
 	}
 }
@@ -212,7 +215,7 @@ func SessionIsValid() gin.HandlerFunc {
 // SessionAllwaysValid test function for local development
 func SessionAllwaysValid() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user := dataSource.createUser("test")
+		user := ds.CreateUser("test")
 		c.Set("user", user)
 	}
 }
@@ -245,9 +248,9 @@ func KeyIsValid(key string) gin.HandlerFunc {
 func findUserSetting(c *gin.Context) {
 
 	log.Info("Finding userSetting")
-	user := userFromContext(c)
+	user := httphelper.UserFromContext(c)
 
-	userSetting := dataSource.findUserSettingByUser(user)
+	userSetting := ds.FindUserSettingByUser(user)
 
 	log.WithFields(log.Fields{
 		"userSetting": userSetting,
@@ -278,7 +281,7 @@ func updateUserSetting(c *gin.Context) {
 		"userSetting": userSetting,
 	}).Info("Updating userSetting")
 
-	userSetting = dataSource.updateUserSetting(userSetting)
+	userSetting = ds.UpdateUserSetting(userSetting)
 
 	if userSetting == nil {
 		log.Info("Invalid User setting when saving, missing ID?")
@@ -318,7 +321,7 @@ func createGameDefinition(c *gin.Context) {
 		"gameDefinition": gameDefinition,
 	}).Info("createGameDefinition")
 
-	createResult := dataSource.createGameDefinition(gameDefinition)
+	createResult := ds.CreateGameDefinition(gameDefinition)
 	if createResult == nil {
 		log.Error("Invalid GameDefinition when saving")
 		c.AbortWithStatus(http.StatusBadRequest)
@@ -326,7 +329,7 @@ func createGameDefinition(c *gin.Context) {
 	}
 
 	// load all the fields
-	result := dataSource.findGameDefinition(createResult.ID)
+	result := ds.FindGameDefinition(createResult.ID)
 
 	log.WithFields(log.Fields{
 		"gameDefinition": result,
@@ -361,7 +364,7 @@ func updateGameDefinition(c *gin.Context) {
 		"gameDefinition": gameDefinition,
 	}).Info("updateGameDefinition")
 
-	result := dataSource.updateGameDefinition(gameDefinition)
+	result := ds.UpdateGameDefinition(gameDefinition)
 	if result == nil {
 		log.Error("Invalid GameDefinition when updating")
 		c.AbortWithStatus(http.StatusBadRequest)
@@ -379,37 +382,37 @@ func updateGameDefinition(c *gin.Context) {
 // @Success 200 {object} model.Match
 // @Security ApiKeyAuth
 // @Router /internal/start-match/{name} [post]
-func startMatch(c *gin.Context) {
+// func startMatch(c *gin.Context) {
 
-	name := c.Param("name")
+// 	name := c.Param("name")
 
-	log.WithFields(log.Fields{
-		"name": name,
-	}).Info("startMatch")
+// 	log.WithFields(log.Fields{
+// 		"name": name,
+// 	}).Info("startMatch")
 
-	gameDefinition := dataSource.findGameDefinitionByName(name)
-	if gameDefinition == nil {
-		log.Info("Invalid gamedefinition name")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
+// 	gameDefinition := ds.FindGameDefinitionByName(name)
+// 	if gameDefinition == nil {
+// 		log.Info("Invalid gamedefinition name")
+// 		c.AbortWithStatus(http.StatusBadRequest)
+// 		return
+// 	}
 
-	match := dataSource.createMatch(gameDefinition.ID)
-	if match == nil {
-		log.Error("Invalid Match when saving")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
+// 	match := ds.CreateMatch(gameDefinition.ID)
+// 	if match == nil {
+// 		log.Error("Invalid Match when saving")
+// 		c.AbortWithStatus(http.StatusBadRequest)
+// 		return
+// 	}
 
-	// load all the fields
-	match = dataSource.findMatch(match.ID)
+// 	// load all the fields
+// 	match = ds.FindMatch(match.ID)
 
-	log.WithFields(log.Fields{
-		"createMatch": match,
-	}).Info("created match")
+// 	log.WithFields(log.Fields{
+// 		"createMatch": match,
+// 	}).Info("created match")
 
-	c.JSON(http.StatusOK, match)
-}
+// 	c.JSON(http.StatusOK, match)
+// }
 
 // startTutorialMatch godoc
 // @Summary create Match and publish
@@ -419,54 +422,54 @@ func startMatch(c *gin.Context) {
 // @Success 200 {object} model.JoinMatch
 // @Security ApiKeyAuth
 // @Router /private/start-tutorial-match/{name} [post]
-func startTutorialMatch(c *gin.Context) {
+// func startTutorialMatch(c *gin.Context) {
 
-	name := c.Param("name")
+// 	name := c.Param("name")
 
-	log.WithFields(log.Fields{
-		"name": name,
-	}).Info("startTutorialMatch")
+// 	log.WithFields(log.Fields{
+// 		"name": name,
+// 	}).Info("startTutorialMatch")
 
-	gameDefinition := dataSource.findGameDefinitionByName(name)
-	if gameDefinition == nil {
-		log.Info("Invalid gamedefinition name")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
+// 	gameDefinition := ds.FindGameDefinitionByName(name)
+// 	if gameDefinition == nil {
+// 		log.Info("Invalid gamedefinition name")
+// 		c.AbortWithStatus(http.StatusBadRequest)
+// 		return
+// 	}
 
-	user := userFromContext(c)
+// 	user := httphelper.UserFromContext(c)
 
-	luchador := dataSource.findLuchador(user)
-	if luchador == nil {
-		log.WithFields(log.Fields{
-			"user": user,
-		}).Error("Error getting luchador for the current user")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
+// 	luchador := ds.FindLuchador(user)
+// 	if luchador == nil {
+// 		log.WithFields(log.Fields{
+// 			"user": user,
+// 		}).Error("Error getting luchador for the current user")
+// 		c.AbortWithStatus(http.StatusBadRequest)
+// 		return
+// 	}
 
-	match := dataSource.findActiveMatchesByGameDefinitionAndParticipant(gameDefinition, luchador)
-	// not found will create
-	if match == nil {
-		match = dataSource.createMatch(gameDefinition.ID)
-		if match == nil {
-			log.Error("Invalid Match when saving")
-			c.AbortWithStatus(http.StatusBadRequest)
-			return
-		}
-	}
+// 	match := ds.FindActiveMatchesByGameDefinitionAndParticipant(gameDefinition, luchador)
+// 	// not found will create
+// 	if match == nil {
+// 		match = ds.CreateMatch(gameDefinition.ID)
+// 		if match == nil {
+// 			log.Error("Invalid Match when saving")
+// 			c.AbortWithStatus(http.StatusBadRequest)
+// 			return
+// 		}
+// 	}
 
-	result := model.JoinMatch{MatchID: match.ID, LuchadorID: luchador.ID}
-	// publish event to run the match
-	resultJSON, _ := json.Marshal(result)
-	publisher.Publish("start.match", string(resultJSON))
+// 	result := model.JoinMatch{MatchID: match.ID, LuchadorID: luchador.ID}
+// 	// publish event to run the match
+// 	resultJSON, _ := json.Marshal(result)
+// 	publisher.Publish("start.match", string(resultJSON))
 
-	log.WithFields(log.Fields{
-		"createMatch": result,
-	}).Info("created match")
+// 	log.WithFields(log.Fields{
+// 		"createMatch": result,
+// 	}).Info("created match")
 
-	c.JSON(http.StatusOK, result)
-}
+// 	c.JSON(http.StatusOK, result)
+// }
 
 // getUser godoc
 // @Summary find The current user information
@@ -476,7 +479,7 @@ func startTutorialMatch(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /private/get-user [get]
 func getUser(c *gin.Context) {
-	user := userFromContext(c)
+	user := httphelper.UserFromContext(c)
 	c.JSON(http.StatusOK, user)
 }
 
@@ -488,10 +491,10 @@ func getUser(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /private/luchador [get]
 func getLuchador(c *gin.Context) {
-	user := userFromContext(c)
+	user := httphelper.UserFromContext(c)
 	var luchador *model.GameComponent
 
-	luchador = dataSource.findLuchador(user)
+	luchador = ds.FindLuchador(user)
 	log.WithFields(log.Fields{
 		"luchador": luchador,
 		"user.id":  user.ID,
@@ -503,13 +506,13 @@ func getLuchador(c *gin.Context) {
 			Name:   fmt.Sprintf("Luchador%d", user.ID),
 		}
 
-		luchador.Configs = randomConfig()
-		luchador.Name = randomName(luchador.Configs)
+		luchador.Configs = model.RandomConfig()
+		luchador.Name = model.RandomName(luchador.Configs)
 		log.WithFields(log.Fields{
 			"getLuchador": luchador,
 		}).Info("creating luchador")
 
-		luchador = dataSource.createLuchador(luchador)
+		luchador = ds.CreateLuchador(luchador)
 
 		if luchador == nil {
 			log.Error("Invalid Luchador when saving")
@@ -538,7 +541,7 @@ func getLuchador(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /private/luchador [put]
 func updateLuchador(c *gin.Context) {
-	user := userFromContext(c)
+	user := httphelper.UserFromContext(c)
 	response := model.UpdateLuchadorResponse{Errors: []string{}}
 
 	var luchador *model.GameComponent
@@ -559,7 +562,7 @@ func updateLuchador(c *gin.Context) {
 		response.Errors = append(response.Errors, "Luchador name length should be less or equal to 40 characters")
 	}
 
-	if dataSource.nameExist(luchador.ID, luchador.Name) {
+	if ds.NameExist(luchador.ID, luchador.Name) {
 		response.Errors = append(response.Errors, "Luchador with this name already exists")
 	}
 
@@ -581,7 +584,7 @@ func updateLuchador(c *gin.Context) {
 	}).Debug("updateLuchador")
 
 	// validate if the luchador is the same from the user
-	currentLuchador := dataSource.findLuchador(user)
+	currentLuchador := ds.FindLuchador(user)
 	log.WithFields(log.Fields{
 		"luchador": luchador,
 		"user.ID":  user.ID,
@@ -593,7 +596,7 @@ func updateLuchador(c *gin.Context) {
 		return
 	}
 
-	response.Luchador = dataSource.updateLuchador(luchador)
+	response.Luchador = ds.UpdateLuchador(luchador)
 
 	if response.Luchador == nil {
 		log.Info("Invalid Luchador when saving, missing ID?")
@@ -628,7 +631,7 @@ func cleanName(name string) string {
 // @Router /private/tutorial [get]
 func getTutorialGameDefinition(c *gin.Context) {
 
-	tutorials := dataSource.findTutorialGameDefinition()
+	tutorials := ds.FindTutorialGameDefinition()
 
 	log.WithFields(log.Fields{
 		"tutorials": tutorials,
@@ -659,7 +662,7 @@ func getMaskConfig(c *gin.Context) {
 		"id": aid,
 	}).Info("getMaskConfig")
 
-	configs := dataSource.findMaskConfig(uint(aid))
+	configs := ds.FindMaskConfig(uint(aid))
 
 	log.WithFields(log.Fields{
 		"configs": configs,
@@ -684,7 +687,7 @@ func getGameDefinitionByName(c *gin.Context) {
 		"name": name,
 	}).Info("getGameDefinition")
 
-	gameDefinition := dataSource.findGameDefinitionByName(name)
+	gameDefinition := ds.FindGameDefinitionByName(name)
 
 	log.WithFields(log.Fields{
 		"gameDefinition": gameDefinition,
@@ -727,7 +730,7 @@ func getGameDefinitionByID(c *gin.Context) {
 		"id": aid,
 	}).Info("getGameDefinitionByID")
 
-	gameDefinition := dataSource.findGameDefinition(uint(aid))
+	gameDefinition := ds.FindGameDefinition(uint(aid))
 
 	log.WithFields(log.Fields{
 		"gameDefinition": gameDefinition,
@@ -745,7 +748,7 @@ func getGameDefinitionByID(c *gin.Context) {
 // @Router /private/game-definition-all [get]
 func getGameDefinition(c *gin.Context) {
 
-	result := dataSource.findAllGameDefinition()
+	result := ds.FindAllGameDefinition()
 
 	log.WithFields(log.Fields{
 		"result": result,
@@ -764,7 +767,7 @@ func getGameDefinition(c *gin.Context) {
 func getRandomMaskConfig(c *gin.Context) {
 
 	log.Info("getRandomMaskConfig")
-	configs := randomConfig()
+	configs := model.RandomConfig()
 
 	log.WithFields(log.Fields{
 		"configs": configs,
@@ -798,17 +801,17 @@ func createGameComponent(c *gin.Context) {
 
 	// validate if the luchador is the same from the user
 
-	found := dataSource.findLuchadorByName(luchador.Name)
+	found := ds.FindLuchadorByName(luchador.Name)
 
 	if found == nil {
 		log.Info("Luchador not found, will create")
-		luchador.Configs = randomConfig()
+		luchador.Configs = model.RandomConfig()
 		log.WithFields(log.Fields{
 			"configs": luchador.Configs,
 		}).Info("Random config assigned to luchador")
 
-		luchador = dataSource.createLuchador(luchador)
-		luchador = dataSource.findLuchadorByID(luchador.ID)
+		luchador = ds.CreateLuchador(luchador)
+		luchador = ds.FindLuchadorByID(luchador.ID)
 	} else {
 		luchador = found
 	}
@@ -833,9 +836,9 @@ func getActiveMatches(c *gin.Context) {
 	var result []model.ActiveMatch
 
 	// multiplayer matches
-	matches := *dataSource.findActiveMultiplayerMatches()
+	matches := *ds.FindActiveMultiplayerMatches()
 	for _, match := range matches {
-		gameDefinition := dataSource.findGameDefinition(match.GameDefinitionID)
+		gameDefinition := ds.FindGameDefinition(match.GameDefinitionID)
 		add := model.ActiveMatch{
 			MatchID:     match.ID,
 			Name:        gameDefinition.Name,
@@ -851,7 +854,7 @@ func getActiveMatches(c *gin.Context) {
 	}
 
 	// gamedefinitions
-	gameDefinitions := *dataSource.findTutorialGameDefinition()
+	gameDefinitions := *ds.FindTutorialGameDefinition()
 	for _, gameDefinition := range gameDefinitions {
 		add := model.ActiveMatch{
 			MatchID:     0,
@@ -910,7 +913,7 @@ func getMatch(c *gin.Context) {
 		"matchID": matchID,
 	}).Info("getMatch")
 
-	match := dataSource.findMatch(matchID)
+	match := ds.FindMatch(matchID)
 
 	log.WithFields(log.Fields{
 		"match": match,
@@ -943,7 +946,7 @@ func getLuchadorConfigsForCurrentMatch(c *gin.Context) {
 
 	var result *[]model.GameComponent
 
-	result = dataSource.findLuchadorConfigsByMatchID(matchID)
+	result = ds.FindLuchadorConfigsByMatchID(matchID)
 	log.WithFields(log.Fields{
 		"result": result,
 	}).Debug("getLuchadorConfigsForCurrentMatch")
@@ -969,10 +972,10 @@ func joinMatch(c *gin.Context) {
 		return
 	}
 
-	user := userFromContext(c)
+	user := httphelper.UserFromContext(c)
 
 	var luchador *model.GameComponent
-	luchador = dataSource.findLuchador(user)
+	luchador = ds.FindLuchador(user)
 	if luchador == nil {
 		log.WithFields(log.Fields{
 			"user": user,
@@ -985,7 +988,7 @@ func joinMatch(c *gin.Context) {
 	joinMatch.LuchadorID = luchador.ID
 
 	var match *model.Match
-	match = dataSource.findMatch(joinMatch.MatchID)
+	match = ds.FindMatch(joinMatch.MatchID)
 	if match == nil {
 		log.WithFields(log.Fields{
 			"user": user,
@@ -1027,7 +1030,7 @@ func getLuchadorByIDAndGamedefinitionID(c *gin.Context) {
 	}
 
 	var luchador *model.GameComponent
-	luchador = dataSource.findLuchadorByID(parameters.LuchadorID)
+	luchador = ds.FindLuchadorByID(parameters.LuchadorID)
 
 	if luchador == nil {
 		log.WithFields(log.Fields{
@@ -1080,7 +1083,7 @@ func addMatchPartipant(c *gin.Context) {
 		return
 	}
 
-	matchParticipant := dataSource.addMatchParticipant(matchParticipantRequest)
+	matchParticipant := ds.AddMatchParticipant(matchParticipantRequest)
 	if matchParticipant == nil {
 		log.WithFields(log.Fields{
 			"matchParticipant": matchParticipantRequest,
@@ -1115,7 +1118,7 @@ func endMatch(c *gin.Context) {
 		return
 	}
 
-	match := dataSource.endMatch(matchRequest)
+	match := ds.EndMatch(matchRequest)
 	if match == nil {
 		log.WithFields(log.Fields{
 			"match": matchRequest,
@@ -1149,7 +1152,7 @@ func addMatchScores(c *gin.Context) {
 		return
 	}
 
-	score := dataSource.addMatchScores(scoreRequest)
+	score := ds.AddMatchScores(scoreRequest)
 	if score == nil {
 		log.WithFields(log.Fields{
 			"score": scoreRequest,
@@ -1182,7 +1185,7 @@ func addMatchMetric(c *gin.Context) {
 		return
 	}
 
-	result := dataSource.addMatchMetric(metric)
+	result := ds.AddMatchMetric(metric)
 	if result == nil {
 		log.WithFields(log.Fields{
 			"metric": metric,
@@ -1206,8 +1209,8 @@ func addMatchMetric(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /private/classroom [get]
 func getClassroom(c *gin.Context) {
-	user := userFromContext(c)
-	result := dataSource.findAllClassroom(user)
+	user := httphelper.UserFromContext(c)
+	result := ds.FindAllClassroom(user)
 
 	log.WithFields(log.Fields{
 		"result": result,
@@ -1225,7 +1228,7 @@ func getClassroom(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /private/classroom [post]
 func addClassroom(c *gin.Context) {
-	user := userFromContext(c)
+	user := httphelper.UserFromContext(c)
 
 	var classroom *model.Classroom
 	err := c.BindJSON(&classroom)
@@ -1237,7 +1240,7 @@ func addClassroom(c *gin.Context) {
 
 	classroom.OwnerID = user.ID
 
-	result := dataSource.addClassroom(classroom)
+	result := ds.AddClassroom(classroom)
 	if result == nil {
 		log.WithFields(log.Fields{
 			"classroom": classroom,
@@ -1264,13 +1267,13 @@ func addClassroom(c *gin.Context) {
 func joinClassroom(c *gin.Context) {
 
 	accessCode := c.Param("accessCode")
-	user := userFromContext(c)
+	user := httphelper.UserFromContext(c)
 
 	log.WithFields(log.Fields{
 		"accessCode": accessCode,
 	}).Info("joinClassroom")
 
-	classroom := dataSource.joinClassroom(user, accessCode)
+	classroom := ds.JoinClassroom(user, accessCode)
 
 	log.WithFields(log.Fields{
 		"classroom": classroom,
@@ -1287,7 +1290,7 @@ func joinClassroom(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /private/available-match-public [get]
 func getPublicAvailableMatch(c *gin.Context) {
-	result := dataSource.findPublicAvailableMatch()
+	result := ds.FindPublicAvailableMatch()
 
 	log.WithFields(log.Fields{
 		"result": result,
@@ -1318,7 +1321,7 @@ func getClassroomAvailableMatch(c *gin.Context) {
 		"id": aid,
 	}).Info("getClassroomAvailableMatch")
 
-	result := dataSource.findAvailableMatchByClassroomID(uint(aid))
+	result := ds.FindAvailableMatchByClassroomID(uint(aid))
 
 	log.WithFields(log.Fields{
 		"result": result,
