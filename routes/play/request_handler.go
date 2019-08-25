@@ -10,84 +10,45 @@ import (
 	"time"
 )
 
-// Request definition
-type Request struct {
+// PlayRequest definition
+type PlayRequest struct {
 	AvailableMatch *model.AvailableMatch
 	LuchadorID     uint
 }
 
-// Response definition
-type Response struct {
-	Match *model.Match
-}
-
-type message struct {
-	input  Request
-	output chan Response
-}
-
 // RequestHandler definition
 type RequestHandler struct {
-	messages  chan message
-	wait      sync.WaitGroup
 	ds        *datasource.DataSource
 	publisher pubsub.Publisher
+	mutex     *sync.Mutex
 }
 
-// Listen starts to process the input channel and returns the instance
-func Listen(_ds *datasource.DataSource, _publisher pubsub.Publisher) *RequestHandler {
+// NewRequestHandler creates a new request handler
+func NewRequestHandler(_ds *datasource.DataSource, _publisher pubsub.Publisher) *RequestHandler {
 	handler := RequestHandler{
-		messages:  make(chan message),
 		ds:        _ds,
 		publisher: _publisher,
+		mutex:     &sync.Mutex{},
 	}
-
-	// notify main goroutine to wait using the waitgroup from the handler
-	handler.wait.Add(1)
-	go func() {
-		for {
-			handler.wait.Add(1)
-			go handler.process()
-		}
-	}()
 
 	return &handler
 }
 
-// Send definition
-func (handler *RequestHandler) Send(request Request) chan Response {
-	response := make(chan Response)
+// Play handler.mutex keeps this executation one by one
+func (handler *RequestHandler) Play(availableMatch *model.AvailableMatch, luchadorID uint) *model.Match {
+	defer handler.mutex.Unlock()
 
-	handler.messages <- message{
-		input:  request,
-		output: response,
-	}
-
-	return response
-}
-
-// process handles one request from the handler.input channel
-func (handler *RequestHandler) process() {
-	select {
-	case next := <-handler.messages:
-		next.output <- handler.buildResponse(next)
-	}
-	handler.wait.Done()
-}
-
-func (handler *RequestHandler) buildResponse(next message) Response {
-
-	match := handler.findActiveMatch(next.input.AvailableMatch)
+	handler.mutex.Lock()
+	match := handler.findActiveMatch(availableMatch)
 	if match == nil {
-		match = handler.createMatch(next.input.AvailableMatch)
+		match = handler.createMatch(availableMatch)
 		handler.publishStartMatch(match)
-		handler.publishJoinMatch(match, next.input.LuchadorID)
+		handler.publishJoinMatch(match, luchadorID)
 	} else {
-		handler.publishJoinMatch(match, next.input.LuchadorID)
+		handler.publishJoinMatch(match, luchadorID)
 	}
 
-	result := Response{Match: match}
-	return result
+	return match
 }
 
 func (handler *RequestHandler) findActiveMatch(availableMatch *model.AvailableMatch) *model.Match {

@@ -15,7 +15,7 @@ var requestHandler *RequestHandler
 
 // Init receive database and message queue objects
 func Init(_ds *datasource.DataSource, _publisher pubsub.Publisher) *Router {
-	requestHandler = Listen(_ds, _publisher)
+	requestHandler = NewRequestHandler(_ds, _publisher)
 
 	return &Router{ds: _ds,
 		publisher: _publisher,
@@ -65,12 +65,11 @@ func play(c *gin.Context) {
 		"user.id":  user.ID,
 	}).Info("publishJoinMatch()")
 
-	wait := requestHandler.Send(Request{LuchadorID: luchador.ID, AvailableMatch: input})
-	response := <-wait
+	match := requestHandler.Play(input, luchador.ID)
 
 	log.WithFields(log.Fields{
-		"Match": response.Match,
+		"Match": match,
 	}).Info("play()")
 
-	c.JSON(http.StatusOK, response.Match)
+	c.JSON(http.StatusOK, match)
 }

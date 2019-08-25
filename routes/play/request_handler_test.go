@@ -44,25 +44,23 @@ func TestPlayRequestHandler(t *testing.T) {
 	am1 := model.AvailableMatch{ID: 42, GameDefinitionID: gd.ID}
 	am3 := model.AvailableMatch{ID: 3, GameDefinitionID: gd.ID}
 
-	handler := play.Listen(ds, publisher)
+	handler := play.NewRequestHandler(ds, publisher)
 
-	s1 := handler.Send(play.Request{AvailableMatch: &am1, LuchadorID: 432})
-	s2 := handler.Send(play.Request{AvailableMatch: &am1, LuchadorID: 450})
-
-	r1 := <-s1
-	r2 := <-s2
+	r1 := handler.Play(&am1, 432)
+	r2 := handler.Play(&am1, 450)
+	r3 := handler.Play(&am1, 450)
 
 	startMatchMessages := mockPublisher.Messages["start.match"]
 	joinMatchMessages := mockPublisher.Messages["join.match"]
 
 	assert.Equal(t, len(startMatchMessages), 1)
-	assert.Equal(t, len(joinMatchMessages), 2)
+	assert.Equal(t, len(joinMatchMessages), 3)
 
-	assert.Equal(t, uint(42), r1.Match.AvailableMatchID)
-	assert.Equal(t, uint(42), r2.Match.AvailableMatchID)
+	assert.Equal(t, uint(42), r1.AvailableMatchID)
+	assert.Equal(t, uint(42), r2.AvailableMatchID)
+	assert.Equal(t, uint(42), r3.AvailableMatchID)
 
-	s3 := handler.Send(play.Request{AvailableMatch: &am3, LuchadorID: 777})
-	r3 := <-s3
-	assert.Equal(t, uint(3), r3.Match.AvailableMatchID)
+	r4 := handler.Play(&am3, 777)
+	assert.Equal(t, uint(3), r4.AvailableMatchID)
 
 }
