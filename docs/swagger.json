@@ -469,7 +469,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/play.Match"
+                            "$ref": "#/definitions/model.Match"
                         }
                     }
                 }
@@ -485,40 +485,6 @@
                 "summary": "returns application health check information",
                 "responses": {
                     "200": {}
-                }
-            }
-        },
-        "/internal/start-match/{name}": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "create Match",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "GameDefinition name",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/model.Match"
-                        }
-                    }
                 }
             }
         },
@@ -981,40 +947,6 @@
                         "schema": {
                             "type": "object",
                             "$ref": "#/definitions/model.Match"
-                        }
-                    }
-                }
-            }
-        },
-        "/private/start-tutorial-match/{name}": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "create Match and publish",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "GameDefinition name",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/model.JoinMatch"
                         }
                     }
                 }
@@ -1606,14 +1538,6 @@
                     "type": "string"
                 },
                 "userID": {
-                    "type": "integer"
-                }
-            }
-        },
-        "play.Match": {
-            "type": "object",
-            "properties": {
-                "matchID": {
                     "type": "integer"
                 }
             }
