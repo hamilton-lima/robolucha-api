@@ -869,3 +869,16 @@ func (ds *DataSource) AddMatchMetric(m *model.MatchMetric) *model.MatchMetric {
 
 	return &metric
 }
+
+// CreateAvailableMatchIfDontExist definition
+func (ds *DataSource) CreateAvailableMatchIfDontExist(gameDefinitionID uint, name string) *model.AvailableMatch {
+	am := model.AvailableMatch{GameDefinitionID: gameDefinitionID, Name: name}
+	ds.DB.Where(&am).FirstOrCreate(&am)
+
+	log.WithFields(log.Fields{
+		"gameDefinitionID": gameDefinitionID,
+		"AvailableMatch":   am,
+	}).Debug("CreateAvailableMatchIfDontExist")
+
+	return &am
+}

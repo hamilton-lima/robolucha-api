@@ -11,7 +11,7 @@ import (
 // GetIntegerParam gets an integer parameter from request and validate
 func GetIntegerParam(c *gin.Context, paramName string, context string) (uint, error) {
 
-	parameter := c.Query(paramName)
+	parameter := c.Param(paramName)
 	i32, err := strconv.ParseInt(parameter, 10, 32)
 	if err != nil {
 		message := "Invalid Integer parameter"

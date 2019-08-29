@@ -106,7 +106,7 @@ func (ds *DataSource) FindAvailableMatchByClassroomID(id uint) *[]model.Availabl
 	var result []model.AvailableMatch
 
 	ds.DB.
-		Where("classroom_id == ?", id).
+		Where("classroom_id = ?", id).
 		Find(&result)
 
 	log.WithFields(log.Fields{

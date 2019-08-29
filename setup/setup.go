@@ -73,3 +73,12 @@ func CreateGameDefinition(fileName string, ds *datasource.DataSource) {
 	}
 
 }
+
+func CreateAvailableMatches(ds *datasource.DataSource) {
+
+	all := ds.FindAllGameDefinition()
+	for _, gd := range *all {
+		ds.CreateAvailableMatchIfDontExist(gd.ID, gd.Name)
+	}
+
+}

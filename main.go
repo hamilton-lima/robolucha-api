@@ -60,6 +60,7 @@ func main() {
 
 	gameDefinitionFolder := os.Args[1]
 	setup.SetupGameDefinitionFromFolder(gameDefinitionFolder, ds)
+	setup.CreateAvailableMatches(ds)
 
 	port := os.Getenv("API_PORT")
 	if len(port) == 0 {
@@ -1308,7 +1309,13 @@ func getPublicAvailableMatch(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /private/available-match-classroom/{id} [get]
 func getClassroomAvailableMatch(c *gin.Context) {
-	id := httphelper.GetIntegerParam(c, "classroom", "getClassroomAvailableMatch")
+	id, err := httphelper.GetIntegerParam(c, "id", "getClassroomAvailableMatch")
+	if err != nil {
+		log.Info("Invalid body content on getClassroomAvailableMatch")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
 	result := ds.FindAvailableMatchByClassroomID(id)
 
 	log.WithFields(log.Fields{
