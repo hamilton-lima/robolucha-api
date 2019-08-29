@@ -154,7 +154,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.POST("/classroom", addClassroom)
 		privateAPI.POST("/join-classroom/:accessCode", joinClassroom)
 		privateAPI.GET("/available-match-public", getPublicAvailableMatch)
-		privateAPI.GET("/available-match-classroom/:classroom", getClassroomAvailableMatch)
+		privateAPI.GET("/available-match-classroom/:id", getClassroomAvailableMatch)
 
 	}
 
@@ -1306,22 +1306,10 @@ func getPublicAvailableMatch(c *gin.Context) {
 // @Param id path int true "Classroom id"
 // @Success 200 200 {object} model.AvailableMatch
 // @Security ApiKeyAuth
-// @Router /private/available-match-classroom/{classroom} [get]
+// @Router /private/available-match-classroom/{id} [get]
 func getClassroomAvailableMatch(c *gin.Context) {
-
-	id := c.Param("classroom")
-	aid, err := strconv.Atoi(id)
-	if err != nil {
-		log.Info("Invalid ID")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
-
-	log.WithFields(log.Fields{
-		"id": aid,
-	}).Info("getClassroomAvailableMatch")
-
-	result := ds.FindAvailableMatchByClassroomID(uint(aid))
+	id := httphelper.GetIntegerParam(c, "classroom", "getClassroomAvailableMatch")
+	result := ds.FindAvailableMatchByClassroomID(id)
 
 	log.WithFields(log.Fields{
 		"result": result,

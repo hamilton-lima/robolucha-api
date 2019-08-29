@@ -488,7 +488,7 @@
                 }
             }
         },
-        "/private/available-match-classroom/{classroom}": {
+        "/private/available-match-classroom/{id}": {
             "get": {
                 "security": [
                     {

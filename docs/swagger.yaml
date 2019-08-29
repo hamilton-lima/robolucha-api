@@ -631,7 +631,7 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: returns application health check information
-  /private/available-match-classroom/{classroom}:
+  /private/available-match-classroom/{id}:
     get:
       consumes:
       - application/json

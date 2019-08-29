@@ -40,7 +40,7 @@ func (router *Router) Setup(group *gin.RouterGroup) {
 // @Param request body model.AvailableMatch true "AvailableMatch"
 // @Success 200 {object} model.Match
 // @Security ApiKeyAuth
-// @Router /internal/play [post]
+// @Router /private/play [post]
 func play(c *gin.Context) {
 
 	var input *model.AvailableMatch
