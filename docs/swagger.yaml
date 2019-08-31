@@ -601,29 +601,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: find one match
-  /internal/play:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: AvailableMatch
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/model.AvailableMatch'
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Match'
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: request to play a match
   /internal/ready:
     get:
       responses:
@@ -913,6 +890,27 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: find one match
+  /private/play/{id}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: AvailableMatch id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Match'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: request to play a match
   /private/tutorial:
     get:
       consumes:

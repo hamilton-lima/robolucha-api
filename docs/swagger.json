@@ -438,43 +438,6 @@
                 }
             }
         },
-        "/internal/play": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "request to play a match",
-                "parameters": [
-                    {
-                        "description": "AvailableMatch",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/model.AvailableMatch"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/model.Match"
-                        }
-                    }
-                }
-            }
-        },
         "/internal/ready": {
             "get": {
                 "security": [
@@ -939,6 +902,40 @@
                         "description": "int valid",
                         "name": "matchID",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Match"
+                        }
+                    }
+                }
+            }
+        },
+        "/private/play/{id}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "request to play a match",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "AvailableMatch id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
