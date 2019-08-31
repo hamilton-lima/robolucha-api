@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"gitlab.com/robolucha/robolucha-api/datasource"
 	"gitlab.com/robolucha/robolucha-api/httphelper"
-	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/pubsub"
 )
 
@@ -30,24 +29,31 @@ type Router struct {
 
 // Setup definition
 func (router *Router) Setup(group *gin.RouterGroup) {
-	group.POST("/play", play)
+	group.POST("/play/:id", play)
 }
 
 // play godoc
 // @Summary request to play a match
 // @Accept json
 // @Produce json
-// @Param request body model.AvailableMatch true "AvailableMatch"
+// @Param id path int true "AvailableMatch id"
 // @Success 200 {object} model.Match
 // @Security ApiKeyAuth
-// @Router /private/play [post]
+// @Router /private/play/{id} [post]
 func play(c *gin.Context) {
 
-	var input *model.AvailableMatch
-	err := c.BindJSON(&input)
+	id, err := httphelper.GetIntegerParam(c, "id", "play")
 	if err != nil {
+		log.Info("Invalid body content on play")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	input := requestHandler.FindAvailableMatchByID(id)
+	if input == nil {
 		log.WithFields(log.Fields{
-			"error": err,
+			"message": "AvailableMatch not found",
+			"id":      id,
 		}).Error("Invalid body content on play()")
 
 		c.AbortWithStatus(http.StatusBadRequest)

@@ -122,3 +122,17 @@ func (handler *RequestHandler) publishJoinMatch(match *model.Match, luchadorID u
 	}).Info("publishJoinMatch")
 
 }
+
+// FindAvailableMatchByID definition
+func (handler *RequestHandler) FindAvailableMatchByID(id uint) *model.AvailableMatch {
+	var result model.AvailableMatch
+	if handler.ds.DB.First(&result, id).RecordNotFound() {
+		return nil
+	}
+
+	log.WithFields(log.Fields{
+		"result": result,
+	}).Info("FindAvailableMatchByID")
+
+	return &result
+}
