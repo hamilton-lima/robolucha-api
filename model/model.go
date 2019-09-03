@@ -238,13 +238,14 @@ type Student struct {
 
 // AvailableMatch definition
 type AvailableMatch struct {
-	ID               uint       `gorm:"primary_key" json:"id"`
-	CreatedAt        time.Time  `json:"-"`
-	UpdatedAt        time.Time  `json:"-"`
-	DeletedAt        *time.Time `json:"-" faker:"-"`
-	Name             string     `json:"name"`
-	GameDefinitionID uint       `json:"gameDefinitionID"`
-	ClassroomID      uint       `json:"classroomID"`
+	ID               uint            `gorm:"primary_key" json:"id"`
+	CreatedAt        time.Time       `json:"-"`
+	UpdatedAt        time.Time       `json:"-"`
+	DeletedAt        *time.Time      `json:"-" faker:"-"`
+	Name             string          `json:"name"`
+	GameDefinitionID uint            `json:"gameDefinitionID"`
+	ClassroomID      uint            `json:"classroomID"`
+	GameDefinition   *GameDefinition `json:"gameDefinition"`
 }
 
 //UpdateLuchadorResponse data structure

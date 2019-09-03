@@ -1073,6 +1073,10 @@
                 "classroomID": {
                     "type": "integer"
                 },
+                "gameDefinition": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.GameDefinition"
+                },
                 "gameDefinitionID": {
                     "type": "integer"
                 },

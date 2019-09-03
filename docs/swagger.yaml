@@ -23,6 +23,9 @@ definitions:
     properties:
       classroomID:
         type: integer
+      gameDefinition:
+        $ref: '#/definitions/model.GameDefinition'
+        type: object
       gameDefinitionID:
         type: integer
       id:
