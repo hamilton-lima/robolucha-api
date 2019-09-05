@@ -1310,7 +1310,7 @@ func getPublicAvailableMatch(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Classroom id"
-// @Success 200 200 {object} model.AvailableMatch
+// @Success 200 200 {array} model.AvailableMatch
 // @Security ApiKeyAuth
 // @Router /private/available-match-classroom/{id} [get]
 func getClassroomAvailableMatch(c *gin.Context) {

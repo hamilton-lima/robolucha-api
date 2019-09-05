@@ -620,8 +620,9 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.AvailableMatch'
-            type: object
+            items:
+              $ref: '#/definitions/model.AvailableMatch'
+            type: array
       security:
       - ApiKeyAuth: []
       summary: find available matches by classroom
