@@ -1269,7 +1269,7 @@ func addClassroom(c *gin.Context) {
 // @Param accessCode path string true "classroom access code"
 // @Success 200 200 {object} model.Classroom
 // @Security ApiKeyAuth
-// @Router /internal/join-classroom/{accessCode} [post]
+// @Router /private/join-classroom/{accessCode} [post]
 func joinClassroom(c *gin.Context) {
 
 	accessCode := c.Param("accessCode")

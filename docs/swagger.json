@@ -261,40 +261,6 @@
                 }
             }
         },
-        "/internal/join-classroom/{accessCode}": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "join a classroom",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "classroom access code",
-                        "name": "accessCode",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/model.Classroom"
-                        }
-                    }
-                }
-            }
-        },
         "/internal/luchador": {
             "post": {
                 "security": [
@@ -655,6 +621,40 @@
                         "schema": {
                             "type": "object",
                             "$ref": "#/definitions/model.UserDetails"
+                        }
+                    }
+                }
+            }
+        },
+        "/private/join-classroom/{accessCode}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "join a classroom",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "classroom access code",
+                        "name": "accessCode",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Classroom"
                         }
                     }
                 }
