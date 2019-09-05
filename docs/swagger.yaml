@@ -300,6 +300,10 @@ definitions:
     type: object
   model.Student:
     properties:
+      classrooms:
+        items:
+          $ref: '#/definitions/model.Classroom'
+        type: array
       id:
         type: integer
       userID:
@@ -321,6 +325,16 @@ definitions:
         type: integer
       username:
         type: string
+    type: object
+  model.UserDetails:
+    properties:
+      classrooms:
+        items:
+          $ref: '#/definitions/model.Classroom'
+        type: array
+      user:
+        $ref: '#/definitions/model.User'
+        type: object
     type: object
   model.UserSetting:
     properties:
@@ -733,7 +747,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.User'
+            $ref: '#/definitions/model.UserDetails'
             type: object
       security:
       - ApiKeyAuth: []

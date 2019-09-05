@@ -654,7 +654,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/model.User"
+                            "$ref": "#/definitions/model.UserDetails"
                         }
                     }
                 }
@@ -1495,6 +1495,12 @@
         "model.Student": {
             "type": "object",
             "properties": {
+                "classrooms": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Classroom"
+                    }
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -1526,6 +1532,21 @@
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "model.UserDetails": {
+            "type": "object",
+            "properties": {
+                "classrooms": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Classroom"
+                    }
+                },
+                "user": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.User"
                 }
             }
         },
