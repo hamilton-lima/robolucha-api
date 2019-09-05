@@ -10,8 +10,8 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/datasource"
+	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/test"
 )
 
@@ -129,6 +129,10 @@ func TestJoinClassroom(t *testing.T) {
 	var joinedClassroom model.Classroom
 	json.Unmarshal(w.Body.Bytes(), &joinedClassroom)
 
+	log.WithFields(log.Fields{
+		"joinedClassroom": joinedClassroom,
+	}).Debug("after join")
+
 	assert.Equal(t, joinedClassroom.Name, "B")
 
 	w = test.PerformRequestNoAuth(router, "GET", "/private/classroom", "")
@@ -142,4 +146,11 @@ func TestJoinClassroom(t *testing.T) {
 	assert.True(t, len(afterJoined[2].Students) == 0)
 	assert.True(t, afterJoined[1].Students[0].UserID == 1)
 
+	classrooms := ds.FindAllClassroomByStudent(joinedClassroom.Students[0].ID)
+	log.WithFields(log.Fields{
+		"classrooms": classrooms,
+	}).Debug("classrooms by user ID")
+
+	assert.True(t, len(classrooms) == 1)
+	assert.Equal(t, classrooms[0].Name, "B")
 }

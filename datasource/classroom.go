@@ -73,6 +73,32 @@ func (ds *DataSource) FindAllClassroom(user *model.User) *[]model.Classroom {
 	return &result
 }
 
+// FindAllClassroomByStudent definition
+func (ds *DataSource) FindAllClassroomByStudent(studentUserID uint) []model.Classroom {
+
+	student := model.Student{UserID: studentUserID}
+
+	if ds.DB.
+		Preload("Classrooms").
+		Where(&student).
+		First(&student).
+		RecordNotFound() {
+
+		log.WithFields(log.Fields{
+			"userID": studentUserID,
+		}).Error("student not found")
+
+		return make([]model.Classroom, 0)
+	}
+
+	log.WithFields(log.Fields{
+		"classrooms": student.Classrooms,
+	}).Debug("FindAllClassroomByStudent")
+
+	return student.Classrooms
+}
+
+// JoinClassroom definition
 func (ds *DataSource) JoinClassroom(user *model.User, accessCode string) *model.Classroom {
 	var result model.Classroom
 	student := model.Student{UserID: user.ID}
@@ -106,7 +132,8 @@ func (ds *DataSource) JoinClassroom(user *model.User, accessCode string) *model.
 
 	log.WithFields(log.Fields{
 		"classroom": result,
-	}).Debug("joinClassroom")
+		"student":   student,
+	}).Info("joinClassroom")
 
 	return &result
 }

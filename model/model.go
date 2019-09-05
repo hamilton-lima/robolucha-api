@@ -11,6 +11,11 @@ type User struct {
 	Username  string     `json:"username"`
 }
 
+type UserDetails struct {
+	User       *User        `json:"user"`
+	Classrooms []Classroom `json:"classrooms"`
+}
+
 // Session definition
 type Session struct {
 	ID        uint       `gorm:"primary_key" json:"id"`
@@ -229,11 +234,12 @@ type Classroom struct {
 
 // Student definition
 type Student struct {
-	ID        uint       `gorm:"primary_key" json:"id,omitempty" faker:"-"`
-	CreatedAt time.Time  `json:"-"`
-	UpdatedAt time.Time  `json:"-"`
-	DeletedAt *time.Time `json:"-" faker:"-"`
-	UserID    uint       `json:"userID,omitempty" gorm:"not null;unique_index"`
+	ID         uint        `gorm:"primary_key" json:"id,omitempty" faker:"-"`
+	CreatedAt  time.Time   `json:"-"`
+	UpdatedAt  time.Time   `json:"-"`
+	DeletedAt  *time.Time  `json:"-" faker:"-"`
+	UserID     uint        `json:"userID,omitempty" gorm:"not null;unique_index"`
+	Classrooms []Classroom `gorm:"many2many:classroom_students" json:"classrooms"`
 }
 
 // AvailableMatch definition

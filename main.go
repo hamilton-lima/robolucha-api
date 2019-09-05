@@ -476,12 +476,17 @@ func updateGameDefinition(c *gin.Context) {
 // @Summary find The current user information
 // @Accept json
 // @Produce json
-// @Success 200 {object} model.User
+// @Success 200 {object} model.UserDetails
 // @Security ApiKeyAuth
 // @Router /private/get-user [get]
 func getUser(c *gin.Context) {
 	user := httphelper.UserFromContext(c)
-	c.JSON(http.StatusOK, user)
+	classrooms := ds.FindAllClassroomByStudent(user.ID)
+	result := model.UserDetails{
+		User:       user,
+		Classrooms: classrooms,
+	}
+	c.JSON(http.StatusOK, result)
 }
 
 // getLuchador godoc
