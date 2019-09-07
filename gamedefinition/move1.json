@@ -53,10 +53,11 @@
   		"codes": []
   	},
     {
-      "x": 400,
-      "y": 150,
-      "width": 80,
-      "height": 120,
+      "x": 390,
+      "y": 0,
+      "width": 210,
+      "height": 400,
+      "alpha": 0.4,
       "type": "region",
       "color": "#00FF00",
       "colider": true,
@@ -78,7 +79,7 @@
   "codes": [],
   "suggestedCodes": [
     { "event": "onStart", "script": "-- Move 1 suggested code" },
-    { "event": "onRepeat", "script": "move(1)" },
+    { "event": "onRepeat", "script": "move(10)" },
     { "event": "onHitWall", "script": "" }
   ]
 }

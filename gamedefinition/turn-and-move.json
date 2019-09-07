@@ -77,7 +77,7 @@
   "codes": [],
   "suggestedCodes": [
     { "event": "onStart", "script": "--You have to turn around!" },
-    { "event": "onRepeat", "script": "move(1)" },
+    { "event": "onRepeat", "script": "move(10)" },
     { "event": "onHitWall", "script": "" }
   ]
 }

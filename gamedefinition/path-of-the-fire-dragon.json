@@ -38,41 +38,41 @@
   "respawnY": 200,
   "gameComponents": [],
   "sceneComponents": [
-  	{
-  		"x":150,
-  		"y":150,
-  		"width":40,
-  		"height":250,
-      "blockMovement": true,
-  		"type":"wall",
-      "alpha": 1,
-  		"color": "#FF0000",
-  		"colider": true,
-      "codes": [{"event":"onHitOther", "script": "addDamage(1)"}]
-  	},
     {
-      "x":310,
-      "y":0,
-      "width":40,
-      "height":250,
+      "x": 150,
+      "y": 150,
+      "width": 40,
+      "height": 250,
       "blockMovement": true,
-      "type":"wall",
-      "alpha":1,
+      "type": "wall",
+      "alpha": 1,
       "color": "#FF0000",
       "colider": true,
-      "codes": [{"event":"onHitOther", "script": "addDamage(1)"}]
+      "codes": [{ "event": "onHitOther", "script": "addDamage(1)" }]
     },
     {
-      "x":470,
-      "y":150,
-      "width":40,
-      "height":250,
+      "x": 310,
+      "y": 0,
+      "width": 40,
+      "height": 250,
       "blockMovement": true,
-      "type":"wall",
-      "alpha":1,
+      "type": "wall",
+      "alpha": 1,
       "color": "#FF0000",
       "colider": true,
-      "codes": [{"event":"onHitOther", "script": "addDamage(1)"}]
+      "codes": [{ "event": "onHitOther", "script": "addDamage(1)" }]
+    },
+    {
+      "x": 470,
+      "y": 150,
+      "width": 40,
+      "height": 250,
+      "blockMovement": true,
+      "type": "wall",
+      "alpha": 1,
+      "color": "#FF0000",
+      "colider": true,
+      "codes": [{ "event": "onHitOther", "script": "addDamage(1)" }]
     },
     {
       "x": 500,
@@ -81,14 +81,15 @@
       "height": 100,
       "type": "region",
       "color": "#00FF00",
+      "alpha": 0.4,
       "colider": true,
       "codes": [{ "event": "onHitOther", "script": "endGame()" }]
     }
   ],
   "codes": [],
   "suggestedCodes": [
-    { "event": "onStart", "script": "-- Move 1 suggested code" },
-    { "event": "onRepeat", "script": "move(1)" },
+    { "event": "onStart", "script": "-- Move 10 suggested code" },
+    { "event": "onRepeat", "script": "move(10)" },
     { "event": "onHitWall", "script": "" }
   ]
 }

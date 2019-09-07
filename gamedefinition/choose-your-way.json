@@ -55,6 +55,7 @@
       "y": 150,
       "width": 40,
       "height": 120,
+      "blockMovement": true,
       "type": "wall",
       "alpha":1,
       "color": "#FF8800",
@@ -72,7 +73,18 @@
       "color": "#FF8800",
       "colider": true,
       "codes": [{ "event": "onHitOther", "script": "" }]
-  	}
+    },
+    {
+      "x": 440,
+      "y": 0,
+      "width": 160,
+      "height": 400,
+      "alpha": 0.4,
+      "type": "region",
+      "color": "#00FF00",
+      "colider": true,
+      "codes": [{ "event": "onHitOther", "script": "endGame()" }]
+    }
   ],
   "codes": [],
   "suggestedCodes": [
