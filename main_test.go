@@ -185,7 +185,7 @@ func TestUpdateGameDefinition(t *testing.T) {
 	gd.ArenaHeight = 42
 
 	body, _ := json.Marshal(gd)
-	router := createRouter(test.API_KEY, "true", auth.SessionAllwaysValid)
+	router := createRouter(test.API_KEY, "true", auth.SessionAllwaysValid, auth.SessionAllwaysValid)
 
 	w := test.PerformRequest(router, "PUT", "/internal/game-definition", string(body), test.API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -258,7 +258,7 @@ func TestCreateGameComponent(t *testing.T) {
 		"body": body,
 	}).Debug("After Create Game component")
 
-	router := createRouter(test.API_KEY, "true", auth.SessionAllwaysValid)
+	router := createRouter(test.API_KEY, "true", auth.SessionAllwaysValid, auth.SessionAllwaysValid)
 	w := test.PerformRequest(router, "POST", "/internal/game-component", body, test.API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
 
@@ -401,7 +401,7 @@ func TestCreateGameDefinition(t *testing.T) {
 	resultFake, body, err := fakeGameDefinition(t, faker.Word(), faker.Word(), 0)
 	assert.Assert(t, err == nil)
 
-	router := createRouter(test.API_KEY, "true", auth.SessionAllwaysValid)
+	router := createRouter(test.API_KEY, "true", auth.SessionAllwaysValid, auth.SessionAllwaysValid)
 	w := test.PerformRequest(router, "POST", "/internal/game-definition", body, test.API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
 
@@ -418,7 +418,7 @@ func TestGETGameDefinition(t *testing.T) {
 
 	url := fmt.Sprintf("/internal/game-definition/%v", definition1.Name)
 
-	router := createRouter(test.API_KEY, "true", auth.SessionAllwaysValid)
+	router := createRouter(test.API_KEY, "true", auth.SessionAllwaysValid, auth.SessionAllwaysValid)
 	w := test.PerformRequest(router, "GET", url, "", test.API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
 
@@ -464,7 +464,7 @@ func TestFindTutorialGameDefinition(t *testing.T) {
 	definition2 := createTestGameDefinition(t, model.GAMEDEFINITION_TYPE_TUTORIAL, 10)
 	definition3 := createTestGameDefinition(t, faker.Word(), 1)
 
-	router := createRouter(test.API_KEY, "true", auth.SessionAllwaysValid)
+	router := createRouter(test.API_KEY, "true", auth.SessionAllwaysValid, auth.SessionAllwaysValid)
 	w := test.PerformRequestNoAuth(router, "GET", "/private/tutorial", "")
 	assert.Equal(t, http.StatusOK, w.Code)
 
@@ -482,7 +482,7 @@ func createTestGameDefinition(t *testing.T, typeName string, sortOrder uint) mod
 	_, body, err := fakeGameDefinition(t, faker.Word(), typeName, sortOrder)
 	assert.Assert(t, err == nil)
 
-	router := createRouter(test.API_KEY, "true", auth.SessionAllwaysValid)
+	router := createRouter(test.API_KEY, "true", auth.SessionAllwaysValid, auth.SessionAllwaysValid)
 	w := test.PerformRequest(router, "POST", "/internal/game-definition", body, test.API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
 
@@ -599,7 +599,7 @@ func TestPOSTMatchMetric(t *testing.T) {
 	}
 	body, _ := json.Marshal(metric)
 
-	router := createRouter(test.API_KEY, "true", auth.SessionAllwaysValid)
+	router := createRouter(test.API_KEY, "true", auth.SessionAllwaysValid, auth.SessionAllwaysValid)
 	w := test.PerformRequest(router, "POST", "/internal/match-metric", string(body), test.API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
 
@@ -637,7 +637,7 @@ func TestGetPublicAvailableMatch(t *testing.T) {
 	}
 	ds.DB.Create(&publicAvailableMatch)
 
-	router := createRouter(test.API_KEY, "true", auth.SessionAllwaysValid)
+	router := createRouter(test.API_KEY, "true", auth.SessionAllwaysValid, auth.SessionAllwaysValid)
 
 	// search public available matches
 	w := test.PerformRequestNoAuth(router, "GET", "/private/available-match-public", "")

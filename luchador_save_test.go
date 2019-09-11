@@ -39,7 +39,7 @@ func Setup(t *testing.T) *model.GameComponent {
 	mockPublisher = &test.MockPublisher{}
 	publisher = mockPublisher
 
-	router = createRouter(test.API_KEY, "true", auth.SessionAllwaysValid)
+	router = createRouter(test.API_KEY, "true", auth.SessionAllwaysValid, auth.SessionAllwaysValid)
 
 	luchador := GetLuchador(t)
 	return &luchador

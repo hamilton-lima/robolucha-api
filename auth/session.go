@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	cookieName = "kc-access"
+	cookieName             = "kc-access"
 	getkeeperEncryptionKey = "GATEKEEPER_ENCRYPTION_KEY"
+	dashboardRole          = "dashboard_user"
 )
 
 // SessionValidatorFactory definition
@@ -58,6 +59,67 @@ func SessionIsValid(ds *datasource.DataSource) gin.HandlerFunc {
 		user := ds.CreateUser(sessionUser.Username)
 		c.Set("user", user)
 	}
+}
+
+// SessionIsValidAndDashBoardUser check if Authorization header is valid
+func SessionIsValidAndDashBoardUser(ds *datasource.DataSource) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		authorization, err := c.Request.Cookie(cookieName)
+		if err != nil {
+			log.Debug("Error reading authorization cookie")
+			c.AbortWithStatus(http.StatusForbidden)
+			return
+		}
+		if authorization.Value == "" {
+			log.Debug("No Authorization cookie")
+			c.AbortWithStatus(http.StatusForbidden)
+			return
+		}
+
+		key := os.Getenv(getkeeperEncryptionKey)
+		sessionUser, err := GetUser(authorization.Value, key)
+		if err != nil {
+			log.Debug("Error reading user from authorization cookie")
+			c.AbortWithStatus(http.StatusForbidden)
+			return
+		}
+
+		if sessionUser.Username == "" {
+			log.WithFields(log.Fields{
+				"authorization": authorization,
+				"cookie-name":   cookieName,
+				"sessionUser":   sessionUser,
+			}).Info("Invalid Session")
+			c.AbortWithStatus(http.StatusForbidden)
+			return
+		} else {
+			log.WithFields(log.Fields{
+				"sessionUser": sessionUser,
+			}).Info("User Authorized")
+		}
+
+		if !contains(sessionUser.Roles, dashboardRole) {
+			log.WithFields(log.Fields{
+				"sessionUser":   sessionUser,
+				"dashboardRole": dashboardRole,
+			}).Info("User DONT have dashboard role")
+			c.AbortWithStatus(http.StatusForbidden)
+			return
+		}
+
+		user := ds.CreateUser(sessionUser.Username)
+		c.Set("user", user)
+	}
+}
+
+func contains(roles []string, search string) bool {
+	for _, role := range roles {
+		if role == search {
+			return true
+		}
+	}
+	return false
 }
 
 // SessionAllwaysValid test function for local development

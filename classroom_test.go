@@ -33,7 +33,7 @@ func SetupClassroom(t *testing.T) {
 	mockPublisher = &test.MockPublisher{}
 	publisher = mockPublisher
 
-	router = createRouter(test.API_KEY, "true", auth.SessionAllwaysValid)
+	router = createRouter(test.API_KEY, "true", auth.SessionAllwaysValid, auth.SessionAllwaysValid)
 }
 
 func TestAddClassroom(t *testing.T) {

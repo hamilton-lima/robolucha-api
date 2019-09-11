@@ -78,9 +78,9 @@ func main() {
 	var router *gin.Engine
 
 	if disableAuth == "true" {
-		router = createRouter(internalAPIKey, logRequestBody, auth.SessionAllwaysValid)
+		router = createRouter(internalAPIKey, logRequestBody, auth.SessionAllwaysValid, auth.SessionAllwaysValid)
 	} else {
-		router = createRouter(internalAPIKey, logRequestBody, auth.SessionIsValid)
+		router = createRouter(internalAPIKey, logRequestBody, auth.SessionIsValid, auth.SessionIsValidAndDashBoardUser)
 	}
 
 	router.Run(":" + port)
@@ -91,7 +91,8 @@ func main() {
 }
 
 func createRouter(internalAPIKey string, logRequestBody string,
-	factory auth.SessionValidatorFactory) *gin.Engine {
+	privateFactory auth.SessionValidatorFactory,
+	dashboardFactory auth.SessionValidatorFactory) *gin.Engine {
 
 	ginMode := os.Getenv("GIN_MODE")
 	if ginMode == "release" {
@@ -134,7 +135,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 	}
 
 	privateAPI := router.Group("/private")
-	privateAPI.Use(factory(ds))
+	privateAPI.Use(privateFactory(ds))
 	{
 		privateAPI.GET("/tutorial", getTutorialGameDefinition)
 		privateAPI.GET("/get-user", getUser)
@@ -157,6 +158,14 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.GET("/available-match-public", getPublicAvailableMatch)
 		privateAPI.GET("/available-match-classroom/:id", getClassroomAvailableMatch)
 
+	}
+
+	dashboardAPI := router.Group("/dashboard")
+	dashboardAPI.Use(dashboardFactory(ds))
+	{
+		dashboardAPI.GET("/get-user", getUserDashboard)
+		dashboardAPI.GET("/classroom", getClassroom)
+		dashboardAPI.POST("/classroom", addClassroom)
 	}
 
 	playRouter := play.Init(ds, publisher)
@@ -411,6 +420,21 @@ func getUser(c *gin.Context) {
 	result := model.UserDetails{
 		User:       user,
 		Classrooms: classrooms,
+	}
+	c.JSON(http.StatusOK, result)
+}
+
+// getUserDashboard godoc
+// @Summary find The current user information
+// @Accept json
+// @Produce json
+// @Success 200 {object} model.UserDetails
+// @Security ApiKeyAuth
+// @Router /dashboard/get-user [get]
+func getUserDashboard(c *gin.Context) {
+	user := httphelper.UserFromContext(c)
+	result := model.UserDetails{
+		User: user,
 	}
 	c.JSON(http.StatusOK, result)
 }
@@ -1139,7 +1163,7 @@ func addMatchMetric(c *gin.Context) {
 // @Produce json
 // @Success 200 200 {array} model.Classroom
 // @Security ApiKeyAuth
-// @Router /private/classroom [get]
+// @Router /dashboard/classroom [get]
 func getClassroom(c *gin.Context) {
 	user := httphelper.UserFromContext(c)
 	result := ds.FindAllClassroom(user)
@@ -1158,7 +1182,7 @@ func getClassroom(c *gin.Context) {
 // @Param request body model.Classroom true "Classroom"
 // @Success 200 {object} model.Classroom
 // @Security ApiKeyAuth
-// @Router /private/classroom [post]
+// @Router /dashboard/classroom [post]
 func addClassroom(c *gin.Context) {
 	user := httphelper.UserFromContext(c)
 
