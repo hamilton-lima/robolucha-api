@@ -78,9 +78,9 @@ func main() {
 	var router *gin.Engine
 
 	if disableAuth == "true" {
-		router = createRouter(internalAPIKey, logRequestBody, SessionAllwaysValid)
+		router = createRouter(internalAPIKey, logRequestBody, auth.SessionAllwaysValid)
 	} else {
-		router = createRouter(internalAPIKey, logRequestBody, SessionIsValid)
+		router = createRouter(internalAPIKey, logRequestBody, auth.SessionIsValid)
 	}
 
 	router.Run(":" + port)
@@ -91,7 +91,7 @@ func main() {
 }
 
 func createRouter(internalAPIKey string, logRequestBody string,
-	factory SessionValidatorFactory) *gin.Engine {
+	factory auth.SessionValidatorFactory) *gin.Engine {
 
 	ginMode := os.Getenv("GIN_MODE")
 	if ginMode == "release" {
@@ -115,7 +115,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 	}
 
 	internalAPI := router.Group("/internal")
-	internalAPI.Use(KeyIsValid(internalAPIKey))
+	internalAPI.Use(auth.KeyIsValid(internalAPIKey))
 	{
 		internalAPI.GET("/game-definition/:name", getGameDefinitionByName)
 		internalAPI.GET("/game-definition-id/:id", getGameDefinitionByIDInternal)
@@ -134,7 +134,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 	}
 
 	privateAPI := router.Group("/private")
-	privateAPI.Use(factory())
+	privateAPI.Use(factory(ds))
 	{
 		privateAPI.GET("/tutorial", getTutorialGameDefinition)
 		privateAPI.GET("/get-user", getUser)
@@ -163,80 +163,6 @@ func createRouter(internalAPIKey string, logRequestBody string,
 	routes.Use(privateAPI, playRouter)
 
 	return router
-}
-
-// SessionValidatorFactory definition
-type SessionValidatorFactory func() gin.HandlerFunc
-
-// SessionIsValid check if Authoraization header is valid
-func SessionIsValid() gin.HandlerFunc {
-	return func(c *gin.Context) {
-
-		cookieName := "kc-access"
-
-		authorization, err := c.Request.Cookie(cookieName)
-		if err != nil {
-			log.Debug("Error reading authorization cookie")
-			c.AbortWithStatus(http.StatusForbidden)
-			return
-		}
-		if authorization.Value == "" {
-			log.Debug("No Authorization cookie")
-			c.AbortWithStatus(http.StatusForbidden)
-			return
-		}
-
-		key := os.Getenv("GATEKEEPER_ENCRYPTION_KEY")
-		sessionUser, err := auth.GetUser(authorization.Value, key)
-		if err != nil {
-			log.Debug("Error reading user from authorization cookie")
-			c.AbortWithStatus(http.StatusForbidden)
-			return
-		}
-
-		if sessionUser.Username == "" {
-			log.WithFields(log.Fields{
-				"authorization": authorization,
-				"cookie-name":   cookieName,
-				"sessionUser":   sessionUser,
-			}).Info("Invalid Session")
-			c.AbortWithStatus(http.StatusForbidden)
-			return
-		} else {
-			log.WithFields(log.Fields{
-				"sessionUser": sessionUser,
-			}).Info("User Authorized")
-		}
-
-		user := ds.CreateUser(sessionUser.Username)
-		c.Set("user", user)
-	}
-}
-
-// SessionAllwaysValid test function for local development
-func SessionAllwaysValid() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		user := ds.CreateUser("test")
-		c.Set("user", user)
-	}
-}
-
-// KeyIsValid check if Authoraization header is valid
-func KeyIsValid(key string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		authorization := c.Request.Header.Get("Authorization")
-		if authorization == "" {
-			log.Debug("No Authorization header")
-			c.AbortWithStatus(http.StatusForbidden)
-		}
-
-		if authorization != key {
-			log.Info("INVALID Authorization key")
-			c.AbortWithStatus(http.StatusForbidden)
-		}
-
-		log.Info("VALID Authorization key")
-	}
 }
 
 // findUserSetting godoc

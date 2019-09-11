@@ -8,16 +8,26 @@ import (
 	"fmt"
 
 	"github.com/dgrijalva/jwt-go"
+	log "github.com/sirupsen/logrus"
 )
 
 type JWTUser struct {
-	Name          string `json:"name"`
-	Username      string `json:"username"`
-	EmailVerified bool   `json:"emailVerified"`
-	FirstName     string `json:"firstName"`
-	LastName      string `json:"lastName"`
-	Email         string `json:"email"`
+	Name          string   `json:"name"`
+	Username      string   `json:"username"`
+	EmailVerified bool     `json:"emailVerified"`
+	FirstName     string   `json:"firstName"`
+	LastName      string   `json:"lastName"`
+	Email         string   `json:"email"`
+	Roles         []string `json:"roles"`
 }
+
+// from https://github.com/keycloak/keycloak-gatekeeper/blob/d87453446b6dbe6aea36d069dac7aef7b42e6c5e/doc.go
+const (
+	claimRealmAccess    = "realm_access"
+	claimResourceAccess = "resource_access"
+	claimResourceRoles  = "roles"
+	claimGroups         = "groups"
+)
 
 func GetUser(encrypted, key string) (JWTUser, error) {
 	result := JWTUser{}
@@ -41,7 +51,41 @@ func GetUser(encrypted, key string) (JWTUser, error) {
 	result.LastName = token.Claims.(jwt.MapClaims)["family_name"].(string)
 	result.Email = token.Claims.(jwt.MapClaims)["email"].(string)
 
+	log.Info("Claim list")
+
+	for key, val := range token.Claims.(jwt.MapClaims) {
+		log.Info(fmt.Sprintf("Claim Key: %v, value: %v", key, val))
+	}
+
+	result.Roles = getRoles(token.Claims.(jwt.MapClaims))
+
 	return result, nil
+}
+
+// from https://github.com/keycloak/keycloak-gatekeeper/blob/1b7ee69ed9ef1b471be86a18b37db82bc950a4f6/user_context.go
+func getRoles(claims jwt.MapClaims) []string {
+	var roleList []string
+
+	if realmRoles, found := claims[claimRealmAccess].(map[string]interface{}); found {
+		if roles, found := realmRoles[claimResourceRoles]; found {
+			for _, r := range roles.([]interface{}) {
+				roleList = append(roleList, fmt.Sprintf("%s", r))
+			}
+		}
+	}
+
+	if accesses, found := claims[claimResourceAccess].(map[string]interface{}); found {
+		for name, list := range accesses {
+			scopes := list.(map[string]interface{})
+			if roles, found := scopes[claimResourceRoles]; found {
+				for _, r := range roles.([]interface{}) {
+					roleList = append(roleList, fmt.Sprintf("%s:%s", name, r))
+				}
+			}
+		}
+	}
+
+	return roleList
 }
 
 func decodeText(state, key string) (string, error) {

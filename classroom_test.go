@@ -10,6 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/robolucha/robolucha-api/auth"
 	"gitlab.com/robolucha/robolucha-api/datasource"
 	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/test"
@@ -32,7 +33,7 @@ func SetupClassroom(t *testing.T) {
 	mockPublisher = &test.MockPublisher{}
 	publisher = mockPublisher
 
-	router = createRouter(test.API_KEY, "true", SessionAllwaysValid)
+	router = createRouter(test.API_KEY, "true", auth.SessionAllwaysValid)
 }
 
 func TestAddClassroom(t *testing.T) {
