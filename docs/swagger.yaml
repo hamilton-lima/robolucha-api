@@ -353,6 +353,59 @@ info:
   title: Robolucha API
   version: "1.0"
 paths:
+  /dashboard/classroom:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Classroom'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: find all Classroom
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Classroom
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.Classroom'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Classroom'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: add a Classroom
+  /dashboard/get-user:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.UserDetails'
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: find The current user information
   /internal/add-match-scores:
     post:
       consumes:
@@ -642,44 +695,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: find all public available matches
-  /private/classroom:
-    get:
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.Classroom'
-            type: array
-      security:
-      - ApiKeyAuth: []
-      summary: find all Classroom
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Classroom
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/model.Classroom'
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Classroom'
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: add a Classroom
   /private/game-definition-all:
     get:
       consumes:
