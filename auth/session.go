@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/robolucha/robolucha-api/datasource"
+	"gitlab.com/robolucha/robolucha-api/model"
 )
 
 const (
@@ -57,7 +58,11 @@ func SessionIsValid(ds *datasource.DataSource) gin.HandlerFunc {
 		}
 
 		user := ds.CreateUser(sessionUser.Username)
-		c.Set("user", user)
+		userDetails := model.UserDetails{
+			User:  user,
+			Roles: sessionUser.Roles,
+		}
+		c.Set("userDetails", userDetails)
 	}
 }
 
@@ -109,7 +114,11 @@ func SessionIsValidAndDashBoardUser(ds *datasource.DataSource) gin.HandlerFunc {
 		}
 
 		user := ds.CreateUser(sessionUser.Username)
-		c.Set("user", user)
+		userDetails := model.UserDetails{
+			User:  user,
+			Roles: sessionUser.Roles,
+		}
+		c.Set("userDetails", userDetails)
 	}
 }
 
@@ -126,7 +135,11 @@ func contains(roles []string, search string) bool {
 func SessionAllwaysValid(ds *datasource.DataSource) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := ds.CreateUser("test")
-		c.Set("user", user)
+		userDetails := model.UserDetails{
+			User:  user,
+			Roles: []string{dashboardRole},
+		}
+		c.Set("userDetails", userDetails)
 	}
 }
 

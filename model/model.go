@@ -11,9 +11,11 @@ type User struct {
 	Username  string     `json:"username"`
 }
 
+// UserDetails definition
 type UserDetails struct {
-	User       *User        `json:"user"`
+	User       *User       `json:"user"`
 	Classrooms []Classroom `json:"classrooms"`
+	Roles      []string    `json:"roles"`
 }
 
 // Session definition

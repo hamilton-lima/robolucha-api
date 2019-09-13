@@ -415,12 +415,8 @@ func updateGameDefinition(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /private/get-user [get]
 func getUser(c *gin.Context) {
-	user := httphelper.UserFromContext(c)
-	classrooms := ds.FindAllClassroomByStudent(user.ID)
-	result := model.UserDetails{
-		User:       user,
-		Classrooms: classrooms,
-	}
+	result := httphelper.UserDetailsFromContext(c)
+	result.Classrooms = ds.FindAllClassroomByStudent(result.User.ID)
 	c.JSON(http.StatusOK, result)
 }
 
@@ -432,10 +428,7 @@ func getUser(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /dashboard/get-user [get]
 func getUserDashboard(c *gin.Context) {
-	user := httphelper.UserFromContext(c)
-	result := model.UserDetails{
-		User: user,
-	}
+	result := httphelper.UserDetailsFromContext(c)
 	c.JSON(http.StatusOK, result)
 }
 

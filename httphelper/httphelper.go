@@ -29,7 +29,14 @@ func GetIntegerParam(c *gin.Context, paramName string, context string) (uint, er
 
 // UserFromContext get the current user from the request context
 func UserFromContext(c *gin.Context) *model.User {
-	val, _ := c.Get("user")
-	user := val.(*model.User)
-	return user
+	val, _ := c.Get("userDetails")
+	userDetails := val.(model.UserDetails)
+	return userDetails.User
+}
+
+// UserDetailsFromContext get the current user from the request context
+func UserDetailsFromContext(c *gin.Context) *model.UserDetails {
+	val, _ := c.Get("userDetails")
+	userDetails := val.(model.UserDetails)
+	return &userDetails
 }
