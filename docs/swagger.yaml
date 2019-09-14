@@ -332,6 +332,10 @@ definitions:
         items:
           $ref: '#/definitions/model.Classroom'
         type: array
+      roles:
+        items:
+          type: string
+        type: array
       user:
         $ref: '#/definitions/model.User'
         type: object
