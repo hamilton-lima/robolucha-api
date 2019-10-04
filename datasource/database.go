@@ -157,6 +157,15 @@ func (ds *DataSource) findUserBySession(UUID string) *model.User {
 	return &user
 }
 
+// FindUserByID definition
+func (ds *DataSource) FindUserByID(id uint) *model.User {
+	var user model.User
+	if ds.DB.Where(&model.User{ID: id}).First(&user).RecordNotFound() {
+		return nil
+	}
+	return &user
+}
+
 // Create if doesnt exist
 func (ds *DataSource) FindUserSettingByUser(user *model.User) *model.UserSetting {
 	var settings model.UserSetting

@@ -309,6 +309,15 @@ definitions:
       userID:
         type: integer
     type: object
+  model.StudentResponse:
+    properties:
+      studentID:
+        type: integer
+      userID:
+        type: integer
+      username:
+        type: string
+    type: object
   model.UpdateLuchadorResponse:
     properties:
       errors:
@@ -395,6 +404,22 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: add a Classroom
+  /dashboard/classroom/{id}/students:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.StudentResponse'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: find all Classroom students
   /dashboard/get-user:
     get:
       consumes:

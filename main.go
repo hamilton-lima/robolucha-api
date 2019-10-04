@@ -153,6 +153,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.GET("/game-definition-all", getGameDefinition)
 		// privateAPI.POST("/start-tutorial-match/:name", startTutorialMatch)
 		privateAPI.GET("/classroom", getClassroom)
+		privateAPI.GET("/classroom/:id/students", getClassroomStudents)
 		privateAPI.POST("/classroom", addClassroom)
 		privateAPI.POST("/join-classroom/:accessCode", joinClassroom)
 		privateAPI.GET("/available-match-public", getPublicAvailableMatch)
@@ -1160,6 +1161,46 @@ func addMatchMetric(c *gin.Context) {
 func getClassroom(c *gin.Context) {
 	user := httphelper.UserFromContext(c)
 	result := ds.FindAllClassroom(user)
+
+	log.WithFields(log.Fields{
+		"result": result,
+	}).Info("getClassroom")
+
+	c.JSON(http.StatusOK, result)
+}
+
+// getClassroomStudents godoc
+// @Summary find all Classroom students
+// @Accept json
+// @Produce json
+// @Success 200 200 {array} model.StudentResponse
+// @Security ApiKeyAuth
+// @Router /dashboard/classroom/{id}/students [get]
+func getClassroomStudents(c *gin.Context) {
+
+	// get classroom id parameter
+	id, err := httphelper.GetIntegerParam(c, "id", "getClassroomStudents")
+	if err != nil {
+		log.Info("Invalid body content on getClassroomStudents")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	// check if current user can see the list of students
+	user := httphelper.UserFromContext(c)
+	classroom := ds.FindClassroomByID(id)
+	if classroom.OwnerID != user.ID {
+		log.WithFields(log.Fields{
+			"classroom": classroom,
+			"user":      user,
+		}).Warn("Current user is not the owner of this classroom")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	// get the list of students
+	// add user name, DONT add user email and name
+	result := ds.BuildStudentResponse(classroom.Students)
 
 	log.WithFields(log.Fields{
 		"result": result,

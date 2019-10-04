@@ -72,6 +72,33 @@
                 }
             }
         },
+        "/dashboard/classroom/{id}/students": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find all Classroom students",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.StudentResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/dashboard/get-user": {
             "get": {
                 "security": [
@@ -1533,6 +1560,20 @@
                 },
                 "userID": {
                     "type": "integer"
+                }
+            }
+        },
+        "model.StudentResponse": {
+            "type": "object",
+            "properties": {
+                "studentID": {
+                    "type": "integer"
+                },
+                "userID": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },

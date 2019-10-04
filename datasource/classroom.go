@@ -73,6 +73,21 @@ func (ds *DataSource) FindAllClassroom(user *model.User) *[]model.Classroom {
 	return &result
 }
 
+func (ds *DataSource) FindClassroomByID(id uint) *model.Classroom {
+	var result model.Classroom
+
+	ds.DB.
+		Preload("Students").
+		Where(&model.Classroom{ID: id}).
+		Find(&result)
+
+	log.WithFields(log.Fields{
+		"classroom": result,
+	}).Debug("FindClassroomByID")
+
+	return &result
+}
+
 // FindAllClassroomByStudent definition
 func (ds *DataSource) FindAllClassroomByStudent(studentUserID uint) []model.Classroom {
 
@@ -160,4 +175,20 @@ func (ds *DataSource) FindAvailableMatchByClassroomID(id uint) *[]model.Availabl
 	}
 
 	return &result
+}
+
+// BuildStudentResponse definition
+func (ds *DataSource) BuildStudentResponse(students []model.Student) []model.StudentResponse {
+	result := make([]model.StudentResponse, len(students))
+
+	for n, student := range students {
+		user := ds.FindUserByID(student.UserID)
+		result[n] = model.StudentResponse{
+			StudentID: student.ID,
+			UserID:    student.UserID,
+			Username:  user.Username,
+		}
+	}
+
+	return result
 }

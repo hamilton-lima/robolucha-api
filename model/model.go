@@ -244,6 +244,13 @@ type Student struct {
 	Classrooms []Classroom `gorm:"many2many:classroom_students" json:"classrooms"`
 }
 
+// StudentResponse definition
+type StudentResponse struct {
+	StudentID uint   `json:"studentID"`
+	UserID    uint   `json:"userID"`
+	Username  string `json:"username"`
+}
+
 // AvailableMatch definition
 type AvailableMatch struct {
 	ID               uint            `gorm:"primary_key" json:"id"`
