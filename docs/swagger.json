@@ -72,7 +72,7 @@
                 }
             }
         },
-        "/dashboard/classroom/{id}/students": {
+        "/dashboard/classroom/students/{id}": {
             "get": {
                 "security": [
                     {
@@ -86,6 +86,15 @@
                     "application/json"
                 ],
                 "summary": "find all Classroom students",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Classroom id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

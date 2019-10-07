@@ -404,10 +404,16 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: add a Classroom
-  /dashboard/classroom/{id}/students:
+  /dashboard/classroom/students/{id}:
     get:
       consumes:
       - application/json
+      parameters:
+      - description: Classroom id
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:

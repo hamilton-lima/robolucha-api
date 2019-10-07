@@ -153,7 +153,6 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.GET("/game-definition-all", getGameDefinition)
 		// privateAPI.POST("/start-tutorial-match/:name", startTutorialMatch)
 		privateAPI.GET("/classroom", getClassroom)
-		privateAPI.GET("/classroom/:id/students", getClassroomStudents)
 		privateAPI.POST("/classroom", addClassroom)
 		privateAPI.POST("/join-classroom/:accessCode", joinClassroom)
 		privateAPI.GET("/available-match-public", getPublicAvailableMatch)
@@ -167,6 +166,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		dashboardAPI.GET("/get-user", getUserDashboard)
 		dashboardAPI.GET("/classroom", getClassroom)
 		dashboardAPI.POST("/classroom", addClassroom)
+		dashboardAPI.GET("/classroom/students/:id", getClassroomStudents)
 	}
 
 	playRouter := play.Init(ds, publisher)
@@ -1173,9 +1173,10 @@ func getClassroom(c *gin.Context) {
 // @Summary find all Classroom students
 // @Accept json
 // @Produce json
+// @Param id path int true "Classroom id"
 // @Success 200 200 {array} model.StudentResponse
 // @Security ApiKeyAuth
-// @Router /dashboard/classroom/{id}/students [get]
+// @Router /dashboard/classroom/students/{id} [get]
 func getClassroomStudents(c *gin.Context) {
 
 	// get classroom id parameter
