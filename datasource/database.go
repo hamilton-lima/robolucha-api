@@ -119,6 +119,12 @@ func NewDataSource(config *DBconfig) *DataSource {
 	DB.AutoMigrate(&model.Student{})
 	DB.AutoMigrate(&model.AvailableMatch{})
 
+	DB.AutoMigrate(&model.LearningObjective{})
+	DB.AutoMigrate(&model.Skill{})
+	DB.AutoMigrate(&model.GradingSystem{})
+	DB.AutoMigrate(&model.Grade{})
+	DB.AutoMigrate(&model.Activity{})
+
 	secret := os.Getenv("API_SECRET")
 
 	return &DataSource{DB: DB, config: config, secret: secret}
@@ -751,6 +757,7 @@ func (ds *DataSource) FindGameDefinition(id uint) *model.GameDefinition {
 	return &gameDefinition
 }
 
+// FindGameDefinitionByName definition
 func (ds *DataSource) FindGameDefinitionByName(name string) *model.GameDefinition {
 	var gameDefinition model.GameDefinition
 
