@@ -5,11 +5,11 @@
         Grade 
             Highest
             Lowest
-            
+
 - add grading to activity
 
-- load & add if dont exist learning experience
-- load & add if dont exist skills 
+- load & add if dont exist learning objective
+- load & add if dont exist skills h
 - load & add if dont exist grading
 - load activity list with skill placeholder objects containing name attribute only
 - populate skills objects based on the name in activity list

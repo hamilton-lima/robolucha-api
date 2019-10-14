@@ -8,7 +8,8 @@ type LearningObjective struct {
 	CreatedAt time.Time  `json:"-"`
 	UpdatedAt time.Time  `json:"-"`
 	DeletedAt *time.Time `json:"-" faker:"-"`
-	Name      string     `json:"name"`
+	Name      string     `json:"name" gorm:"not null;unique_index"`
+	Skills    []Skill    `gorm:"many2many:learningobjective_skills" json:"skills"`
 }
 
 // Skill definition
@@ -33,31 +34,44 @@ type GradingSystem struct {
 
 // Grade definition
 type Grade struct {
-	ID        uint       `gorm:"primary_key" json:"id"`
-	CreatedAt time.Time  `json:"-"`
-	UpdatedAt time.Time  `json:"-"`
-	DeletedAt *time.Time `json:"-" faker:"-"`
-	Name      string     `json:"name"`
-	Lowest    float32    `json:"lowest"`
-	Highest   float32    `json:"highest"`
-	Color     string     `json:"color"`
+	ID              uint       `gorm:"primary_key" json:"id"`
+	CreatedAt       time.Time  `json:"-"`
+	UpdatedAt       time.Time  `json:"-"`
+	DeletedAt       *time.Time `json:"-" faker:"-"`
+	Name            string     `json:"name"`
+	Lowest          float32    `json:"lowest"`
+	Highest         float32    `json:"highest"`
+	Color           string     `json:"color"`
+	GradingSystemID uint       `json:"gradingSystemID"`
 }
-
-// Check canada learning code data structure for
-// activities adn mine craft education
-// check license of the activities
-// add activities without gamedefinition???
 
 // Activity definition
 type Activity struct {
-	ID               uint       `gorm:"primary_key" json:"id"`
-	CreatedAt        time.Time  `json:"-"`
-	UpdatedAt        time.Time  `json:"-"`
-	DeletedAt        *time.Time `json:"-" faker:"-"`
-	Name             string     `json:"name"`
-	Description      string     `gorm:"size:125000" json:"description"`
-	Skills           []Skill    `gorm:"many2many:activitiy_skills" json:"skills"`
-	GameDefinitionID uint       `json:"gameDefinitionID"`
-	SourceURL        string     `json:"sourceURL"`
-	SourceName       string     `json:"sourceName"`
+	ID               uint            `gorm:"primary_key" json:"id"`
+	CreatedAt        time.Time       `json:"-"`
+	UpdatedAt        time.Time       `json:"-"`
+	DeletedAt        *time.Time      `json:"-" faker:"-"`
+	Name             string          `json:"name"`
+	Description      string          `gorm:"size:125000" json:"description"`
+	Skills           []Skill         `gorm:"many2many:activitiy_skills" json:"skills"`
+	GradingSystemID  uint            `json:"gradingSystemID"`
+	GradingSystem    GradingSystem   `json:"gradingSystem"`
+	GameDefinitionID uint            `json:"gameDefinitionID"`
+	GameDefinition   *GameDefinition `json:"gameDefinition"`
+	// SourceURL        string          `json:"sourceURL"`
+	// SourceName       string          `json:"sourceName"`
+}
+
+// Assignment definition
+type Assignment struct {
+	ID          uint       `gorm:"primary_key" json:"id"`
+	CreatedAt   time.Time  `json:"-"`
+	UpdatedAt   time.Time  `json:"-"`
+	DeletedAt   *time.Time `json:"-" faker:"-"`
+	ClassroomID uint       `json:"classroomID"`
+	Classroom   Classroom  `json:"classroom"`
+	ActivityID  uint       `json:"activityID"`
+	Activity    Activity   `json:"activity"`
+	TimeStart   time.Time  `json:"timeStart"`
+	TimeEnd     time.Time  `json:"timeEnd"`
 }
