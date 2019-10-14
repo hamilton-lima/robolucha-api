@@ -8,6 +8,8 @@
 
 - add grading to activity
 
+** how to add grading assignment the code version that was used?
+
 - load & add if dont exist learning objective
 - load & add if dont exist skills h
 - load & add if dont exist grading

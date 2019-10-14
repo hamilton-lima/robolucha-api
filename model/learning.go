@@ -75,3 +75,16 @@ type Assignment struct {
 	TimeStart   time.Time  `json:"timeStart"`
 	TimeEnd     time.Time  `json:"timeEnd"`
 }
+
+// AssignmentGrade definition
+type AssignmentGrade struct {
+	ID           uint       `gorm:"primary_key" json:"id"`
+	CreatedAt    time.Time  `json:"-"`
+	UpdatedAt    time.Time  `json:"-"`
+	DeletedAt    *time.Time `json:"-" faker:"-"`
+	AssignmentID uint       `json:"assignmentID"`
+	Assignment   Assignment `json:"assignment"`
+	StudentID    uint       `json:"studentID"`
+	Student      Student    `json:"student"`
+	Grade        float32    `json:"grade"`
+}
