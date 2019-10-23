@@ -1,14 +1,26 @@
 # Setup learning objectives steps 
 
-- create grading class 
+ok - create grading class 
     GradingSystem
         Grade 
             Highest
             Lowest
 
-- add grading to activity
+ok - add grading to activity
 
-** how to add grading assignment the code version that was used?
+## How to add grading assignment the code version that was used?
+    - ok Assignment
+    - CodeHistory
+    - ok Grade value - 0 to 100
+    - ok skill
+
+## Code versioning
+    - Add CodeHistory reference to AssignmentGrade
+    - Add version to Code that should be auto updated    
+    - Create Code hook on add/update actions to create records in CodeHistory
+    - When creating AssignmentGrade link to CodeHistory
+
+** Setup process 
 
 - load & add if dont exist learning objective
 - load & add if dont exist skills h

@@ -76,15 +76,27 @@ type Assignment struct {
 	TimeEnd     time.Time  `json:"timeEnd"`
 }
 
+// AssignmentEvaluation definition
+type AssignmentEvaluation struct {
+	ID               uint              `gorm:"primary_key" json:"id"`
+	CreatedAt        time.Time         `json:"-"`
+	UpdatedAt        time.Time         `json:"-"`
+	DeletedAt        *time.Time        `json:"-" faker:"-"`
+	AssignmentID     uint              `json:"assignmentID"`
+	Assignment       Assignment        `json:"assignment"`
+	StudentID        uint              `json:"studentID"`
+	Student          Student           `json:"student"`
+	AssignmentGrades []AssignmentGrade `json:"assignmentGrades"`
+}
+
 // AssignmentGrade definition
 type AssignmentGrade struct {
-	ID           uint       `gorm:"primary_key" json:"id"`
-	CreatedAt    time.Time  `json:"-"`
-	UpdatedAt    time.Time  `json:"-"`
-	DeletedAt    *time.Time `json:"-" faker:"-"`
-	AssignmentID uint       `json:"assignmentID"`
-	Assignment   Assignment `json:"assignment"`
-	StudentID    uint       `json:"studentID"`
-	Student      Student    `json:"student"`
-	Grade        float32    `json:"grade"`
+	ID                     uint       `gorm:"primary_key" json:"id"`
+	CreatedAt              time.Time  `json:"-"`
+	UpdatedAt              time.Time  `json:"-"`
+	DeletedAt              *time.Time `json:"-" faker:"-"`
+	Grade                  float32    `json:"grade"`
+	SkillID                uint       `json:"skillID"`
+	Skill                  Skill      `json:"skill"`
+	AssignmentEvaluationID uint       `json:"assignmentEvaluationID"`
 }
