@@ -663,3 +663,27 @@ func TestGetPublicAvailableMatch(t *testing.T) {
 	assert.Assert(t, result2[0].Name == availableMatch.Name)
 
 }
+
+func TestAddCodeVersion(t *testing.T) {
+	Setup(t)
+	defer ds.DB.Close()
+
+	code := model.Code{Event: "onStart", Script: "turnGun(90)"}
+
+	ds.DB.Create(&code)
+	assert.Equal(t, code.Version, uint(1))
+
+	// search version
+	var version model.CodeHistory
+	ds.DB.Where(&model.CodeHistory{CodeID: code.ID, Version: code.Version}).First(&version)
+	assert.Equal(t, version.Script, "turnGun(90)")
+
+	code.Script = "turnGun(160)"
+	ds.DB.Save(&code)
+	assert.Equal(t, code.Version, uint(2))
+
+	// search second version
+	var second model.CodeHistory
+	ds.DB.Where(&model.CodeHistory{CodeID: code.ID, Version: code.Version}).First(&second)
+	assert.Equal(t, second.Script, "turnGun(160)")
+}

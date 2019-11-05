@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"github.com/jinzhu/gorm"
+	log "github.com/sirupsen/logrus"
+	"time"
+)
 
 // User definition
 type User struct {
@@ -160,8 +164,56 @@ type Code struct {
 	DeletedAt        *time.Time `json:"-" faker:"-"`
 	Event            string     `json:"event"`
 	Script           string     `json:"script"`
+	Version          uint       `json:"version"`
 	Exception        string     `json:"exception"`
 	GameDefinitionID uint       `json:"gameDefinition" faker:"-"`
+}
+
+// BeforeSave Code hook, used to version Code
+func (c *Code) BeforeSave() (err error) {
+	if c.Version == 0 {
+		c.Version = 1
+	} else {
+		c.Version = c.Version + 1
+	}
+
+	return
+}
+
+// AfterCreate Code hook
+func (c *Code) AfterCreate(scope *gorm.Scope) (err error) {
+	version := CodeHistory{Script: c.Script, Version: c.Version, CodeID: c.ID}
+
+	log.WithFields(log.Fields{
+		"version": version,
+	}).Info("Code afterCreate")
+
+	scope.DB().Model(&version).Create(&version)
+	return
+}
+
+// AfterUpdate Code hook
+func (c *Code) AfterUpdate(scope *gorm.Scope) (err error) {
+	version := CodeHistory{Script: c.Script, Version: c.Version, CodeID: c.ID}
+
+	log.WithFields(log.Fields{
+		"version": version,
+	}).Info("Code afterUpdate")
+
+	scope.DB().Model(&version).Create(&version)
+	return
+}
+
+// CodeHistory definition
+type CodeHistory struct {
+	ID        uint       `gorm:"primary_key" json:"id,omitempty" faker:"-"`
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
+	DeletedAt *time.Time `json:"-" faker:"-"`
+	Script    string     `json:"script"`
+	Version   uint       `json:"version"`
+	CodeID    uint       `json:"codeID"`
+	Code      *Code      `json:"code,omitempty"`
 }
 
 // Config definition

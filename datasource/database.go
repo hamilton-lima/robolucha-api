@@ -109,6 +109,8 @@ func NewDataSource(config *DBconfig) *DataSource {
 	DB.AutoMigrate(&model.UserSetting{})
 	DB.AutoMigrate(&model.Match{})
 	DB.AutoMigrate(&model.Code{})
+	DB.AutoMigrate(&model.CodeHistory{})
+	
 	DB.AutoMigrate(&model.Config{})
 	DB.AutoMigrate(&model.MatchScore{})
 	DB.AutoMigrate(&model.SceneComponent{})
