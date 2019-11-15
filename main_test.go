@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -429,32 +430,51 @@ func TestGETGameDefinition(t *testing.T) {
 	assert.Assert(t, definition1.ID != definition2.ID)
 }
 
-// func TestFindMultiplayerMatch(t *testing.T) {
-// 	SetupMain(t)
-// 	defer ds.DB.Close()
+func createMatch(gameDefinitionID uint) model.Match {
+	match := model.Match{
+		TimeStart:        time.Now(),
+		GameDefinitionID: gameDefinitionID}
 
-// 	definition1 := createTestGameDefinition(t, model.GAMEDEFINITION_TYPE_TUTORIAL, 20)
-// 	definition2 := createTestGameDefinition(t, model.GAMEDEFINITION_TYPE_MULTIPLAYER, 10)
-// 	definition3 := createTestGameDefinition(t, faker.Word(), 1)
+	ds.DB.Create(&match)
+	return match
+}
 
-// 	ds.CreateMatch(definition1.ID)
-// 	match := ds.CreateMatch(definition2.ID)
-// 	ds.CreateMatch(definition3.ID)
+func TestFindMultiplayerMatch(t *testing.T) {
+	SetupMain(t)
+	// log.SetLevel(log.InfoLevel)
+	// ds.DB.LogMode(true)
+	defer ds.DB.Close()
 
-// 	router := createRouter(test.API_KEY, "true", auth.SessionAllwaysValid)
-// 	w := test.PerformRequestNoAuth(router, "GET", "/private/match", "")
-// 	assert.Equal(t, http.StatusOK, w.Code)
+	definition1 := createTestGameDefinition(t, model.GAMEDEFINITION_TYPE_TUTORIAL, 20)
+	definition2 := createTestGameDefinition(t, model.GAMEDEFINITION_TYPE_MULTIPLAYER, 10)
+	definition3 := createTestGameDefinition(t, faker.Word(), 1)
 
-// 	var matches []model.ActiveMatch
-// 	json.Unmarshal(w.Body.Bytes(), &matches)
+	createMatch(definition1.ID)
+	match := createMatch(definition2.ID)
+	createMatch(definition3.ID)
 
-// 	assert.Assert(t, matches[0].MatchID == match.ID)
+	definition2.Duration = 1200000
+	ds.DB.Save(&definition2)
 
-// 	gameDefinitions := *ds.FindTutorialGameDefinition()
+	router := createRouter(test.API_KEY, "true", auth.SessionAllwaysValid, auth.SessionAllwaysValid)
+	w := test.PerformRequestNoAuth(router, "GET", "/private/match", "")
+	assert.Equal(t, http.StatusOK, w.Code)
 
-// 	// all the tutorial gamedefinitions and the active multiplayer matches
-// 	assert.Assert(t, len(matches) == len(gameDefinitions)+1)
-// }
+	var matches []model.ActiveMatch
+
+	log.WithFields(log.Fields{
+		"matches": matches,
+	}).Warning("TestFindMultiplayerMatch")
+
+	json.Unmarshal(w.Body.Bytes(), &matches)
+
+	assert.Assert(t, matches[0].MatchID == match.ID)
+
+	gameDefinitions := *ds.FindTutorialGameDefinition()
+
+	// all the tutorial gamedefinitions and the active multiplayer matches
+	assert.Assert(t, len(matches) == len(gameDefinitions)+1)
+}
 
 func TestFindTutorialGameDefinition(t *testing.T) {
 	SetupMain(t)

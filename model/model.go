@@ -55,21 +55,6 @@ type ActiveMatch struct {
 	TimeStart   time.Time `json:"timeStart"`
 }
 
-// Match definition
-type Match struct {
-	ID                 uint            `gorm:"primary_key" json:"id"`
-	CreatedAt          time.Time       `json:"-"`
-	UpdatedAt          time.Time       `json:"-"`
-	DeletedAt          *time.Time      `json:"-" faker:"-"`
-	TimeStart          time.Time       `json:"timeStart"`
-	TimeEnd            time.Time       `json:"timeEnd"`
-	LastTimeAlive      time.Time       `json:"lastTimeAlive"`
-	GameDefinitionID   uint            `json:"gameDefinitionID"`
-	AvailableMatchID   uint            `json:"availableMatchID"`
-	GameDefinitionData string          `gorm:"size:125000" json:"-"`
-	Participants       []GameComponent `gorm:"many2many:match_participants" json:"participants"`
-}
-
 // GameDefinition definition
 type GameDefinition struct {
 	ID                            uint             `gorm:"primary_key" json:"id" faker:"-"`
@@ -119,6 +104,22 @@ type GameDefinition struct {
 	SceneComponents               []SceneComponent `json:"sceneComponents"`
 	Codes                         []Code           `gorm:"many2many:gamedefinition_codes" json:"codes"`
 	LuchadorSuggestedCodes        []Code           `gorm:"many2many:gamedefinition_suggestedcodes" json:"suggestedCodes"`
+}
+
+// Match definition
+type Match struct {
+	ID                 uint            `gorm:"primary_key" json:"id"`
+	CreatedAt          time.Time       `json:"-"`
+	UpdatedAt          time.Time       `json:"-"`
+	DeletedAt          *time.Time      `json:"-" faker:"-"`
+	TimeStart          time.Time       `json:"timeStart"`
+	TimeEnd            time.Time       `json:"timeEnd"`
+	LastTimeAlive      time.Time       `json:"lastTimeAlive"`
+	GameDefinitionID   uint            `json:"gameDefinitionID"`
+	GameDefinition     GameDefinition  `json:"gameDefinition"`
+	AvailableMatchID   uint            `json:"availableMatchID"`
+	GameDefinitionData string          `gorm:"size:125000" json:"-"`
+	Participants       []GameComponent `gorm:"many2many:match_participants" json:"participants"`
 }
 
 // SceneComponent definition

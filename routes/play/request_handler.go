@@ -39,7 +39,12 @@ func (handler *RequestHandler) Play(availableMatch *model.AvailableMatch, luchad
 	defer handler.mutex.Unlock()
 
 	handler.mutex.Lock()
-	match := handler.findActiveMatch(availableMatch)
+	matches := *handler.ds.FindActiveMatches("available_match_id = ?", availableMatch.ID)
+	var match *model.Match
+	if len(matches) > 0 {
+		match = &matches[0]
+	}
+
 	if match == nil {
 		match = handler.createMatch(availableMatch)
 		handler.publishStartMatch(match)
@@ -51,24 +56,25 @@ func (handler *RequestHandler) Play(availableMatch *model.AvailableMatch, luchad
 	return match
 }
 
-func (handler *RequestHandler) findActiveMatch(availableMatch *model.AvailableMatch) *model.Match {
+// func (handler *RequestHandler) findActiveMatch(availableMatch *model.AvailableMatch) *model.Match {
 
-	var match model.Match
+// 	var match model.Match
 
-	if handler.ds.DB.
-		Where("available_match_id = ?", availableMatch.ID).
-		Where("time_end < time_start").
-		Order("time_start desc").First(&match).
-		RecordNotFound() {
-		return nil
-	}
+// 	if handler.ds.DB.
+// 		Joins("left join game_definitions on matches.game_definition_id = game_definitions.id").
+// 		Where("available_match_id = ?", availableMatch.ID).
+// 		Where(handler.ds.ActiveMatchesSQL()).
+// 		Order("time_start desc").First(&match).
+// 		RecordNotFound() {
+// 		return nil
+// 	}
 
-	log.WithFields(log.Fields{
-		"match": match,
-	}).Info("findActiveMatch")
+// 	log.WithFields(log.Fields{
+// 		"match": match,
+// 	}).Info("findActiveMatch")
 
-	return &match
-}
+// 	return &match
+// }
 
 func (handler *RequestHandler) createMatch(availableMatch *model.AvailableMatch) *model.Match {
 

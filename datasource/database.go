@@ -110,7 +110,7 @@ func NewDataSource(config *DBconfig) *DataSource {
 	DB.AutoMigrate(&model.Match{})
 	DB.AutoMigrate(&model.Code{})
 	DB.AutoMigrate(&model.CodeHistory{})
-	
+
 	DB.AutoMigrate(&model.Config{})
 	DB.AutoMigrate(&model.MatchScore{})
 	DB.AutoMigrate(&model.SceneComponent{})
@@ -291,53 +291,92 @@ func applyConfigChanges(original []model.Config, updated []model.Config) []model
 	return original
 }
 
+// func (ds *DataSource) ActiveMatchesSQL() string {
+
+// 	endBeforeStart := "time_end < time_start"
+// 	start := "UNIX_TIMESTAMP(time_start)"
+// 	duration := "(game_definitions.duration/1000)"
+// 	now := "UNIX_TIMESTAMP(NOW())"
+
+// 	sql := fmt.Sprintf("%v and %v + %v > %v",
+// 		endBeforeStart, start, duration, now)
+
+// 	return sql
+// }
+
 func (ds *DataSource) FindActiveMultiplayerMatches() *[]model.Match {
+
+	matches := ds.FindActiveMatches("game_definitions.type = ?", model.GAMEDEFINITION_TYPE_MULTIPLAYER)
+
+	log.WithFields(log.Fields{
+		"matches": matches,
+	}).Info("findActiveMatches")
+
+	return matches
+}
+
+func (ds *DataSource) FindActiveMatches(query interface{}, args ...interface{}) *[]model.Match {
 
 	var matches []model.Match
 	ds.DB.
 		Joins("left join game_definitions on matches.game_definition_id = game_definitions.id").
-		Where("game_definitions.type = ?", model.GAMEDEFINITION_TYPE_MULTIPLAYER).
+		Preload("GameDefinition").
 		Where("time_end < time_start").
-		Order("time_start desc").Find(&matches)
+		Where(query, args).
+		Order("time_start desc").
+		Find(&matches)
 
 	log.WithFields(log.Fields{
 		"matches": matches,
-	}).Info("findActiveMatches")
+	}).Warn("findActiveMatches")
 
-	return &matches
-}
-
-func (ds *DataSource) FindActiveMatches() *[]model.Match {
-
-	var matches []model.Match
-	ds.DB.Where("time_end < time_start").Order("time_start desc").Find(&matches)
-
-	log.WithFields(log.Fields{
-		"matches": matches,
-	}).Info("findActiveMatches")
-
-	return &matches
-}
-
-func (ds *DataSource) FindActiveMatchesByGameDefinitionAndParticipant(gameDefinition *model.GameDefinition, gameComponent *model.GameComponent) *model.Match {
-
-	var matches []model.Match
-	ds.DB.Preload("Participants").Where(&model.Match{GameDefinitionID: gameDefinition.ID}).Where("time_end < time_start").Find(&matches)
-
-	log.WithFields(log.Fields{
-		"matches": matches,
-	}).Info("findActiveMatchesByGameDefinitionAndParticipant")
+	result := make([]model.Match, 0)
 
 	for _, match := range matches {
-		for _, participant := range match.Participants {
-			if participant.ID == gameComponent.ID {
-				return &match
-			}
+		duration := time.Duration(match.GameDefinition.Duration) * time.Millisecond
+		startPlusDuration := match.TimeStart.Add(duration)
+		now := time.Now()
+
+		log.WithFields(log.Fields{
+			"duration":          duration,
+			"startPlusDuration": startPlusDuration,
+			"now":               now,
+			"isAfter":           startPlusDuration.After(now),
+		}).Debug("findActiveMatches/time")
+
+		if startPlusDuration.After(now) {
+			result = append(result, match)
 		}
 	}
 
-	return nil
+	return &result
 }
+
+// func (ds *DataSource) FindActiveMatchesByGameDefinitionAndParticipant(gameDefinition *model.GameDefinition, gameComponent *model.GameComponent) *model.Match {
+
+// 	matches := ds.FindActiveMatches(&model.Match{GameDefinitionID: gameDefinition.ID})
+
+// 	// var matches []model.Match
+// 	// ds.DB.Preload("Participants").
+// 	// 	Joins("left join game_definitions on matches.game_definition_id = game_definitions.id").
+// 	// 	Where(&model.Match{GameDefinitionID: gameDefinition.ID}).
+// 	// 	Where(ds.ActiveMatchesSQL()).
+// 	// 	Find(&matches)
+
+// 	log.WithFields(log.Fields{
+// 		"matches": matches,
+// 	}).Info("findActiveMatchesByGameDefinitionAndParticipant")
+
+// 	for _, match := range *matches {
+// 		for _, participant := range match.Participants {
+// 			if participant.ID == gameComponent.ID {
+// 				return &match
+// 			}
+// 		}
+// 	}
+
+// 	return nil
+// }
 
 func (ds *DataSource) FindMaskConfig(id uint) *[]model.Config {
 
