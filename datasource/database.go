@@ -40,7 +40,9 @@ func BuildMysqlConfig() *DBconfig {
 	password := os.Getenv("MYSQL_PASSWORD")
 	database := os.Getenv("MYSQL_DATABASE")
 	host := os.Getenv("MYSQL_HOST")
-	connection := fmt.Sprintf("%v:%v@tcp(%v:3306)/%v?charset=utf8&parseTime=True&loc=Local", user, password, host, database)
+	port := os.Getenv("MYSQL_PORT")
+
+	connection := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?charset=utf8&parseTime=True&loc=Local", user, password, host, port, database)
 
 	return &DBconfig{
 		dialect:  "mysql",
