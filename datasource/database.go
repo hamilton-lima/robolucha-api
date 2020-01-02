@@ -83,7 +83,7 @@ func NewDataSource(config *DBconfig) *DataSource {
 			"host":     config.host,
 			"database": config.database,
 			"user":     config.user,
-		}).Debug("Database connection status")
+		}).Info("Database connection status")
 
 		if err != nil {
 			log.WithFields(log.Fields{
