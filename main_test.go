@@ -707,3 +707,44 @@ func TestAddCodeVersion(t *testing.T) {
 	ds.DB.Where(&model.CodeHistory{CodeID: code.ID, Version: code.Version}).First(&second)
 	assert.Equal(t, second.Script, "turnGun(160)")
 }
+
+func TestUpdateLuchadorCode(t *testing.T) {
+	Setup(t)
+	defer ds.DB.Close()
+
+	luchador := model.GameComponent{}
+	err := faker.FakeData(&luchador)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Error("Error generating mock luchador")
+		panic(1)
+	}
+
+	luchador.Codes = make([]model.Code, 2)
+	luchador.Codes[0] = model.Code{Event: "onStart", Script: "turnGun(90)"}
+	luchador.Codes[1] = model.Code{Event: "onRepeat", Script: "move(10)"}
+
+	ds.UpdateLuchador(&luchador)
+	assert.Equal(t, len(luchador.Codes), 2)
+	assert.Equal(t, luchador.Codes[0].Script, "turnGun(90)")
+
+	log.WithFields(log.Fields{
+		"luchador.Codes": luchador.Codes,
+	}).Error("update (1)")
+
+	// force new objects to create new codes instead of updating
+	luchador.Codes[0] = model.Code{Event: "", Script: "turnGun(90)"}
+	luchador.Codes[1] = model.Code{Event: "onRepeat", Script: "move(10)"}
+
+	ds.UpdateLuchador(&luchador)
+
+	result := ds.FindLuchadorByID(luchador.ID)
+	assert.Equal(t, len(result.Codes), 2)
+	assert.Equal(t, result.Codes[0].Script, "")
+
+	log.WithFields(log.Fields{
+		"luchador.Codes": luchador.Codes,
+	}).Error("update (2)")
+
+}
