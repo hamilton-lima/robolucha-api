@@ -261,6 +261,7 @@ func (ds *DataSource) FindLuchadorByIDNoPreload(id uint) *model.GameComponent {
 	return &luchador
 }
 
+// UpdateLuchador keeping unique config an code
 func (ds *DataSource) UpdateLuchador(component *model.GameComponent) *model.GameComponent {
 	current := ds.FindLuchadorByID(component.ID)
 	if current == nil {
@@ -269,13 +270,36 @@ func (ds *DataSource) UpdateLuchador(component *model.GameComponent) *model.Game
 
 	current.Name = component.Name
 	current.Configs = applyConfigChanges(current.Configs, component.Configs)
-	current.Codes = component.Codes
+	current.Codes = applyCodeChanges(current.Codes, component.Codes)
 
 	ds.DB.Save(current)
 
 	log.WithFields(log.Fields{
 		"luchador": current,
 	}).Info("after updateLuchador")
+
+	return current
+}
+
+func applyCodeChanges(current []model.Code, updated []model.Code) []model.Code {
+	var found bool
+
+	for _, newCode := range updated {
+		found = false
+
+		//search by event+gameDefinition
+		for i, currentCode := range current {
+			if currentCode.Event == newCode.Event && currentCode.GameDefinitionID == newCode.GameDefinitionID {
+				current[i].Script = newCode.Script
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			current = append(current, newCode)
+		}
+	}
 
 	return current
 }
