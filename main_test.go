@@ -721,6 +721,11 @@ func TestUpdateLuchadorCode(t *testing.T) {
 		panic(1)
 	}
 
+	luchador.Codes = make([]model.Code, 0)
+	ds.UpdateLuchador(&luchador)
+	result := ds.FindLuchadorByID(luchador.ID)
+	assert.Equal(t, len(result.Codes), 0)
+
 	luchador.Codes = make([]model.Code, 2)
 	luchador.Codes[0] = model.Code{Event: "onStart", Script: "turnGun(90)"}
 	luchador.Codes[1] = model.Code{Event: "onRepeat", Script: "move(10)"}
@@ -729,22 +734,28 @@ func TestUpdateLuchadorCode(t *testing.T) {
 	assert.Equal(t, len(luchador.Codes), 2)
 	assert.Equal(t, luchador.Codes[0].Script, "turnGun(90)")
 
+	result = ds.FindLuchadorByID(luchador.ID)
+	assert.Equal(t, len(result.Codes), 2)
+	assert.Equal(t, result.Codes[0].Script, "turnGun(90)")
+	assert.Equal(t, result.Codes[1].Script, "move(10)")
+
 	log.WithFields(log.Fields{
 		"luchador.Codes": luchador.Codes,
 	}).Error("update (1)")
 
 	// force new objects to create new codes instead of updating
-	luchador.Codes[0] = model.Code{Event: "", Script: "turnGun(90)"}
-	luchador.Codes[1] = model.Code{Event: "onRepeat", Script: "move(10)"}
+	luchador.Codes[0] = model.Code{Event: "onStart", Script: ""}
+	luchador.Codes[1] = model.Code{Event: "onRepeat", Script: "move(99)"}
 
 	ds.UpdateLuchador(&luchador)
 
-	result := ds.FindLuchadorByID(luchador.ID)
+	result = ds.FindLuchadorByID(luchador.ID)
 	assert.Equal(t, len(result.Codes), 2)
 	assert.Equal(t, result.Codes[0].Script, "")
+	assert.Equal(t, result.Codes[1].Script, "move(99)")
 
 	log.WithFields(log.Fields{
-		"luchador.Codes": luchador.Codes,
+		"result.Codes": result.Codes,
 	}).Error("update (2)")
 
 }
