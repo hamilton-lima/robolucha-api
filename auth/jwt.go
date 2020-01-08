@@ -51,10 +51,10 @@ func GetUser(encrypted, key string) (JWTUser, error) {
 	result.LastName = token.Claims.(jwt.MapClaims)["family_name"].(string)
 	result.Email = token.Claims.(jwt.MapClaims)["email"].(string)
 
-	log.Info("Claim list")
+	log.Debug("Claim list")
 
 	for key, val := range token.Claims.(jwt.MapClaims) {
-		log.Info(fmt.Sprintf("Claim Key: %v, value: %v", key, val))
+		log.Debug(fmt.Sprintf("Claim Key: %v, value: %v", key, val))
 	}
 
 	result.Roles = getRoles(token.Claims.(jwt.MapClaims))
