@@ -418,6 +418,7 @@ func updateGameDefinition(c *gin.Context) {
 func getUser(c *gin.Context) {
 	result := httphelper.UserDetailsFromContext(c)
 	result.Classrooms = ds.FindAllClassroomByStudent(result.User.ID)
+	result.Settings = *ds.FindUserSettingByUser(result.User)
 	c.JSON(http.StatusOK, result)
 }
 

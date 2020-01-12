@@ -20,6 +20,7 @@ type UserDetails struct {
 	User       *User       `json:"user"`
 	Classrooms []Classroom `json:"classrooms"`
 	Roles      []string    `json:"roles"`
+	Settings   UserSetting `json:"settings"`
 }
 
 // Session definition
@@ -39,7 +40,8 @@ type UserSetting struct {
 	UpdatedAt  time.Time  `json:"-"`
 	DeletedAt  *time.Time `json:"-" faker:"-"`
 	UserID     uint       `json:"userID"`
-	LastOption string     `json:"lastOption"`
+	FirstLogin bool       `json:"firstLogin"`
+	FirstMatch bool       `json:"firstMatch"`
 }
 
 // ActiveMatch definition, describes the result of findActiveMatches
