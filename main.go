@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/gin-contrib/cors"
+	useragent "github.com/mileusna/useragent"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/gin-gonic/gin"
@@ -26,6 +27,7 @@ import (
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"gitlab.com/robolucha/robolucha-api/auth"
 	"gitlab.com/robolucha/robolucha-api/datasource"
+	"gitlab.com/robolucha/robolucha-api/events"
 	"gitlab.com/robolucha/robolucha-api/httphelper"
 	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/pubsub"
@@ -37,6 +39,8 @@ import (
 )
 
 var ds *datasource.DataSource
+var eventsDS *events.DataSource
+
 var publisher pubsub.Publisher
 
 func main() {
@@ -50,8 +54,12 @@ func main() {
 	ds = datasource.NewDataSource(datasource.BuildMysqlConfig())
 	defer ds.DB.Close()
 
+	eventsDS = events.NewDataSource(events.BuildMysqlConfig())
+	defer eventsDS.DB.Close()
+
 	publisher = &pubsub.RedisPublisher{}
 	go ds.KeepAlive()
+	go eventsDS.KeepAlive()
 
 	if len(os.Args) < 2 {
 		log.Error("Missing gamedefinition folder parameter")
@@ -157,6 +165,8 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.POST("/join-classroom/:accessCode", joinClassroom)
 		privateAPI.GET("/available-match-public", getPublicAvailableMatch)
 		privateAPI.GET("/available-match-classroom/:id", getClassroomAvailableMatch)
+
+		privateAPI.POST("/page-events", addEvents)
 
 	}
 
@@ -1314,4 +1324,46 @@ func getClassroomAvailableMatch(c *gin.Context) {
 	}).Info("getPublicAvailableMatch")
 
 	c.JSON(http.StatusOK, result)
+}
+
+// addEvents godoc
+// @Summary add page events
+// @Accept json
+// @Produce json
+// @Param request body model.PageEventRequest true "PageEventRequest"
+// @Success 200 {string} string
+// @Security ApiKeyAuth
+// @Router /private/page-events [post]
+func addEvents(c *gin.Context) {
+	user := httphelper.UserFromContext(c)
+
+	var request *model.PageEventRequest
+	err := c.BindJSON(&request)
+	if err != nil {
+		log.Info("Invalid body content on addEvent")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	header := c.Request.Header.Get("User-Agent")
+	ua := useragent.Parse(header)
+
+	event := model.PageEvent{
+		UserID:      user.ID,
+		RemoteAddr:  c.ClientIP(),
+		UserAgent:   ua.Name,
+		Version:     ua.Version,
+		OSName:      ua.OS,
+		OSVersion:   ua.OSVersion,
+		Mobile:      ua.Mobile,
+		Tablet:      ua.Tablet,
+		Desktop:     ua.Desktop,
+		Device:      ua.Device,
+		Page:        request.Page,
+		Action:      request.Action,
+		ComponentID: request.ComponentID,
+	}
+
+	eventsDS.CreateEvent(event)
+	c.JSON(http.StatusOK, "")
 }

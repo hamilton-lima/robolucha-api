@@ -346,7 +346,7 @@ type PageEvent struct {
 	Mobile      bool       `json:"mobile"`
 	Tablet      bool       `json:"tablet"`
 	Desktop     bool       `json:"desktop"`
-	Device      bool       `json:"device"`
+	Device      string     `json:"device"`
 	Page        string     `json:"page"`
 	Action      string     `json:"action"`
 	ComponentID string     `json:"componentID"`

@@ -16,6 +16,7 @@ require (
 	github.com/jinzhu/gorm v1.9.9
 	github.com/matryer/try v0.0.0-20161228173917-9ac251b645a2 // indirect
 	github.com/mattn/go-sqlite3 v1.11.0 // indirect
+	github.com/mileusna/useragent v0.0.0-20190129205925-3e331f0949a5
 	github.com/sirupsen/logrus v1.4.2
 	github.com/stretchr/testify v1.3.0
 	github.com/swaggo/gin-swagger v1.1.0
