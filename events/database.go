@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/jinzhu/copier"
 	"github.com/jinzhu/gorm"
 
 	_ "github.com/go-sql-driver/mysql"
