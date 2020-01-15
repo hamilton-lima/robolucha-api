@@ -60,6 +60,8 @@ definitions:
         type: integer
       script:
         type: string
+      version:
+        type: integer
     type: object
   model.Config:
     properties:
@@ -206,6 +208,9 @@ definitions:
     properties:
       availableMatchID:
         type: integer
+      gameDefinition:
+        $ref: '#/definitions/model.GameDefinition'
+        type: object
       gameDefinitionID:
         type: integer
       id:
@@ -255,6 +260,15 @@ definitions:
         type: integer
       score:
         type: integer
+    type: object
+  model.PageEventRequest:
+    properties:
+      action:
+        type: string
+      componentID:
+        type: string
+      page:
+        type: string
     type: object
   model.SceneComponent:
     properties:
@@ -345,16 +359,21 @@ definitions:
         items:
           type: string
         type: array
+      settings:
+        $ref: '#/definitions/model.UserSetting'
+        type: object
       user:
         $ref: '#/definitions/model.User'
         type: object
     type: object
   model.UserSetting:
     properties:
+      firstLogin:
+        type: boolean
+      firstMatch:
+        type: boolean
       id:
         type: integer
-      lastOption:
-        type: string
       userID:
         type: integer
     type: object
@@ -958,6 +977,28 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: find one match
+  /private/page-events:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: PageEventRequest
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.PageEventRequest'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: add page events
   /private/play/{id}:
     post:
       consumes:

@@ -978,6 +978,42 @@
                 }
             }
         },
+        "/private/page-events": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "add page events",
+                "parameters": [
+                    {
+                        "description": "PageEventRequest",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.PageEventRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/private/play/{id}": {
             "post": {
                 "security": [
@@ -1191,6 +1227,9 @@
                 },
                 "script": {
                     "type": "string"
+                },
+                "version": {
+                    "type": "integer"
                 }
             }
         },
@@ -1414,6 +1453,10 @@
                 "availableMatchID": {
                     "type": "integer"
                 },
+                "gameDefinition": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.GameDefinition"
+                },
                 "gameDefinitionID": {
                     "type": "integer"
                 },
@@ -1488,6 +1531,20 @@
                 },
                 "score": {
                     "type": "integer"
+                }
+            }
+        },
+        "model.PageEventRequest": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "componentID": {
+                    "type": "string"
+                },
+                "page": {
+                    "type": "string"
                 }
             }
         },
@@ -1627,6 +1684,10 @@
                         "type": "string"
                     }
                 },
+                "settings": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.UserSetting"
+                },
                 "user": {
                     "type": "object",
                     "$ref": "#/definitions/model.User"
@@ -1636,11 +1697,14 @@
         "model.UserSetting": {
             "type": "object",
             "properties": {
+                "firstLogin": {
+                    "type": "boolean"
+                },
+                "firstMatch": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "integer"
-                },
-                "lastOption": {
-                    "type": "string"
                 },
                 "userID": {
                     "type": "integer"
