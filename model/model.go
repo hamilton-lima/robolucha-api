@@ -323,3 +323,31 @@ type UpdateLuchadorResponse struct {
 	Errors   []string       `json:"errors"`
 	Luchador *GameComponent `json:"luchador"`
 }
+
+// PageEventRequest sent from the application
+type PageEventRequest struct {
+	Page        string `json:"page"`
+	Action      string `json:"action"`
+	ComponentID string `json:"componentID"`
+}
+
+// PageEvent to be saved after http request inspection
+type PageEvent struct {
+	ID          uint       `gorm:"primary_key" json:"id"`
+	CreatedAt   time.Time  `json:"-"`
+	UpdatedAt   time.Time  `json:"-"`
+	DeletedAt   *time.Time `json:"-" faker:"-"`
+	UserID      uint       `json:"userID"`
+	RemoteAddr  string     `json:"remoteAddr"`
+	UserAgent   string     `json:"userAgent"`
+	Version     string     `json:"version"`
+	OSName      string     `json:"OSName"`
+	OSVersion   string     `json:"OSVersion"`
+	Mobile      bool       `json:"mobile"`
+	Tablet      bool       `json:"tablet"`
+	Desktop     bool       `json:"desktop"`
+	Device      bool       `json:"device"`
+	Page        string     `json:"page"`
+	Action      string     `json:"action"`
+	ComponentID string     `json:"componentID"`
+}
