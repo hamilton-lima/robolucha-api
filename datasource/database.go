@@ -118,7 +118,6 @@ func NewDataSource(config *DBconfig) *DataSource {
 	DB.AutoMigrate(&model.SceneComponent{})
 	DB.AutoMigrate(&model.GameComponent{})
 	DB.AutoMigrate(&model.GameDefinition{})
-	DB.AutoMigrate(&model.MatchMetric{})
 	DB.AutoMigrate(&model.Classroom{})
 	DB.AutoMigrate(&model.Student{})
 	DB.AutoMigrate(&model.AvailableMatch{})
@@ -939,19 +938,6 @@ func resetGameDefinitionArrays(gameDefinition *model.GameDefinition) {
 	if gameDefinition.LuchadorSuggestedCodes == nil {
 		gameDefinition.LuchadorSuggestedCodes = make([]model.Code, 0)
 	}
-}
-
-func (ds *DataSource) AddMatchMetric(m *model.MatchMetric) *model.MatchMetric {
-
-	metric := model.MatchMetric{}
-	copier.Copy(&metric, &m)
-	ds.DB.Create(&metric)
-
-	log.WithFields(log.Fields{
-		"metric": metric,
-	}).Debug("addMatchMetric")
-
-	return &metric
 }
 
 // CreateAvailableMatchIfDontExist definition

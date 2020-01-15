@@ -1146,7 +1146,7 @@ func addMatchMetric(c *gin.Context) {
 		return
 	}
 
-	result := ds.AddMatchMetric(metric)
+	result := eventsDS.AddMatchMetric(metric)
 	if result == nil {
 		log.WithFields(log.Fields{
 			"metric": metric,

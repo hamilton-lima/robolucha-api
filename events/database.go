@@ -96,6 +96,7 @@ func NewDataSource(config *DBconfig) *DataSource {
 
 	// Migrate the schema
 	DB.AutoMigrate(&model.PageEvent{})
+	DB.AutoMigrate(&model.MatchMetric{})
 
 	return &DataSource{DB: DB, config: config}
 }
@@ -116,4 +117,17 @@ func (ds *DataSource) CreateEvent(event model.PageEvent) {
 		"event": event,
 	}).Debug("event created")
 
+}
+
+func (ds *DataSource) AddMatchMetric(m *model.MatchMetric) *model.MatchMetric {
+
+	metric := model.MatchMetric{}
+	copier.Copy(&metric, &m)
+	ds.DB.Create(&metric)
+
+	log.WithFields(log.Fields{
+		"metric": metric,
+	}).Debug("addMatchMetric")
+
+	return &metric
 }
