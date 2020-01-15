@@ -17,6 +17,7 @@ import (
 	// "github.com/stretchr/testify/assert"
 	"gitlab.com/robolucha/robolucha-api/auth"
 	"gitlab.com/robolucha/robolucha-api/datasource"
+	"gitlab.com/robolucha/robolucha-api/events"
 	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/test"
 	"gotest.tools/assert"
@@ -30,6 +31,7 @@ func SetupMain(t *testing.T) {
 
 	os.Remove(test.DB_NAME)
 	ds = datasource.NewDataSource(datasource.BuildSQLLiteConfig(test.DB_NAME))
+	eventsDS = events.NewDataSource(events.BuildSQLLiteConfig(test.DB_NAME))
 }
 
 // func TestCreateMatch(t *testing.T) {
@@ -607,7 +609,7 @@ func fakeGameDefinition(t *testing.T, name string, typeName string, sortOrder ui
 
 func TestPOSTMatchMetric(t *testing.T) {
 	SetupMain(t)
-	defer ds.DB.Close()
+	defer eventsDS.DB.Close()
 
 	var metric *model.MatchMetric
 	err := faker.FakeData(&metric)

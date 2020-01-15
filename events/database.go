@@ -49,6 +49,12 @@ func BuildMysqlConfig() *DBconfig {
 		args:     connection}
 }
 
+func BuildSQLLiteConfig(fileName string) *DBconfig {
+	return &DBconfig{
+		dialect: "sqlite3",
+		args:    fileName}
+}
+
 // NewDataSource creates a DataSource instance
 func NewDataSource(config *DBconfig) *DataSource {
 	waitTime := 2 * time.Second
