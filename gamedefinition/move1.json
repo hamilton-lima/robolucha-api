@@ -36,8 +36,8 @@
   "fireEnergyCost": 2,
   "respawnX": 200,
   "respawnY": 200,
-  "respawnAngle": 45,
-  "respawnGunAngle": 90,
+  "respawnAngle": 0,
+  "respawnGunAngle": 0,
   "gameComponents": [],
   "sceneComponents": [
   	{
