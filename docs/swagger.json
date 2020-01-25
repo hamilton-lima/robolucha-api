@@ -1697,17 +1697,20 @@
         "model.UserSetting": {
             "type": "object",
             "properties": {
-                "firstLogin": {
-                    "type": "boolean"
-                },
-                "firstMatch": {
-                    "type": "boolean"
-                },
                 "id": {
                     "type": "integer"
                 },
+                "playedTutorial": {
+                    "type": "boolean"
+                },
                 "userID": {
                     "type": "integer"
+                },
+                "visitedMainPage": {
+                    "type": "boolean"
+                },
+                "visitedMaskPage": {
+                    "type": "boolean"
                 }
             }
         }

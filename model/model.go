@@ -35,13 +35,14 @@ type Session struct {
 
 // UserSetting definition
 type UserSetting struct {
-	ID         uint       `gorm:"primary_key" json:"id"`
-	CreatedAt  time.Time  `json:"-"`
-	UpdatedAt  time.Time  `json:"-"`
-	DeletedAt  *time.Time `json:"-" faker:"-"`
-	UserID     uint       `json:"userID"`
-	FirstLogin bool       `json:"firstLogin"`
-	FirstMatch bool       `json:"firstMatch"`
+	ID              uint       `gorm:"primary_key" json:"id"`
+	CreatedAt       time.Time  `json:"-"`
+	UpdatedAt       time.Time  `json:"-"`
+	DeletedAt       *time.Time `json:"-" faker:"-"`
+	UserID          uint       `json:"userID"`
+	VisitedMainPage bool       `json:"visitedMainPage"`
+	VisitedMaskPage bool       `json:"visitedMaskPage"`
+	PlayedTutorial  bool       `json:"playedTutorial"`
 }
 
 // ActiveMatch definition, describes the result of findActiveMatches

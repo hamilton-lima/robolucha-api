@@ -188,8 +188,10 @@ func (ds *DataSource) UpdateUserSetting(settings *model.UserSetting) *model.User
 		return nil
 	}
 
-	current.FirstLogin = settings.FirstLogin
-	current.FirstMatch = settings.FirstMatch
+	current.VisitedMainPage = settings.VisitedMainPage
+	current.VisitedMaskPage = settings.VisitedMaskPage
+	current.PlayedTutorial = settings.PlayedTutorial
+
 	ds.DB.Save(&current)
 
 	log.WithFields(log.Fields{

@@ -368,14 +368,16 @@ definitions:
     type: object
   model.UserSetting:
     properties:
-      firstLogin:
-        type: boolean
-      firstMatch:
-        type: boolean
       id:
         type: integer
+      playedTutorial:
+        type: boolean
       userID:
         type: integer
+      visitedMainPage:
+        type: boolean
+      visitedMaskPage:
+        type: boolean
     type: object
 host: http://local.robolucha.com:5000
 info:
