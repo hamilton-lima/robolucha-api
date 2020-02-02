@@ -1,6 +1,7 @@
 package play_test
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -65,9 +66,20 @@ func TestPlayRequestHandler(t *testing.T) {
 
 }
 
+func createLuchador(id uint) *model.GameComponent {
+	luchador := &model.GameComponent{
+		UserID: id,
+		Name:   fmt.Sprintf("Luchador%d", id),
+	}
+
+	return ds.CreateLuchador(luchador)
+}
+
 func TestLeaveTutorial(t *testing.T) {
 	Setup(t)
 	defer ds.DB.Close()
+
+	luchador := createLuchador(1)
 
 	gd := model.BuildDefaultGameDefinition()
 	gd.Name = "FOOBAR"
@@ -79,17 +91,17 @@ func TestLeaveTutorial(t *testing.T) {
 
 	handler := play.NewRequestHandler(ds, publisher)
 
-	handler.Play(&am1, 432)
+	match := handler.Play(&am1, luchador.ID)
 	handler.Play(&am2, 450)
 	handler.Play(&am1, 450)
 
-	luchador := model.GameComponent{
-		ID: uint(432),
-	}
+	// simulate runner adding the match participant
+	ds.AddMatchParticipant(&model.MatchParticipant{
+		LuchadorID: luchador.ID,
+		MatchID:    match.ID,
+	})
 
-	handler.LeaveTutorialMatches(&luchador)
-
+	handler.LeaveTutorialMatches(luchador)
 	endMatchMessages := mockPublisher.Messages["end.match"]
-
 	assert.Equal(t, len(endMatchMessages), 1)
 }

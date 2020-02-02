@@ -61,12 +61,18 @@ func (handler *RequestHandler) FindTutorialMatchesByParticipant(gameComponent *m
 
 	matches := handler.ds.FindActiveMatches("game_definitions.type = ?", model.GAMEDEFINITION_TYPE_TUTORIAL)
 	log.WithFields(log.Fields{
-		"matches": matches,
-	}).Info("findActiveMatches")
+		"matches": model.LogMatches(matches),
+	}).Info("FindTutorialMatchesByParticipant")
 
 	result := make([]model.Match, 0)
 
 	for _, match := range *matches {
+
+		log.WithFields(log.Fields{
+			"match":        model.LogMatch(match),
+			"participants": match.Participants,
+		}).Info("FindTutorialMatchesByParticipant/filter participants")
+
 		for _, participant := range match.Participants {
 			if participant.ID == gameComponent.ID {
 				result = append(result, match)
@@ -179,7 +185,7 @@ func (handler *RequestHandler) LeaveTutorialMatches(gameComponent *model.GameCom
 
 		matchJSON, _ := json.Marshal(match)
 		message := string(matchJSON)
-		requestHandler.publisher.Publish(channel, message)
+		handler.publisher.Publish(channel, message)
 	}
 
 }
