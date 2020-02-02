@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gitlab.com/robolucha/robolucha-api/datasource"
 	"gitlab.com/robolucha/robolucha-api/httphelper"
+	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/pubsub"
 )
 
@@ -30,6 +31,7 @@ type Router struct {
 // Setup definition
 func (router *Router) Setup(group *gin.RouterGroup) {
 	group.POST("/play/:id", play)
+	group.POST("/leave-tutorial-match", leaveTutorialMatch)
 }
 
 // play godoc
@@ -78,4 +80,29 @@ func play(c *gin.Context) {
 	}).Info("play()")
 
 	c.JSON(http.StatusOK, match)
+}
+
+// leaveTutorialMatch godoc
+// @Summary Sends message to end active tutorial matches
+// @Accept json
+// @Produce json
+// @Success 200 {string} string
+// @Security ApiKeyAuth
+// @Router /private/leave-tutorial-match [post]
+func leaveTutorialMatch(c *gin.Context) {
+
+	user := httphelper.UserFromContext(c)
+
+	var luchador *model.GameComponent
+	luchador = requestHandler.ds.FindLuchador(user)
+	if luchador == nil {
+		log.WithFields(log.Fields{
+			"user": user,
+		}).Error("Error getting luchador for the current user")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	requestHandler.LeaveTutorialMatches(luchador)
+	c.JSON(http.StatusOK, "")
 }

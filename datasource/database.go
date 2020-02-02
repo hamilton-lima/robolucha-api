@@ -343,12 +343,14 @@ func (ds *DataSource) FindActiveMultiplayerMatches() *[]model.Match {
 	return matches
 }
 
+// FindActiveMatches definition
 func (ds *DataSource) FindActiveMatches(query interface{}, args ...interface{}) *[]model.Match {
 
 	var matches []model.Match
 	ds.DB.
 		Joins("left join game_definitions on matches.game_definition_id = game_definitions.id").
 		Preload("GameDefinition").
+		Preload("Participants").
 		Where("time_end < time_start").
 		Where(query, args).
 		Order("time_start desc").
@@ -360,6 +362,7 @@ func (ds *DataSource) FindActiveMatches(query interface{}, args ...interface{}) 
 
 	result := make([]model.Match, 0)
 
+	// auto remove matches where the duration is greater than the current time
 	for _, match := range matches {
 		duration := time.Duration(match.GameDefinition.Duration) * time.Millisecond
 		startPlusDuration := match.TimeStart.Add(duration)
@@ -540,7 +543,7 @@ func (ds *DataSource) EndMatch(match *model.Match) *model.Match {
 	ds.DB.Model(&match).Update("time_end", match.TimeEnd)
 
 	log.WithFields(log.Fields{
-		"match": match,
+		"match": model.LogMatch(*match),
 	}).Info("Match time_end updated")
 
 	return match
