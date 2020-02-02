@@ -56,6 +56,27 @@ func (handler *RequestHandler) Play(availableMatch *model.AvailableMatch, luchad
 	return match
 }
 
+// FindTutorialMatchesByParticipant definition
+func (handler *RequestHandler) FindTutorialMatchesByParticipant(gameComponent *model.GameComponent) []model.Match {
+
+	matches := handler.ds.FindActiveMatches("game_definitions.type = ?", model.GAMEDEFINITION_TYPE_TUTORIAL)
+	log.WithFields(log.Fields{
+		"matches": matches,
+	}).Info("findActiveMatches")
+
+	result := make([]model.Match, 0)
+
+	for _, match := range *matches {
+		for _, participant := range match.Participants {
+			if participant.ID == gameComponent.ID {
+				result = append(result, match)
+			}
+		}
+	}
+
+	return result
+}
+
 // func (handler *RequestHandler) findActiveMatch(availableMatch *model.AvailableMatch) *model.Match {
 
 // 	var match model.Match
@@ -141,4 +162,24 @@ func (handler *RequestHandler) FindAvailableMatchByID(id uint) *model.AvailableM
 	}).Info("FindAvailableMatchByID")
 
 	return &result
+}
+
+// LeaveTutorialMatches definition
+func (handler *RequestHandler) LeaveTutorialMatches(gameComponent *model.GameComponent) {
+
+	matches := handler.FindTutorialMatchesByParticipant(gameComponent)
+	log.WithFields(log.Fields{
+		"matches": matches,
+	}).Info("tutorial matches")
+
+	channel := "end.match"
+
+	for _, match := range matches {
+		handler.ds.EndMatch(&match)
+
+		matchJSON, _ := json.Marshal(match)
+		message := string(matchJSON)
+		requestHandler.publisher.Publish(channel, message)
+	}
+
 }

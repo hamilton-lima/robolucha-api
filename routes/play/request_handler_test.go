@@ -64,3 +64,32 @@ func TestPlayRequestHandler(t *testing.T) {
 	assert.Equal(t, uint(3), r4.AvailableMatchID)
 
 }
+
+func TestLeaveTutorial(t *testing.T) {
+	Setup(t)
+	defer ds.DB.Close()
+
+	gd := model.BuildDefaultGameDefinition()
+	gd.Name = "FOOBAR"
+	gd.Type = "tutorial"
+	ds.CreateGameDefinition(&gd)
+
+	am1 := model.AvailableMatch{ID: 42, GameDefinitionID: gd.ID}
+	am2 := model.AvailableMatch{ID: 3, GameDefinitionID: gd.ID}
+
+	handler := play.NewRequestHandler(ds, publisher)
+
+	handler.Play(&am1, 432)
+	handler.Play(&am2, 450)
+	handler.Play(&am1, 450)
+
+	luchador := model.GameComponent{
+		ID: uint(432),
+	}
+
+	handler.LeaveTutorialMatches(&luchador)
+
+	endMatchMessages := mockPublisher.Messages["end.match"]
+
+	assert.Equal(t, len(endMatchMessages), 1)
+}
