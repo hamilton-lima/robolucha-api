@@ -157,6 +157,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.GET("/match-single", getMatch)
 		privateAPI.GET("/match-config", getLuchadorConfigsForCurrentMatch)
 		privateAPI.POST("/join-match", joinMatch)
+		privateAPI.POST("/leave-tutorial-match", leaveTutorialMatch)
 		privateAPI.GET("/game-definition-id/:id", getGameDefinitionByID)
 		privateAPI.GET("/game-definition-all", getGameDefinition)
 		// privateAPI.POST("/start-tutorial-match/:name", startTutorialMatch)
@@ -1365,5 +1366,42 @@ func addEvents(c *gin.Context) {
 	}
 
 	eventsDS.CreateEvent(event)
+	c.JSON(http.StatusOK, "")
+}
+
+// leaveTutorialMatch godoc
+// @Summary Sends message to end active tutorial matches
+// @Accept json
+// @Produce json
+// @Success 200 {string} string
+// @Security ApiKeyAuth
+// @Router /private/leave-tutorial-match [post]
+func leaveTutorialMatch(c *gin.Context) {
+
+	user := httphelper.UserFromContext(c)
+
+	var luchador *model.GameComponent
+	luchador = ds.FindLuchador(user)
+	if luchador == nil {
+		log.WithFields(log.Fields{
+			"user": user,
+		}).Error("Error getting luchador for the current user")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	matches := ds.FindTutorialMatchesByParticipant(luchador)
+	log.WithFields(log.Fields{
+		"matches": matches,
+	}).Info("tutorial matches")
+
+	channel := "end.match"
+
+	for match := range matches {
+		matchJSON, _ := json.Marshal(match)
+		message := string(matchJSON)
+		publisher.Publish(channel, message)
+	}
+
 	c.JSON(http.StatusOK, "")
 }

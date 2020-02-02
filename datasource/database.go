@@ -361,18 +361,22 @@ func (ds *DataSource) FindActiveMatches(query interface{}, args ...interface{}) 
 	result := make([]model.Match, 0)
 
 	for _, match := range matches {
-		duration := time.Duration(match.GameDefinition.Duration) * time.Millisecond
-		startPlusDuration := match.TimeStart.Add(duration)
-		now := time.Now()
+		if match.GameDefinition.Duration > 0 {
+			duration := time.Duration(match.GameDefinition.Duration) * time.Millisecond
+			startPlusDuration := match.TimeStart.Add(duration)
+			now := time.Now()
 
-		log.WithFields(log.Fields{
-			"duration":          duration,
-			"startPlusDuration": startPlusDuration,
-			"now":               now,
-			"isAfter":           startPlusDuration.After(now),
-		}).Debug("findActiveMatches/time")
+			log.WithFields(log.Fields{
+				"duration":          duration,
+				"startPlusDuration": startPlusDuration,
+				"now":               now,
+				"isAfter":           startPlusDuration.After(now),
+			}).Debug("findActiveMatches/time")
 
-		if startPlusDuration.After(now) {
+			if startPlusDuration.After(now) {
+				result = append(result, match)
+			}
+		} else {
 			result = append(result, match)
 		}
 	}
@@ -380,31 +384,26 @@ func (ds *DataSource) FindActiveMatches(query interface{}, args ...interface{}) 
 	return &result
 }
 
-// func (ds *DataSource) FindActiveMatchesByGameDefinitionAndParticipant(gameDefinition *model.GameDefinition, gameComponent *model.GameComponent) *model.Match {
+func (ds *DataSource) FindTutorialMatchesByParticipant(gameComponent *model.GameComponent) []model.Match {
 
-// 	matches := ds.FindActiveMatches(&model.Match{GameDefinitionID: gameDefinition.ID})
+	matches := ds.FindActiveMatches("game_definitions.type = ?", model.GAMEDEFINITION_TYPE_TUTORIAL)
 
-// 	// var matches []model.Match
-// 	// ds.DB.Preload("Participants").
-// 	// 	Joins("left join game_definitions on matches.game_definition_id = game_definitions.id").
-// 	// 	Where(&model.Match{GameDefinitionID: gameDefinition.ID}).
-// 	// 	Where(ds.ActiveMatchesSQL()).
-// 	// 	Find(&matches)
+	log.WithFields(log.Fields{
+		"matches": matches,
+	}).Info("findActiveMatches")
 
-// 	log.WithFields(log.Fields{
-// 		"matches": matches,
-// 	}).Info("findActiveMatchesByGameDefinitionAndParticipant")
+	result := make([]model.Match, 0)
 
-// 	for _, match := range *matches {
-// 		for _, participant := range match.Participants {
-// 			if participant.ID == gameComponent.ID {
-// 				return &match
-// 			}
-// 		}
-// 	}
+	for _, match := range *matches {
+		for _, participant := range match.Participants {
+			if participant.ID == gameComponent.ID {
+				result = append(result, match)
+			}
+		}
+	}
 
-// 	return nil
-// }
+	return result
+}
 
 func (ds *DataSource) FindMaskConfig(id uint) *[]model.Config {
 
