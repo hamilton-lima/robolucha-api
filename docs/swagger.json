@@ -760,30 +760,6 @@
                 }
             }
         },
-        "/private/leave-tutorial-match": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Sends message to end active tutorial matches",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/private/luchador": {
             "get": {
                 "security": [
