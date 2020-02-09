@@ -272,6 +272,7 @@ func (ds *DataSource) UpdateLuchador(component *model.GameComponent) *model.Game
 
 	current.Name = component.Name
 	current.Configs = applyConfigChanges(current.Configs, component.Configs)
+	current.Codes = removeDuplicates(current.Codes)
 	current.Codes = applyCodeChanges(current.Codes, component.Codes)
 
 	ds.DB.Save(current)
@@ -281,6 +282,29 @@ func (ds *DataSource) UpdateLuchador(component *model.GameComponent) *model.Game
 	}).Info("after updateLuchador")
 
 	return current
+}
+
+func removeDuplicates(current []model.Code) []model.Code {
+	var found bool
+	result := make([]model.Code, 0)
+
+	for _, code := range current {
+		found = false
+
+		//search by event+gameDefinition
+		for _, newCode := range result {
+			if newCode.Event == code.Event && newCode.GameDefinitionID == code.GameDefinitionID {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			current = append(result, code)
+		}
+	}
+
+	return result
 }
 
 func applyCodeChanges(current []model.Code, updated []model.Code) []model.Code {
