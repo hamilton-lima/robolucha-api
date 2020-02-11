@@ -272,39 +272,15 @@ func (ds *DataSource) UpdateLuchador(component *model.GameComponent) *model.Game
 
 	current.Name = component.Name
 	current.Configs = applyConfigChanges(current.Configs, component.Configs)
-	current.Codes = removeDuplicates(current.Codes)
-	current.Codes = applyCodeChanges(current.Codes, component.Codes)
 
+	current.Codes = applyCodeChanges(current.Codes, component.Codes)
 	ds.DB.Save(current)
 
 	log.WithFields(log.Fields{
 		"luchador": current,
-	}).Info("after updateLuchador")
+	}).Warning("after updateLuchador")
 
 	return current
-}
-
-func removeDuplicates(current []model.Code) []model.Code {
-	var found bool
-	result := make([]model.Code, 0)
-
-	for _, code := range current {
-		found = false
-
-		//search by event+gameDefinition
-		for _, newCode := range result {
-			if newCode.Event == code.Event && newCode.GameDefinitionID == code.GameDefinitionID {
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			current = append(result, code)
-		}
-	}
-
-	return result
 }
 
 func applyCodeChanges(current []model.Code, updated []model.Code) []model.Code {
@@ -471,6 +447,8 @@ func (ds *DataSource) FindLuchadorByID(luchadorID uint) *model.GameComponent {
 		return nil
 	}
 
+	luchador.Codes = removeDuplicates(luchador.Codes)
+
 	log.WithFields(log.Fields{
 		"luchador": luchador,
 	}).Info("FindLuchadorByID")
@@ -497,11 +475,40 @@ func (ds *DataSource) FindLuchadorByNamePreload(name string) *model.GameComponen
 		return nil
 	}
 
+	luchador.Codes = removeDuplicates(luchador.Codes)
+
 	log.WithFields(log.Fields{
 		"luchador": luchador,
 	}).Info("FindLuchadorByNamePreload")
 
 	return &luchador
+}
+
+func removeDuplicates(current []model.Code) []model.Code {
+	var found bool
+	result := make([]model.Code, 0)
+
+	for _, code := range current {
+		found = false
+
+		//search by event+gameDefinition
+		for i, newCode := range result {
+			if newCode.Event == code.Event && newCode.GameDefinitionID == code.GameDefinitionID {
+				if code.ID > newCode.ID {
+					result[i] = code
+				}
+
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			result = append(result, code)
+		}
+	}
+
+	return result
 }
 
 func (ds *DataSource) NameExist(ID uint, name string) bool {

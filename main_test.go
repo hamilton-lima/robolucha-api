@@ -751,7 +751,16 @@ func TestUpdateLuchadorCode(t *testing.T) {
 
 	ds.UpdateLuchador(&luchador)
 
+	log.WithFields(log.Fields{
+		"luchador.Codes": luchador.Codes,
+	}).Error("update (2)")
+
 	result = ds.FindLuchadorByID(luchador.ID)
+
+	log.WithFields(log.Fields{
+		"luchador.Codes": result.Codes,
+	}).Error("findByID")
+
 	assert.Equal(t, len(result.Codes), 2)
 	assert.Equal(t, result.Codes[0].Script, "")
 	assert.Equal(t, result.Codes[1].Script, "move(99)")
