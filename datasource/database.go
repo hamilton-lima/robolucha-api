@@ -243,6 +243,8 @@ func (ds *DataSource) FindLuchador(user *model.User) *model.GameComponent {
 		return nil
 	}
 
+	luchador.Codes = removeDuplicates(luchador.Codes)
+
 	log.WithFields(log.Fields{
 		"luchador": luchador,
 	}).Info("FindLuchador")
