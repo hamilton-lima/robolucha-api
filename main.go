@@ -1362,6 +1362,8 @@ func addEvents(c *gin.Context) {
 		Page:        request.Page,
 		Action:      request.Action,
 		ComponentID: request.ComponentID,
+		AppName:     request.AppName,
+		AppVersion:  request.AppVersion,
 	}
 
 	eventsDS.CreateEvent(event)
