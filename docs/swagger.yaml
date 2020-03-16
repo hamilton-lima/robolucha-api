@@ -263,6 +263,10 @@ definitions:
     type: object
   model.PageEventRequest:
     properties:
+      AppName:
+        type: string
+      AppVersion:
+        type: string
       action:
         type: string
       componentID:
