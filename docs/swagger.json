@@ -1561,6 +1561,12 @@
         "model.PageEventRequest": {
             "type": "object",
             "properties": {
+                "AppName": {
+                    "type": "string"
+                },
+                "AppVersion": {
+                    "type": "string"
+                },
                 "action": {
                     "type": "string"
                 },

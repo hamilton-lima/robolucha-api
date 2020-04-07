@@ -330,6 +330,8 @@ type PageEventRequest struct {
 	Page        string `json:"page"`
 	Action      string `json:"action"`
 	ComponentID string `json:"componentID"`
+	AppName     string `json:"AppName"`
+	AppVersion  string `json:"AppVersion"`
 }
 
 // PageEvent to be saved after http request inspection
@@ -351,4 +353,6 @@ type PageEvent struct {
 	Page        string     `json:"page"`
 	Action      string     `json:"action"`
 	ComponentID string     `json:"componentID"`
+	AppName     string     `json:"AppName"`
+	AppVersion  string     `json:"AppVersion"`
 }
