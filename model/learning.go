@@ -22,44 +22,45 @@ type Skill struct {
 	Description string     `gorm:"size:125000" json:"description"`
 }
 
-// GradingSystem definition
-type GradingSystem struct {
+// TODO add this as second phase
+// // GradingSystem definition
+// type GradingSystem struct {
+// 	ID        uint       `gorm:"primary_key" json:"id"`
+// 	CreatedAt time.Time  `json:"-"`
+// 	UpdatedAt time.Time  `json:"-"`
+// 	DeletedAt *time.Time `json:"-" faker:"-"`
+// 	Name      string     `json:"name"`
+// 	Grades    []Grade    `json:"grades"`
+// }
+
+// Grade definition
+type Grade struct {
 	ID        uint       `gorm:"primary_key" json:"id"`
 	CreatedAt time.Time  `json:"-"`
 	UpdatedAt time.Time  `json:"-"`
 	DeletedAt *time.Time `json:"-" faker:"-"`
 	Name      string     `json:"name"`
-	Grades    []Grade    `json:"grades"`
-}
-
-// Grade definition
-type Grade struct {
-	ID              uint       `gorm:"primary_key" json:"id"`
-	CreatedAt       time.Time  `json:"-"`
-	UpdatedAt       time.Time  `json:"-"`
-	DeletedAt       *time.Time `json:"-" faker:"-"`
-	Name            string     `json:"name"`
-	Lowest          float32    `json:"lowest"`
-	Highest         float32    `json:"highest"`
-	Color           string     `json:"color"`
-	GradingSystemID uint       `json:"gradingSystemID"`
+	Lowest    float32    `json:"lowest"`
+	Highest   float32    `json:"highest"`
+	Color     string     `json:"color"`
+	// GradingSystemID uint       `json:"gradingSystemID"`
 }
 
 // Activity definition
 type Activity struct {
-	ID               uint            `gorm:"primary_key" json:"id"`
-	CreatedAt        time.Time       `json:"-"`
-	UpdatedAt        time.Time       `json:"-"`
-	DeletedAt        *time.Time      `json:"-" faker:"-"`
-	Name             string          `json:"name"`
-	Description      string          `gorm:"size:125000" json:"description"`
-	Skills           []Skill         `gorm:"many2many:activitiy_skills" json:"skills"`
-	GradingSystemID  uint            `json:"gradingSystemID"`
-	GradingSystem    GradingSystem   `json:"gradingSystem"`
+	ID          uint       `gorm:"primary_key" json:"id"`
+	CreatedAt   time.Time  `json:"-"`
+	UpdatedAt   time.Time  `json:"-"`
+	DeletedAt   *time.Time `json:"-" faker:"-"`
+	Name        string     `json:"name"`
+	Description string     `gorm:"size:125000" json:"description"`
+	Skills      []Skill    `gorm:"many2many:activitiy_skills" json:"skills"`
+	// GradingSystemID  uint            `json:"gradingSystemID"`
+	// GradingSystem    GradingSystem   `json:"gradingSystem"`
 	GameDefinitionID uint            `json:"gameDefinitionID"`
 	GameDefinition   *GameDefinition `json:"gameDefinition"`
-	// SourceURL        string          `json:"sourceURL"`
-	// SourceName       string          `json:"sourceName"`
+	SourceURL        string          `json:"sourceURL"`
+	SourceName       string          `json:"sourceName"`
 }
 
 // Assignment definition

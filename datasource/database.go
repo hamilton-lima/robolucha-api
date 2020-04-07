@@ -124,7 +124,7 @@ func NewDataSource(config *DBconfig) *DataSource {
 
 	DB.AutoMigrate(&model.LearningObjective{})
 	DB.AutoMigrate(&model.Skill{})
-	DB.AutoMigrate(&model.GradingSystem{})
+	// DB.AutoMigrate(&model.GradingSystem{})
 	DB.AutoMigrate(&model.Grade{})
 	DB.AutoMigrate(&model.Activity{})
 

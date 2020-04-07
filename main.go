@@ -61,13 +61,17 @@ func main() {
 	go ds.KeepAlive()
 	go eventsDS.KeepAlive()
 
-	if len(os.Args) < 2 {
-		log.Error("Missing gamedefinition folder parameter")
+	if len(os.Args) < 3 {
+		log.Error("Wrong number of parameters, usage: api <gamedefinition folder> <grade folder>")
 		os.Exit(2)
 	}
 
 	gameDefinitionFolder := os.Args[1]
+	gradeFolder := os.Args[2]
+
 	setup.SetupGameDefinitionFromFolder(gameDefinitionFolder, ds)
+	setup.SetupGradeFromFolder(gradeFolder, ds)
+
 	setup.CreateAvailableMatches(ds)
 
 	port := os.Getenv("API_PORT")

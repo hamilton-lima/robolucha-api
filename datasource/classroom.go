@@ -192,3 +192,41 @@ func (ds *DataSource) BuildStudentResponse(students []model.Student) []model.Stu
 
 	return result
 }
+
+// FindGradeByName definition
+func (ds *DataSource) FindGradeByName(name string) *model.Grade {
+	var result model.Grade
+
+	if ds.DB.Where(&model.Grade{Name: name}).Find(&result).RecordNotFound() {
+		return nil
+	}
+
+	log.WithFields(log.Fields{
+		"grade": result,
+	}).Debug("FindGradeByName")
+
+	return &result
+}
+
+// AddGrade defines add grade
+func (ds *DataSource) AddGrade(c *model.Grade) *model.Grade {
+
+	grade := model.Grade{
+		Name:    c.Name,
+		Lowest:  c.Lowest,
+		Highest: c.Highest,
+		Color:   c.Color,
+	}
+
+	log.WithFields(log.Fields{
+		"grade": grade,
+	}).Debug("AddGrade")
+
+	ds.DB.Create(&grade)
+
+	log.WithFields(log.Fields{
+		"classroom": grade,
+	}).Debug("after AddGrade")
+
+	return &grade
+}
