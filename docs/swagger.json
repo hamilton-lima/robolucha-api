@@ -540,6 +540,33 @@
                 }
             }
         },
+        "/private/activity": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find existing activities",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Activity"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/private/available-match-classroom/{id}": {
             "get": {
                 "security": [
@@ -1190,6 +1217,40 @@
                 }
             }
         },
+        "model.Activity": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "gameDefinition": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.GameDefinition"
+                },
+                "gameDefinitionID": {
+                    "description": "GradingSystemID  uint            `json:\"gradingSystemID\"`\nGradingSystem    GradingSystem   `json:\"gradingSystem\"`",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "skills": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Skill"
+                    }
+                },
+                "sourceName": {
+                    "type": "string"
+                },
+                "sourceURL": {
+                    "type": "string"
+                }
+            }
+        },
         "model.AvailableMatch": {
             "type": "object",
             "properties": {
@@ -1639,6 +1700,20 @@
                     "items": {
                         "$ref": "#/definitions/model.MatchScore"
                     }
+                }
+            }
+        },
+        "model.Skill": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
