@@ -12,6 +12,12 @@ import (
 	"gitlab.com/robolucha/robolucha-api/model"
 )
 
+// LoadMetadataFromFolder loads all metadata from folderName
+func LoadMetadataFromFolder(folderName string, ds *datasource.DataSource) {
+	SetupGameDefinitionFromFolder(filepath.Join(folderName, "gamedefinition"), ds)
+	SetupGradeFromFolder(filepath.Join(folderName, "grade"), ds)
+}
+
 func SetupGameDefinitionFromFolder(folderName string, ds *datasource.DataSource) {
 
 	log.WithFields(log.Fields{
