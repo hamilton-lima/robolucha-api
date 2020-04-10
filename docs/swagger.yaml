@@ -19,6 +19,28 @@ definitions:
       type:
         type: string
     type: object
+  model.Activity:
+    properties:
+      description:
+        type: string
+      gameDefinition:
+        $ref: '#/definitions/model.GameDefinition'
+        type: object
+      gameDefinitionID:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      skills:
+        items:
+          $ref: '#/definitions/model.Skill'
+        type: array
+      sourceName:
+        type: string
+      sourceURL:
+        type: string
+    type: object
   model.AvailableMatch:
     properties:
       classroomID:
@@ -316,6 +338,15 @@ definitions:
           $ref: '#/definitions/model.MatchScore'
         type: array
     type: object
+  model.Skill:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   model.Student:
     properties:
       classrooms:
@@ -391,6 +422,22 @@ info:
   title: Robolucha API
   version: "1.0"
 paths:
+  /dashboard/activity:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Activity'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: find existing activities
   /dashboard/classroom:
     get:
       consumes:

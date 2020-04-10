@@ -10,6 +10,33 @@
     "host": "http://local.robolucha.com:5000",
     "basePath": "/",
     "paths": {
+        "/dashboard/activity": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find existing activities",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Activity"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/dashboard/classroom": {
             "get": {
                 "security": [
@@ -1190,6 +1217,39 @@
                 }
             }
         },
+        "model.Activity": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "gameDefinition": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.GameDefinition"
+                },
+                "gameDefinitionID": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "skills": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Skill"
+                    }
+                },
+                "sourceName": {
+                    "type": "string"
+                },
+                "sourceURL": {
+                    "type": "string"
+                }
+            }
+        },
         "model.AvailableMatch": {
             "type": "object",
             "properties": {
@@ -1639,6 +1699,20 @@
                     "items": {
                         "$ref": "#/definitions/model.MatchScore"
                     }
+                }
+            }
+        },
+        "model.Skill": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
