@@ -32,6 +32,7 @@ import (
 	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/pubsub"
 	"gitlab.com/robolucha/robolucha-api/routes"
+	"gitlab.com/robolucha/robolucha-api/routes/learning"
 	"gitlab.com/robolucha/robolucha-api/routes/play"
 	"gitlab.com/robolucha/robolucha-api/setup"
 
@@ -185,6 +186,9 @@ func createRouter(internalAPIKey string, logRequestBody string,
 
 	playRouter := play.Init(ds, publisher)
 	routes.Use(privateAPI, playRouter)
+
+	learningRouter := learning.Init(ds, publisher)
+	routes.Use(privateAPI, learningRouter)
 
 	return router
 }
