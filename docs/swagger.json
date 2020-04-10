@@ -10,6 +10,33 @@
     "host": "http://local.robolucha.com:5000",
     "basePath": "/",
     "paths": {
+        "/dashboard/activity": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find existing activities",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Activity"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/dashboard/classroom": {
             "get": {
                 "security": [
@@ -537,33 +564,6 @@
                 "summary": "returns application health check information",
                 "responses": {
                     "200": {}
-                }
-            }
-        },
-        "/private/activity": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "find existing activities",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.Activity"
-                            }
-                        }
-                    }
                 }
             }
         },
@@ -1228,7 +1228,6 @@
                     "$ref": "#/definitions/model.GameDefinition"
                 },
                 "gameDefinitionID": {
-                    "description": "GradingSystemID  uint            `json:\"gradingSystemID\"`\nGradingSystem    GradingSystem   `json:\"gradingSystem\"`",
                     "type": "integer"
                 },
                 "id": {

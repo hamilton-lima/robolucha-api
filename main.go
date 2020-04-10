@@ -184,11 +184,11 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		dashboardAPI.GET("/classroom/students/:id", getClassroomStudents)
 	}
 
+	learningRouter := learning.Init(ds, publisher)
+	routes.Use(dashboardAPI, learningRouter)
+
 	playRouter := play.Init(ds, publisher)
 	routes.Use(privateAPI, playRouter)
-
-	learningRouter := learning.Init(ds, publisher)
-	routes.Use(privateAPI, learningRouter)
 
 	return router
 }

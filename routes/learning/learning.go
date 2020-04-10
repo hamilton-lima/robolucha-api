@@ -53,7 +53,7 @@ func (router *Router) Setup(group *gin.RouterGroup) {
 // @Produce json
 // @Success 200 {array} model.Activity
 // @Security ApiKeyAuth
-// @Router /private/activity [get]
+// @Router /dashboard/activity [get]
 func getActivity(c *gin.Context) {
 	result := requestHandler.ds.FindAllActivities()
 

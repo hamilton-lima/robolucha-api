@@ -27,9 +27,6 @@ definitions:
         $ref: '#/definitions/model.GameDefinition'
         type: object
       gameDefinitionID:
-        description: |-
-          GradingSystemID  uint            `json:"gradingSystemID"`
-          GradingSystem    GradingSystem   `json:"gradingSystem"`
         type: integer
       id:
         type: integer
@@ -425,6 +422,22 @@ info:
   title: Robolucha API
   version: "1.0"
 paths:
+  /dashboard/activity:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Activity'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: find existing activities
   /dashboard/classroom:
     get:
       consumes:
@@ -751,22 +764,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: returns application health check information
-  /private/activity:
-    get:
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.Activity'
-            type: array
-      security:
-      - ApiKeyAuth: []
-      summary: find existing activities
   /private/available-match-classroom/{id}:
     get:
       consumes:
