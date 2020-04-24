@@ -246,7 +246,7 @@ func (ds *DataSource) FindLuchador(user *model.User) *model.GameComponent {
 	luchador.Codes = removeDuplicates(luchador.Codes)
 
 	log.WithFields(log.Fields{
-		"luchador": luchador,
+		"luchador": model.LogGameComponent(luchador),
 	}).Info("FindLuchador")
 
 	return &luchador
@@ -339,7 +339,7 @@ func (ds *DataSource) FindActiveMultiplayerMatches() *[]model.Match {
 	matches := ds.FindActiveMatches("game_definitions.type = ?", model.GAMEDEFINITION_TYPE_MULTIPLAYER)
 
 	log.WithFields(log.Fields{
-		"matches": matches,
+		"matches": model.LogMatches(matches),
 	}).Info("findActiveMatches")
 
 	return matches

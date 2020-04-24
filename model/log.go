@@ -4,6 +4,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// LogGameComponent build a simplified version of gameComponent for logging
+func LogGameComponent(input GameComponent) map[string]interface{} {
+	return log.Fields{
+		"ID":     input.ID,
+		"name":   input.Name,
+		"userID": input.UserID,
+	}
+}
+
 // LogGameDefinition build a simplified version of gameDefinition for logging
 func LogGameDefinition(input GameDefinition) map[string]interface{} {
 	return log.Fields{
