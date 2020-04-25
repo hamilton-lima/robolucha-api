@@ -246,7 +246,7 @@ func (ds *DataSource) FindLuchador(user *model.User) *model.GameComponent {
 	luchador.Codes = removeDuplicates(luchador.Codes)
 
 	log.WithFields(log.Fields{
-		"luchador": luchador,
+		"luchador": model.LogGameComponent(luchador),
 	}).Info("FindLuchador")
 
 	return &luchador
@@ -339,7 +339,7 @@ func (ds *DataSource) FindActiveMultiplayerMatches() *[]model.Match {
 	matches := ds.FindActiveMatches("game_definitions.type = ?", model.GAMEDEFINITION_TYPE_MULTIPLAYER)
 
 	log.WithFields(log.Fields{
-		"matches": matches,
+		"matches": model.LogMatches(matches),
 	}).Info("findActiveMatches")
 
 	return matches
@@ -366,18 +366,23 @@ func (ds *DataSource) FindActiveMatches(query interface{}, args ...interface{}) 
 
 	// auto remove matches where the duration is greater than the current time
 	for _, match := range matches {
-		duration := time.Duration(match.GameDefinition.Duration) * time.Millisecond
-		startPlusDuration := match.TimeStart.Add(duration)
-		now := time.Now()
+		// only if the match gamedefinition has duration
+		if match.GameDefinition.Duration > 0 {
+			duration := time.Duration(match.GameDefinition.Duration) * time.Millisecond
+			startPlusDuration := match.TimeStart.Add(duration)
+			now := time.Now()
 
-		log.WithFields(log.Fields{
-			"duration":          duration,
-			"startPlusDuration": startPlusDuration,
-			"now":               now,
-			"isAfter":           startPlusDuration.After(now),
-		}).Debug("findActiveMatches/time")
+			log.WithFields(log.Fields{
+				"duration":          duration,
+				"startPlusDuration": startPlusDuration,
+				"now":               now,
+				"isAfter":           startPlusDuration.After(now),
+			}).Debug("findActiveMatches/time")
 
-		if startPlusDuration.After(now) {
+			if startPlusDuration.After(now) {
+				result = append(result, match)
+			}
+		} else {
 			result = append(result, match)
 		}
 	}

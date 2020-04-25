@@ -175,7 +175,7 @@ func (handler *RequestHandler) LeaveTutorialMatches(gameComponent *model.GameCom
 
 	matches := handler.FindTutorialMatchesByParticipant(gameComponent)
 	log.WithFields(log.Fields{
-		"matches": matches,
+		"matches": model.LogMatches(&matches),
 	}).Info("tutorial matches")
 
 	channel := "end.match"

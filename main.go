@@ -461,7 +461,7 @@ func getLuchador(c *gin.Context) {
 
 	luchador = ds.FindLuchador(user)
 	log.WithFields(log.Fields{
-		"luchador": luchador,
+		"luchador": model.LogGameComponent(*luchador),
 		"user.id":  user.ID,
 	}).Info("after find luchador on getLuchador")
 
@@ -1015,7 +1015,7 @@ func getLuchadorByIDAndGamedefinitionID(c *gin.Context) {
 	luchador.Codes = filteredCodes
 
 	log.WithFields(log.Fields{
-		"getLuchador": luchador,
+		"getLuchador": model.LogGameComponent(*luchador),
 	}).Info("result")
 
 	c.JSON(http.StatusOK, luchador)
