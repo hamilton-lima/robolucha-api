@@ -69,7 +69,7 @@ func (handler *RequestHandler) FindTutorialMatchesByParticipant(gameComponent *m
 	for _, match := range *matches {
 
 		log.WithFields(log.Fields{
-			"match":        model.LogMatch(match),
+			"match":        model.LogMatch(&match),
 			"participants": match.Participants,
 		}).Info("FindTutorialMatchesByParticipant/filter participants")
 

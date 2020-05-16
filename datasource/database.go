@@ -270,7 +270,7 @@ func (ds *DataSource) FindLuchador(user *model.User) *model.GameComponent {
 	luchador.Codes = removeDuplicates(luchador.Codes)
 
 	log.WithFields(log.Fields{
-		"luchador": model.LogGameComponent(luchador),
+		"luchador": model.LogGameComponent(&luchador),
 	}).Info("FindLuchador")
 
 	return &luchador
@@ -605,7 +605,7 @@ func (ds *DataSource) EndMatch(match *model.Match) *model.Match {
 	ds.DB.Model(&match).Update("time_end", match.TimeEnd)
 
 	log.WithFields(log.Fields{
-		"match": model.LogMatch(*match),
+		"match": model.LogMatch(match),
 	}).Info("Match time_end updated")
 
 	return match

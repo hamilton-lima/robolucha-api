@@ -5,7 +5,13 @@ import (
 )
 
 // LogGameComponent build a simplified version of gameComponent for logging
-func LogGameComponent(input GameComponent) map[string]interface{} {
+func LogGameComponent(input *GameComponent) map[string]interface{} {
+	if input == nil {
+		return log.Fields{
+			"ID": nil,
+		}
+	}
+
 	return log.Fields{
 		"ID":     input.ID,
 		"name":   input.Name,
@@ -14,7 +20,13 @@ func LogGameComponent(input GameComponent) map[string]interface{} {
 }
 
 // LogGameDefinition build a simplified version of gameDefinition for logging
-func LogGameDefinition(input GameDefinition) map[string]interface{} {
+func LogGameDefinition(input *GameDefinition) map[string]interface{} {
+	if input == nil {
+		return log.Fields{
+			"ID": nil,
+		}
+	}
+
 	return log.Fields{
 		"ID":   input.ID,
 		"name": input.Name,
@@ -23,11 +35,17 @@ func LogGameDefinition(input GameDefinition) map[string]interface{} {
 }
 
 // LogMatch build a simplified version of Match for logging
-func LogMatch(input Match) map[string]interface{} {
+func LogMatch(input *Match) map[string]interface{} {
+	if input == nil {
+		return log.Fields{
+			"ID": nil,
+		}
+	}
+
 	return log.Fields{
 		"ID":               input.ID,
 		"AvailableMatchID": input.AvailableMatchID,
-		"GameDefinition":   LogGameDefinition(input.GameDefinition),
+		"GameDefinition":   LogGameDefinition(&input.GameDefinition),
 	}
 }
 
@@ -37,7 +55,7 @@ func LogMatches(matches *[]Match) map[string]interface{} {
 	result := log.Fields{}
 
 	for _, match := range *matches {
-		result[string(match.ID)] = LogMatch(match)
+		result[string(match.ID)] = LogMatch(&match)
 	}
 
 	return result
