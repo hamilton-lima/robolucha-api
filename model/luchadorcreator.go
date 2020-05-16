@@ -2,8 +2,6 @@ package model
 
 import (
 	"math/rand"
-
-	log "github.com/sirupsen/logrus"
 )
 
 var maskShape = []string{
@@ -121,10 +119,6 @@ func RandomConfig() []Config {
 	for shape, options := range MaskShapes {
 		list = add2ConfigList(list, shape, randomString(options))
 	}
-
-	log.WithFields(log.Fields{
-		"config": list,
-	}).Info("generated config")
 
 	return list
 }

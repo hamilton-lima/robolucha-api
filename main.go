@@ -475,7 +475,7 @@ func getLuchador(c *gin.Context) {
 		luchador.Configs = model.RandomConfig()
 		luchador.Name = model.RandomName(luchador.Configs)
 		log.WithFields(log.Fields{
-			"getLuchador": luchador,
+			"getLuchador": model.LogGameComponent(luchador),
 		}).Info("creating luchador")
 
 		luchador = ds.CreateLuchador(luchador)
@@ -487,12 +487,12 @@ func getLuchador(c *gin.Context) {
 		}
 
 		log.WithFields(log.Fields{
-			"luchador": luchador,
+			"luchador": model.LogGameComponent(luchador),
 		}).Info("created luchador")
 	}
 
 	log.WithFields(log.Fields{
-		"getLuchador": luchador,
+		"getLuchador": model.LogGameComponent(luchador),
 	}).Info("result")
 
 	c.JSON(http.StatusOK, luchador)

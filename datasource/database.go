@@ -255,7 +255,7 @@ func (ds *DataSource) CreateLuchador(l *model.GameComponent) *model.GameComponen
 	ds.DB.Create(&luchador)
 
 	log.WithFields(log.Fields{
-		"luchador": luchador,
+		"luchador": model.LogGameComponent(&luchador),
 	}).Info("Luchador created")
 
 	return &luchador
