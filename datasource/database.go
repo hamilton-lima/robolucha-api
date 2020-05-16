@@ -184,9 +184,9 @@ func (ds *DataSource) FindUserSettingByUser(user *model.User) *model.UserSetting
 }
 
 // Create if doesnt exist
-func (ds *DataSource) FindUserLevelByUser(user *model.User) *model.UserLevel {
+func (ds *DataSource) FindUserLevelByUserID(userID uint) *model.UserLevel {
 	var level model.UserLevel
-	ds.DB.Where(&model.UserLevel{UserID: user.ID}).FirstOrCreate(&level)
+	ds.DB.Where(&model.UserLevel{UserID: userID}).FirstOrCreate(&level)
 	return &level
 }
 
@@ -283,7 +283,7 @@ func (ds *DataSource) FindLuchadorByIDNoPreload(id uint) *model.GameComponent {
 	}
 
 	log.WithFields(log.Fields{
-		"luchador": luchador,
+		"luchador": model.LogGameComponent(&luchador),
 	}).Info("FindLuchadorByID")
 
 	return &luchador
@@ -303,8 +303,8 @@ func (ds *DataSource) UpdateLuchador(component *model.GameComponent) *model.Game
 	ds.DB.Save(current)
 
 	log.WithFields(log.Fields{
-		"luchador": current,
-	}).Warning("after updateLuchador")
+		"luchador": model.LogGameComponent(current),
+	}).Info("after updateLuchador")
 
 	return current
 }
@@ -609,6 +609,37 @@ func (ds *DataSource) EndMatch(match *model.Match) *model.Match {
 	}).Info("Match time_end updated")
 
 	return match
+}
+
+// UpdateParticipantsLevel definition
+func (ds *DataSource) UpdateParticipantsLevel(match *model.Match) {
+
+	// Load match with participants
+	match = ds.FindMatch(match.ID)
+	unblockLevel := match.GameDefinition.UnblockLevel
+	log.WithFields(log.Fields{
+		"unblockLevel": unblockLevel,
+	}).Info("UpdateParticipantsLevel")
+
+	for _, participant := range match.Participants {
+		userLevel := ds.FindUserLevelByUserID(participant.UserID)
+		log.WithFields(log.Fields{
+			"userLevel": userLevel,
+		}).Info("UpdateParticipantsLevel")
+
+		if userLevel.Level < unblockLevel {
+			userLevel.Level = unblockLevel
+			updatedLevel := ds.UpdateUserLevel(userLevel)
+			log.WithFields(log.Fields{
+				"userLevel": updatedLevel,
+			}).Info("UpdateParticipantsLevel")
+		}
+	}
+
+	log.WithFields(log.Fields{
+		"match": model.LogMatch(match),
+	}).Info("Match time_end updated")
+
 }
 
 func (ds *DataSource) FindLuchadorConfigsByMatchID(id uint) *[]model.GameComponent {

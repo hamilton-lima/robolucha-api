@@ -433,7 +433,7 @@ func getUser(c *gin.Context) {
 	result := httphelper.UserDetailsFromContext(c)
 	result.Classrooms = ds.FindAllClassroomByStudent(result.User.ID)
 	result.Settings = *ds.FindUserSettingByUser(result.User)
-	result.Level = *ds.FindUserLevelByUser(result.User)
+	result.Level = *ds.FindUserLevelByUserID(result.User.ID)
 	c.JSON(http.StatusOK, result)
 }
 
@@ -1097,6 +1097,8 @@ func endMatch(c *gin.Context) {
 	log.WithFields(log.Fields{
 		"match": match,
 	}).Info("result")
+
+	ds.UpdateParticipantsLevel(matchRequest)
 
 	c.JSON(http.StatusOK, match)
 }

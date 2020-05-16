@@ -58,7 +58,7 @@ func SessionIsValid(ds *datasource.DataSource) gin.HandlerFunc {
 		}
 
 		user := ds.CreateUser(sessionUser.Username)
-		level := ds.FindUserLevelByUser(user)
+		level := ds.FindUserLevelByUserID(user.ID)
 
 		userDetails := model.UserDetails{
 			User:  user,
@@ -117,7 +117,7 @@ func SessionIsValidAndDashBoardUser(ds *datasource.DataSource) gin.HandlerFunc {
 		}
 
 		user := ds.CreateUser(sessionUser.Username)
-		level := ds.FindUserLevelByUser(user)
+		level := ds.FindUserLevelByUserID(user.ID)
 
 		userDetails := model.UserDetails{
 			User:  user,
@@ -141,7 +141,7 @@ func contains(roles []string, search string) bool {
 func SessionAllwaysValid(ds *datasource.DataSource) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := ds.CreateUser("test")
-		level := ds.FindUserLevelByUser(user)
+		level := ds.FindUserLevelByUserID(user.ID)
 		userDetails := model.UserDetails{
 			User:  user,
 			Roles: []string{dashboardRole},
