@@ -752,6 +752,9 @@ func (ds *DataSource) UpdateGameDefinition(input *model.GameDefinition) *model.G
 		gameDefinition.RespawnY = input.RespawnY
 		gameDefinition.RespawnAngle = input.RespawnAngle
 		gameDefinition.RespawnGunAngle = input.RespawnGunAngle
+		gameDefinition.MinLevel = input.MinLevel
+		gameDefinition.MaxLevel = input.MaxLevel
+		gameDefinition.UnblockLevel = input.UnblockLevel
 
 		dbc := ds.DB.Save(gameDefinition)
 		if dbc.Error != nil {

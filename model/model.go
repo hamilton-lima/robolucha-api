@@ -114,6 +114,9 @@ type GameDefinition struct {
 	RespawnY                      uint             `json:"respawnY"`
 	RespawnAngle                  uint             `json:"respawnAngle"`
 	RespawnGunAngle               uint             `json:"respawnGunAngle"`
+	MinLevel                      uint             `json:"minLevel"`
+	MaxLevel                      uint             `json:"maxLevel"`
+	UnblockLevel                  uint             `json:"unblockLevel"`
 	GameComponents                []GameComponent  `json:"gameComponents"`
 	SceneComponents               []SceneComponent `json:"sceneComponents"`
 	Codes                         []Code           `gorm:"many2many:gamedefinition_codes" json:"codes"`
