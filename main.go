@@ -433,6 +433,7 @@ func getUser(c *gin.Context) {
 	result := httphelper.UserDetailsFromContext(c)
 	result.Classrooms = ds.FindAllClassroomByStudent(result.User.ID)
 	result.Settings = *ds.FindUserSettingByUser(result.User)
+	result.Level = *ds.FindUserLevelByUser(result.User)
 	c.JSON(http.StatusOK, result)
 }
 

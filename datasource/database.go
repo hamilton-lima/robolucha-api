@@ -109,6 +109,7 @@ func NewDataSource(config *DBconfig) *DataSource {
 	DB.AutoMigrate(&model.User{})
 	DB.AutoMigrate(&model.Session{})
 	DB.AutoMigrate(&model.UserSetting{})
+	DB.AutoMigrate(&model.UserLevel{})
 	DB.AutoMigrate(&model.Match{})
 	DB.AutoMigrate(&model.Code{})
 	DB.AutoMigrate(&model.CodeHistory{})
@@ -180,6 +181,29 @@ func (ds *DataSource) FindUserSettingByUser(user *model.User) *model.UserSetting
 	var settings model.UserSetting
 	ds.DB.Where(&model.UserSetting{UserID: user.ID}).FirstOrCreate(&settings)
 	return &settings
+}
+
+// Create if doesnt exist
+func (ds *DataSource) FindUserLevelByUser(user *model.User) *model.UserLevel {
+	var level model.UserLevel
+	ds.DB.Where(&model.UserLevel{UserID: user.ID}).FirstOrCreate(&level)
+	return &level
+}
+
+func (ds *DataSource) UpdateUserLevel(level *model.UserLevel) *model.UserLevel {
+	var current model.UserLevel
+	if ds.DB.First(&current, level.ID).RecordNotFound() {
+		return nil
+	}
+
+	current.Level = level.Level
+	ds.DB.Save(&current)
+
+	log.WithFields(log.Fields{
+		"user level": current,
+	}).Error("User Level updated")
+
+	return &current
 }
 
 func (ds *DataSource) UpdateUserSetting(settings *model.UserSetting) *model.UserSetting {

@@ -21,6 +21,7 @@ type UserDetails struct {
 	Classrooms []Classroom `json:"classrooms"`
 	Roles      []string    `json:"roles"`
 	Settings   UserSetting `json:"settings"`
+	Level      UserLevel   `json:"level"`
 }
 
 // Session definition
@@ -43,6 +44,16 @@ type UserSetting struct {
 	VisitedMainPage bool       `json:"visitedMainPage"`
 	VisitedMaskPage bool       `json:"visitedMaskPage"`
 	PlayedTutorial  bool       `json:"playedTutorial"`
+}
+
+// UserLevel definition
+type UserLevel struct {
+	ID        uint       `gorm:"primary_key" json:"id"`
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
+	DeletedAt *time.Time `json:"-" faker:"-"`
+	UserID    uint       `json:"userID"`
+	Level     uint       `json:"level"`
 }
 
 // ActiveMatch definition, describes the result of findActiveMatches
