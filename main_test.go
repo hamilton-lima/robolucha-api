@@ -351,7 +351,7 @@ func TestFindMultiplayerMatch(t *testing.T) {
 
 	log.WithFields(log.Fields{
 		"matches": matches,
-	}).Warning("TestFindMultiplayerMatch")
+	}).Info("TestFindMultiplayerMatch")
 
 	json.Unmarshal(w.Body.Bytes(), &matches)
 

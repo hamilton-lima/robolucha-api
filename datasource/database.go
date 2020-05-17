@@ -201,7 +201,7 @@ func (ds *DataSource) UpdateUserLevel(level *model.UserLevel) *model.UserLevel {
 
 	log.WithFields(log.Fields{
 		"user level": current,
-	}).Error("User Level updated")
+	}).Info("User Level updated")
 
 	return &current
 }
@@ -384,7 +384,7 @@ func (ds *DataSource) FindActiveMatches(query interface{}, args ...interface{}) 
 
 	log.WithFields(log.Fields{
 		"matches": matches,
-	}).Warn("findActiveMatches")
+	}).Info("findActiveMatches")
 
 	result := make([]model.Match, 0)
 
@@ -468,6 +468,20 @@ func (ds *DataSource) FindMatch(id uint) *model.Match {
 		"id":    id,
 		"match": match,
 	}).Info("FindMatch")
+
+	return &match
+}
+
+// FindMatchPreload definition
+func (ds *DataSource) FindMatchPreload(id uint) *model.Match {
+
+	var match model.Match
+	ds.DB.Preload("Participants").Preload("GameDefinition").Where(&model.Match{ID: id}).First(&match)
+
+	log.WithFields(log.Fields{
+		"id":    id,
+		"match": model.LogMatch(&match),
+	}).Info("FindMatchWithGameDefinition")
 
 	return &match
 }
@@ -612,13 +626,18 @@ func (ds *DataSource) EndMatch(match *model.Match) *model.Match {
 }
 
 // UpdateParticipantsLevel definition
-func (ds *DataSource) UpdateParticipantsLevel(match *model.Match) {
+func (ds *DataSource) UpdateParticipantsLevel(matchID uint) {
 
 	// Load match with participants
-	match = ds.FindMatch(match.ID)
+	match := ds.FindMatchPreload(matchID)
+	log.WithFields(log.Fields{
+		"match":        model.LogMatch(match),
+		"participants": match.Participants,
+	}).Info("UpdateParticipantsLevel find")
+
 	unblockLevel := match.GameDefinition.UnblockLevel
 	log.WithFields(log.Fields{
-		"unblockLevel": unblockLevel,
+		"match unblockLevel": unblockLevel,
 	}).Info("UpdateParticipantsLevel")
 
 	for _, participant := range match.Participants {

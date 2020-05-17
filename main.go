@@ -1098,7 +1098,7 @@ func endMatch(c *gin.Context) {
 		"match": match,
 	}).Info("result")
 
-	ds.UpdateParticipantsLevel(matchRequest)
+	ds.UpdateParticipantsLevel(matchRequest.ID)
 
 	c.JSON(http.StatusOK, match)
 }
