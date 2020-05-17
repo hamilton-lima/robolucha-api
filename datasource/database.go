@@ -109,6 +109,7 @@ func NewDataSource(config *DBconfig) *DataSource {
 	DB.AutoMigrate(&model.User{})
 	DB.AutoMigrate(&model.Session{})
 	DB.AutoMigrate(&model.UserSetting{})
+	DB.AutoMigrate(&model.UserLevel{})
 	DB.AutoMigrate(&model.Match{})
 	DB.AutoMigrate(&model.Code{})
 	DB.AutoMigrate(&model.CodeHistory{})
@@ -182,6 +183,29 @@ func (ds *DataSource) FindUserSettingByUser(user *model.User) *model.UserSetting
 	return &settings
 }
 
+// Create if doesnt exist
+func (ds *DataSource) FindUserLevelByUserID(userID uint) *model.UserLevel {
+	var level model.UserLevel
+	ds.DB.Where(&model.UserLevel{UserID: userID}).FirstOrCreate(&level)
+	return &level
+}
+
+func (ds *DataSource) UpdateUserLevel(level *model.UserLevel) *model.UserLevel {
+	var current model.UserLevel
+	if ds.DB.First(&current, level.ID).RecordNotFound() {
+		return nil
+	}
+
+	current.Level = level.Level
+	ds.DB.Save(&current)
+
+	log.WithFields(log.Fields{
+		"user level": current,
+	}).Info("User Level updated")
+
+	return &current
+}
+
 func (ds *DataSource) UpdateUserSetting(settings *model.UserSetting) *model.UserSetting {
 	var current model.UserSetting
 	if ds.DB.First(&current, settings.ID).RecordNotFound() {
@@ -231,7 +255,7 @@ func (ds *DataSource) CreateLuchador(l *model.GameComponent) *model.GameComponen
 	ds.DB.Create(&luchador)
 
 	log.WithFields(log.Fields{
-		"luchador": luchador,
+		"luchador": model.LogGameComponent(&luchador),
 	}).Info("Luchador created")
 
 	return &luchador
@@ -246,7 +270,7 @@ func (ds *DataSource) FindLuchador(user *model.User) *model.GameComponent {
 	luchador.Codes = removeDuplicates(luchador.Codes)
 
 	log.WithFields(log.Fields{
-		"luchador": model.LogGameComponent(luchador),
+		"luchador": model.LogGameComponent(&luchador),
 	}).Info("FindLuchador")
 
 	return &luchador
@@ -259,7 +283,7 @@ func (ds *DataSource) FindLuchadorByIDNoPreload(id uint) *model.GameComponent {
 	}
 
 	log.WithFields(log.Fields{
-		"luchador": luchador,
+		"luchador": model.LogGameComponent(&luchador),
 	}).Info("FindLuchadorByID")
 
 	return &luchador
@@ -279,8 +303,8 @@ func (ds *DataSource) UpdateLuchador(component *model.GameComponent) *model.Game
 	ds.DB.Save(current)
 
 	log.WithFields(log.Fields{
-		"luchador": current,
-	}).Warning("after updateLuchador")
+		"luchador": model.LogGameComponent(current),
+	}).Info("after updateLuchador")
 
 	return current
 }
@@ -360,7 +384,7 @@ func (ds *DataSource) FindActiveMatches(query interface{}, args ...interface{}) 
 
 	log.WithFields(log.Fields{
 		"matches": matches,
-	}).Warn("findActiveMatches")
+	}).Info("findActiveMatches")
 
 	result := make([]model.Match, 0)
 
@@ -444,6 +468,20 @@ func (ds *DataSource) FindMatch(id uint) *model.Match {
 		"id":    id,
 		"match": match,
 	}).Info("FindMatch")
+
+	return &match
+}
+
+// FindMatchPreload definition
+func (ds *DataSource) FindMatchPreload(id uint) *model.Match {
+
+	var match model.Match
+	ds.DB.Preload("Participants").Preload("GameDefinition").Where(&model.Match{ID: id}).First(&match)
+
+	log.WithFields(log.Fields{
+		"id":    id,
+		"match": model.LogMatch(&match),
+	}).Info("FindMatchWithGameDefinition")
 
 	return &match
 }
@@ -581,10 +619,46 @@ func (ds *DataSource) EndMatch(match *model.Match) *model.Match {
 	ds.DB.Model(&match).Update("time_end", match.TimeEnd)
 
 	log.WithFields(log.Fields{
-		"match": model.LogMatch(*match),
+		"match": model.LogMatch(match),
 	}).Info("Match time_end updated")
 
 	return match
+}
+
+// UpdateParticipantsLevel definition
+func (ds *DataSource) UpdateParticipantsLevel(matchID uint) {
+
+	// Load match with participants
+	match := ds.FindMatchPreload(matchID)
+	log.WithFields(log.Fields{
+		"match":        model.LogMatch(match),
+		"participants": match.Participants,
+	}).Info("UpdateParticipantsLevel find")
+
+	unblockLevel := match.GameDefinition.UnblockLevel
+	log.WithFields(log.Fields{
+		"match unblockLevel": unblockLevel,
+	}).Info("UpdateParticipantsLevel")
+
+	for _, participant := range match.Participants {
+		userLevel := ds.FindUserLevelByUserID(participant.UserID)
+		log.WithFields(log.Fields{
+			"userLevel": userLevel,
+		}).Info("UpdateParticipantsLevel")
+
+		if userLevel.Level < unblockLevel {
+			userLevel.Level = unblockLevel
+			updatedLevel := ds.UpdateUserLevel(userLevel)
+			log.WithFields(log.Fields{
+				"userLevel": updatedLevel,
+			}).Info("UpdateParticipantsLevel")
+		}
+	}
+
+	log.WithFields(log.Fields{
+		"match": model.LogMatch(match),
+	}).Info("Match time_end updated")
+
 }
 
 func (ds *DataSource) FindLuchadorConfigsByMatchID(id uint) *[]model.GameComponent {
@@ -728,6 +802,9 @@ func (ds *DataSource) UpdateGameDefinition(input *model.GameDefinition) *model.G
 		gameDefinition.RespawnY = input.RespawnY
 		gameDefinition.RespawnAngle = input.RespawnAngle
 		gameDefinition.RespawnGunAngle = input.RespawnGunAngle
+		gameDefinition.MinLevel = input.MinLevel
+		gameDefinition.MaxLevel = input.MaxLevel
+		gameDefinition.UnblockLevel = input.UnblockLevel
 
 		dbc := ds.DB.Save(gameDefinition)
 		if dbc.Error != nil {

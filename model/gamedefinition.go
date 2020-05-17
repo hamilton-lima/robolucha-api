@@ -46,6 +46,10 @@ func BuildDefaultGameDefinition() GameDefinition {
 	gd.Codes = make([]Code, 0)
 	gd.LuchadorSuggestedCodes = make([]Code, 0)
 
+	gd.MinLevel = 0
+	gd.MaxLevel = 0
+	gd.UnblockLevel = 0
+
 	return gd
 
 }

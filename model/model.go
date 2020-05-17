@@ -21,6 +21,7 @@ type UserDetails struct {
 	Classrooms []Classroom `json:"classrooms"`
 	Roles      []string    `json:"roles"`
 	Settings   UserSetting `json:"settings"`
+	Level      UserLevel   `json:"level"`
 }
 
 // Session definition
@@ -43,6 +44,16 @@ type UserSetting struct {
 	VisitedMainPage bool       `json:"visitedMainPage"`
 	VisitedMaskPage bool       `json:"visitedMaskPage"`
 	PlayedTutorial  bool       `json:"playedTutorial"`
+}
+
+// UserLevel definition
+type UserLevel struct {
+	ID        uint       `gorm:"primary_key" json:"id"`
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
+	DeletedAt *time.Time `json:"-" faker:"-"`
+	UserID    uint       `json:"userID"`
+	Level     uint       `json:"level"`
 }
 
 // ActiveMatch definition, describes the result of findActiveMatches
@@ -103,6 +114,9 @@ type GameDefinition struct {
 	RespawnY                      uint             `json:"respawnY"`
 	RespawnAngle                  uint             `json:"respawnAngle"`
 	RespawnGunAngle               uint             `json:"respawnGunAngle"`
+	MinLevel                      uint             `json:"minLevel"`
+	MaxLevel                      uint             `json:"maxLevel"`
+	UnblockLevel                  uint             `json:"unblockLevel"`
 	GameComponents                []GameComponent  `json:"gameComponents"`
 	SceneComponents               []SceneComponent `json:"sceneComponents"`
 	Codes                         []Code           `gorm:"many2many:gamedefinition_codes" json:"codes"`

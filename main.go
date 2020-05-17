@@ -433,6 +433,7 @@ func getUser(c *gin.Context) {
 	result := httphelper.UserDetailsFromContext(c)
 	result.Classrooms = ds.FindAllClassroomByStudent(result.User.ID)
 	result.Settings = *ds.FindUserSettingByUser(result.User)
+	result.Level = *ds.FindUserLevelByUserID(result.User.ID)
 	c.JSON(http.StatusOK, result)
 }
 
@@ -461,7 +462,7 @@ func getLuchador(c *gin.Context) {
 
 	luchador = ds.FindLuchador(user)
 	log.WithFields(log.Fields{
-		"luchador": model.LogGameComponent(*luchador),
+		"luchador": model.LogGameComponent(luchador),
 		"user.id":  user.ID,
 	}).Info("after find luchador on getLuchador")
 
@@ -474,7 +475,7 @@ func getLuchador(c *gin.Context) {
 		luchador.Configs = model.RandomConfig()
 		luchador.Name = model.RandomName(luchador.Configs)
 		log.WithFields(log.Fields{
-			"getLuchador": luchador,
+			"getLuchador": model.LogGameComponent(luchador),
 		}).Info("creating luchador")
 
 		luchador = ds.CreateLuchador(luchador)
@@ -486,12 +487,12 @@ func getLuchador(c *gin.Context) {
 		}
 
 		log.WithFields(log.Fields{
-			"luchador": luchador,
+			"luchador": model.LogGameComponent(luchador),
 		}).Info("created luchador")
 	}
 
 	log.WithFields(log.Fields{
-		"getLuchador": luchador,
+		"getLuchador": model.LogGameComponent(luchador),
 	}).Info("result")
 
 	c.JSON(http.StatusOK, luchador)
@@ -1015,7 +1016,7 @@ func getLuchadorByIDAndGamedefinitionID(c *gin.Context) {
 	luchador.Codes = filteredCodes
 
 	log.WithFields(log.Fields{
-		"getLuchador": model.LogGameComponent(*luchador),
+		"getLuchador": model.LogGameComponent(luchador),
 	}).Info("result")
 
 	c.JSON(http.StatusOK, luchador)
@@ -1096,6 +1097,8 @@ func endMatch(c *gin.Context) {
 	log.WithFields(log.Fields{
 		"match": match,
 	}).Info("result")
+
+	ds.UpdateParticipantsLevel(matchRequest.ID)
 
 	c.JSON(http.StatusOK, match)
 }
