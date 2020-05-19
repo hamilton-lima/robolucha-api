@@ -166,11 +166,15 @@ definitions:
         type: integer
       maxFireDamage:
         type: integer
+      maxLevel:
+        type: integer
       maxParticipants:
         type: integer
       minFireAmount:
         type: integer
       minFireDamage:
+        type: integer
+      minLevel:
         type: integer
       minParticipants:
         type: integer
@@ -218,6 +222,8 @@ definitions:
         type: integer
       type:
         type: string
+      unblockLevel:
+        type: integer
     type: object
   model.JoinMatch:
     properties:
@@ -390,6 +396,9 @@ definitions:
         items:
           $ref: '#/definitions/model.Classroom'
         type: array
+      level:
+        $ref: '#/definitions/model.UserLevel'
+        type: object
       roles:
         items:
           type: string
@@ -400,6 +409,15 @@ definitions:
       user:
         $ref: '#/definitions/model.User'
         type: object
+    type: object
+  model.UserLevel:
+    properties:
+      id:
+        type: integer
+      level:
+        type: integer
+      userID:
+        type: integer
     type: object
   model.UserSetting:
     properties:
