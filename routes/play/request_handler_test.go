@@ -7,12 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/stretchr/testify/assert"
 	"gitlab.com/robolucha/robolucha-api/datasource"
 	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/pubsub"
 	"gitlab.com/robolucha/robolucha-api/routes/play"
 	"gitlab.com/robolucha/robolucha-api/test"
-	"gotest.tools/assert"
 	"testing"
 )
 
@@ -104,4 +104,37 @@ func TestLeaveTutorial(t *testing.T) {
 	handler.LeaveTutorialMatches(luchador)
 	endMatchMessages := mockPublisher.Messages["end.match"]
 	assert.Equal(t, len(endMatchMessages), 1)
+}
+
+func TestUserHasLevelToPlay(t *testing.T) {
+	Setup(t)
+	defer ds.DB.Close()
+
+	handler := play.NewRequestHandler(ds, publisher)
+
+	levelZero := model.UserLevel{Level: 0}
+	levelTen := model.UserLevel{Level: 10}
+	levelTwelve := model.UserLevel{Level: 12}
+	levelFourTeen := model.UserLevel{Level: 14}
+
+	defZeroZero := model.GameDefinition{MinLevel: 0, MaxLevel: 0}
+	defTenZero := model.GameDefinition{MinLevel: 10, MaxLevel: 0}
+	defTenThirteen := model.GameDefinition{MinLevel: 10, MaxLevel: 13}
+
+	assert.True(t, handler.UserHasLevelToPlay(&levelZero, &defZeroZero))
+	assert.False(t, handler.UserHasLevelToPlay(&levelZero, &defTenZero))
+	assert.False(t, handler.UserHasLevelToPlay(&levelZero, &defTenThirteen))
+
+	assert.True(t, handler.UserHasLevelToPlay(&levelTen, &defZeroZero))
+	assert.True(t, handler.UserHasLevelToPlay(&levelTen, &defTenZero))
+	assert.True(t, handler.UserHasLevelToPlay(&levelTen, &defTenThirteen))
+
+	assert.True(t, handler.UserHasLevelToPlay(&levelTwelve, &defZeroZero))
+	assert.True(t, handler.UserHasLevelToPlay(&levelTwelve, &defTenZero))
+	assert.True(t, handler.UserHasLevelToPlay(&levelTwelve, &defTenThirteen))
+
+	assert.True(t, handler.UserHasLevelToPlay(&levelFourTeen, &defZeroZero))
+	assert.True(t, handler.UserHasLevelToPlay(&levelFourTeen, &defTenZero))
+	assert.False(t, handler.UserHasLevelToPlay(&levelFourTeen, &defTenThirteen))
+
 }

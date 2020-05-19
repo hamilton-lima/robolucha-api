@@ -159,7 +159,7 @@ func (handler *RequestHandler) publishJoinMatch(match *model.Match, luchadorID u
 // FindAvailableMatchByID definition
 func (handler *RequestHandler) FindAvailableMatchByID(id uint) *model.AvailableMatch {
 	var result model.AvailableMatch
-	if handler.ds.DB.First(&result, id).RecordNotFound() {
+	if handler.ds.DB.Preload("GameDefinition").First(&result, id).RecordNotFound() {
 		return nil
 	}
 
@@ -188,4 +188,12 @@ func (handler *RequestHandler) LeaveTutorialMatches(gameComponent *model.GameCom
 		handler.publisher.Publish(channel, message)
 	}
 
+}
+
+func (handler *RequestHandler) UserHasLevelToPlay(user *model.UserLevel, gameDefinition *model.GameDefinition) bool {
+	level := user.Level
+	min := gameDefinition.MinLevel
+	max := gameDefinition.MaxLevel
+	canPlay := (level >= min) && (max == 0 || level <= max)
+	return canPlay
 }
