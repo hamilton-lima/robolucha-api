@@ -1440,6 +1440,9 @@
                 "maxFireDamage": {
                     "type": "integer"
                 },
+                "maxLevel": {
+                    "type": "integer"
+                },
                 "maxParticipants": {
                     "type": "integer"
                 },
@@ -1447,6 +1450,9 @@
                     "type": "integer"
                 },
                 "minFireDamage": {
+                    "type": "integer"
+                },
+                "minLevel": {
                     "type": "integer"
                 },
                 "minParticipants": {
@@ -1517,6 +1523,9 @@
                 },
                 "type": {
                     "type": "string"
+                },
+                "unblockLevel": {
+                    "type": "integer"
                 }
             }
         },
@@ -1782,6 +1791,10 @@
                         "$ref": "#/definitions/model.Classroom"
                     }
                 },
+                "level": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.UserLevel"
+                },
                 "roles": {
                     "type": "array",
                     "items": {
@@ -1795,6 +1808,20 @@
                 "user": {
                     "type": "object",
                     "$ref": "#/definitions/model.User"
+                }
+            }
+        },
+        "model.UserLevel": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "level": {
+                    "type": "integer"
+                },
+                "userID": {
+                    "type": "integer"
                 }
             }
         },
