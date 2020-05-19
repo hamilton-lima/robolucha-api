@@ -66,20 +66,33 @@ func play(c *gin.Context) {
 		"AvailableMatch": input,
 	}).Info("play()")
 
-	user := httphelper.UserFromContext(c)
-	luchador := requestHandler.ds.FindLuchador(user)
-	log.WithFields(log.Fields{
-		"luchador": luchador,
-		"user.id":  user.ID,
-	}).Info("publishJoinMatch()")
+	user := httphelper.UserDetailsFromContext(c)
 
-	match := requestHandler.Play(input, luchador.ID)
+	if requestHandler.UserHasLevelToPlay(&user.Level, input.GameDefinition) {
 
-	log.WithFields(log.Fields{
-		"Match": match,
-	}).Info("play()")
+		luchador := requestHandler.ds.FindLuchador(user.User)
+		log.WithFields(log.Fields{
+			"luchador": luchador,
+			"user.id":  user.User.ID,
+		}).Info("publishJoinMatch()")
 
-	c.JSON(http.StatusOK, match)
+		match := requestHandler.Play(input, luchador.ID)
+
+		log.WithFields(log.Fields{
+			"Match": match,
+		}).Info("play()")
+
+		c.JSON(http.StatusOK, match)
+	} else {
+		log.WithFields(log.Fields{
+			"user.level":     user.Level.Level,
+			"match minlevel": input.GameDefinition.MinLevel,
+			"match maxlevel": input.GameDefinition.MaxLevel,
+		}).Error("play() user DO NOT have right level to play")
+
+		c.JSON(http.StatusBadRequest, nil)
+	}
+
 }
 
 // leaveTutorialMatch godoc
