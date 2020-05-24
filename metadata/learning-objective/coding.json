@@ -1,0 +1,73 @@
+{
+  "name": "Coding",
+  "skills": [
+    {
+      "name": "Sequence of instructions",
+      "description": "The relationship between the command and the result"
+    },
+    {
+      "name": "Create variables",
+      "description": "Give a name for some data that is in use in the program"
+    },
+    {
+      "name": "Event handling",
+      "description": "Know existing events in the game and respond to the question, what the robot should do if this event happens"
+    },
+    {
+      "name": "Mathematical expressions",
+      "description": "Use mathematical operators"
+    },
+    {
+      "name": "Conditionals",
+      "description": "Use logical operators and IF"
+    },
+    {
+      "name": "Logical expressions",
+      "description": "Use AND, OR combined to IF"
+    },
+    {
+      "name": "Data Structure",
+      "description": "Access data from existing data structures as 'other' and 'me' and create new structures to support game logic"
+    },
+    {
+      "name": "Repetition structure",
+      "description": "Apply while and for"
+    },
+    {
+      "name": "Procedures",
+      "description": "Name blocks of code to be reused"
+    },
+    {
+      "name": "Interactive process",
+      "description": "Grow the code piece by piece validating each step before proceeding further"
+    },
+    {
+      "name": "Debugging",
+      "description": "Use debugging functions to identify problems in the code, fixing defective robots"
+    },
+    {
+      "name": "Creating Math functions",
+      "description": "Create reusable math functions with and without parameters"
+    },
+    {
+      "name": "Creating Logical functions",
+      "description": "Isolate rules and strategy decisions in functions"
+    },
+    {
+      "name": "Sorting",
+      "description": "Basic sorting algorithms"
+    },
+    {
+      "name": "Lists",
+      "description": "Keeping lists shared to event handlers"
+    },
+    {
+      "name": "Path finding algorithms",
+      "description": "Path finding algorithms"
+    },
+    {
+      "name": "Calculate tragetory",
+      "description": "Identify next position of other robots"
+    }
+  ]
+}
