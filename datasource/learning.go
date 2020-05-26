@@ -22,3 +22,39 @@ func (ds *DataSource) FindAllActivities() *[]model.Activity {
 
 	return &result
 }
+
+// FindLearningObjectiveByName definition
+func (ds *DataSource) FindLearningObjectiveByName(name string) *model.LearningObjective {
+	var result model.LearningObjective
+
+	if ds.DB.Where(&model.LearningObjective{Name: name}).Find(&result).RecordNotFound() {
+		return nil
+	}
+
+	log.WithFields(log.Fields{
+		"learning objective": result,
+	}).Debug("FindLearningObjectiveByName")
+
+	return &result
+}
+
+// AddLearningObjective definition
+func (ds *DataSource) AddLearningObjective(c *model.LearningObjective) *model.LearningObjective {
+
+	objective := model.LearningObjective{
+		Name:   c.Name,
+		Skills: c.Skills,
+	}
+
+	log.WithFields(log.Fields{
+		"objective": objective,
+	}).Debug("AddLearningObjective")
+
+	ds.DB.Create(&objective)
+
+	log.WithFields(log.Fields{
+		"objective": objective,
+	}).Debug("after AddLearningObjective")
+
+	return &objective
+}
