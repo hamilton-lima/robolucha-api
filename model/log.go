@@ -34,6 +34,34 @@ func LogGameDefinition(input *GameDefinition) map[string]interface{} {
 	}
 }
 
+// LogAvailableMatches build a simplified version of []AvailableMatch for logging
+func LogAvailableMatches(matches *[]AvailableMatch) map[string]interface{} {
+
+	result := log.Fields{}
+
+	for _, match := range *matches {
+		result[string(match.ID)] = LogAvailableMatch(&match)
+	}
+
+	return result
+}
+
+// LogAvailableMatch build a simplified version of AvailableMatch for logging
+func LogAvailableMatch(input *AvailableMatch) map[string]interface{} {
+	if input == nil {
+		return log.Fields{
+			"ID": nil,
+		}
+	}
+
+	return log.Fields{
+		"ID":             input.ID,
+		"name":           input.Name,
+		"ClassroomID":    input.ClassroomID,
+		"GameDefinition": LogGameDefinition(input.GameDefinition),
+	}
+}
+
 // LogMatch build a simplified version of Match for logging
 func LogMatch(input *Match) map[string]interface{} {
 	if input == nil {
