@@ -151,6 +151,7 @@ type SceneComponent struct {
 	Width            uint       `json:"width"`
 	Height           uint       `json:"height"`
 	Rotation         uint       `json:"rotation"`
+	Life             uint       `json:"life"`
 	Respawn          bool       `json:"respawn"`
 	Colider          bool       `json:"colider"`
 	ShowInRadar      bool       `json:"showInRadar"`
