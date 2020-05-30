@@ -322,6 +322,8 @@ definitions:
         type: integer
       id:
         type: integer
+      life:
+        type: integer
       respawn:
         type: boolean
       rotation:
