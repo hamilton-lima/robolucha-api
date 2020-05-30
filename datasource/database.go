@@ -616,7 +616,7 @@ func (ds *DataSource) AddMatchParticipant(mp *model.MatchParticipant) *model.Mat
 
 func (ds *DataSource) EndMatch(match *model.Match) *model.Match {
 
-	ds.DB.Model(&match).Update("time_end", match.TimeEnd)
+	ds.DB.Model(&match).Update("time_end", time.Now())
 
 	log.WithFields(log.Fields{
 		"match": model.LogMatch(match),
