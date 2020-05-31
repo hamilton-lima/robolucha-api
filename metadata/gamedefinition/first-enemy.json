@@ -63,7 +63,7 @@
       "type": "region",
       "color": "#00FF00",
       "colider": true,
-      "codes": [{ "event": "onHitOther", "script": "endGame()" }]
+      "codes": [{ "event": "onHitOther", "script": "if not other.npc then endGame() end" }]
     }
   ],
   "codes": [],
