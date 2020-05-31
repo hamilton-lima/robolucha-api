@@ -103,6 +103,8 @@ definitions:
     type: object
   model.GameComponent:
     properties:
+      angle:
+        type: integer
       codes:
         items:
           $ref: '#/definitions/model.Code'
@@ -113,11 +115,21 @@ definitions:
         type: array
       gameDefinition:
         type: integer
+      gunAngle:
+        type: integer
       id:
+        type: integer
+      isNPC:
+        type: boolean
+      life:
         type: integer
       name:
         type: string
       userID:
+        type: integer
+      x:
+        type: integer
+      "y":
         type: integer
     type: object
   model.GameDefinition:
