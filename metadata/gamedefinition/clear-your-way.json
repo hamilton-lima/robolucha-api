@@ -75,7 +75,18 @@
   		"color": "#FFFF00",
   		"colider": true,
   		"codes": []
-  	}
+    },
+    {
+      "x": 390,
+      "y": 0,
+      "width": 210,
+      "height": 400,
+      "alpha": 0.4,
+      "type": "region",
+      "color": "#00FF00",
+      "colider": true,
+      "codes": [{ "event": "onHitOther", "script": "endGame()" }]
+    },
   ],
   "codes": [],
   "suggestedCodes": [

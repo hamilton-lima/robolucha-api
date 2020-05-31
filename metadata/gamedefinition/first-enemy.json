@@ -12,7 +12,7 @@
   "label": "First Enemy",
   "description": "",
   "type": "tutorial",
-  "sortOrder": 110,
+  "sortOrder": 10,
   "radarAngle": 45,
   "radarRadius": 200,
   "punchAngle": 90,
@@ -34,24 +34,45 @@
   "increaseSpeedEnergyCost": 10,
   "increaseSpeedPercentage": 20,
   "fireEnergyCost": 2,
-  "respawnX": 100,
+  "respawnX": 200,
   "respawnY": 200,
+  "respawnAngle": 0,
+  "respawnGunAngle": 0,
   "gameComponents": [
     {
       "id": 0,
-      "name": "El Bravucón",
+      "name": "Neil Potato",
       "codes": [
-        { "event": "onStart", "script": "turnGun(-90)", "exception": "" },
-        { "event": "onRepeat", "script": "fire(1)", "exception": "" },
+        { "event": "onRepeat", "script": "move(-100)\nfire(1)\nmove(100)", "exception": "" }
       ],
-      "configs": []
+      "configs": [],
+      "x": 400,
+      "y": 300,
+      "life": 20,
+      "angle": 180,
+      "gunAngle": 270
     }
   ],
-  "sceneComponents": [],
+  "sceneComponents": [
+    {
+      "x": 490,
+      "y": 0,
+      "width": 110,
+      "height": 400,
+      "alpha": 0.4,
+      "type": "region",
+      "color": "#00FF00",
+      "colider": true,
+      "codes": [{ "event": "onHitOther", "script": "endGame()" }]
+    }
+  ],
   "codes": [],
   "suggestedCodes": [
     { "event": "onRepeat", "script": "move(20)\nfire(1)" },
-    { "event": "onHitWall", "script": "turn(45)" }
-    { "event": "onFound", "script": "if chance > 0.8 then\n  --do something here!\nend"}
+    { "event": "onHitWall", "script": "turn(45)" },
+    {
+      "event": "onFound",
+      "script": "if chance > 0.8 then\n  --do something here!\nend"
+    }
   ]
 }
