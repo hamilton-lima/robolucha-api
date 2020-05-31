@@ -173,6 +173,12 @@ type GameComponent struct {
 	UserID           uint       `json:"userID,omitempty"`
 	Codes            []Code     `gorm:"many2many:gamecomponent_codes" json:"codes"`
 	Configs          []Config   `gorm:"many2many:gamecomponent_configs" json:"configs"`
+	IsNPC            bool       `json:"isNPC"`
+	X                uint       `json:"x"`
+	Y                uint       `json:"y"`
+	Life             uint       `json:"life"`
+	Angle            uint       `json:"angle"`
+	GunAngle         uint       `json:"gunAngle"`
 }
 
 // Code definition
