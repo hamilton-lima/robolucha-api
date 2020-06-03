@@ -208,6 +208,21 @@ func (ds *DataSource) FindGradeByName(name string) *model.Grade {
 	return &result
 }
 
+// FindLevelGroupByName definition
+func (ds *DataSource) FindLevelGroupByName(name string) *model.LevelGroup {
+	var result model.LevelGroup
+
+	if ds.DB.Where(&model.LevelGroup{Name: name}).Find(&result).RecordNotFound() {
+		return nil
+	}
+
+	log.WithFields(log.Fields{
+		"level group": result,
+	}).Debug("FindLevelGroupByName")
+
+	return &result
+}
+
 // AddGrade defines add grade
 func (ds *DataSource) AddGrade(c *model.Grade) *model.Grade {
 
@@ -229,4 +244,26 @@ func (ds *DataSource) AddGrade(c *model.Grade) *model.Grade {
 	}).Debug("after AddGrade")
 
 	return &grade
+}
+
+// AddLevelGroup definition
+func (ds *DataSource) AddLevelGroup(c *model.LevelGroup) *model.LevelGroup {
+
+	levelGroup := model.LevelGroup{
+		Name:        c.Name,
+		Description: c.Description,
+		MinLevel:    c.MinLevel,
+	}
+
+	log.WithFields(log.Fields{
+		"levelGroup": levelGroup,
+	}).Debug("AddLevelGroup")
+
+	ds.DB.Create(&levelGroup)
+
+	log.WithFields(log.Fields{
+		"levelGroup": levelGroup,
+	}).Debug("after AddLevelGroup")
+
+	return &levelGroup
 }

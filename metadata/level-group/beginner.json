@@ -1,1 +1,5 @@
-{ "name": "Beginner", "description": "Learn the basics of robolucha" }
+{
+  "name": "Beginner",
+  "description": "Learn the basics of robolucha",
+  "minlevel": 0
+}

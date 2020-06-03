@@ -30,6 +30,7 @@ type LevelGroup struct {
 	DeletedAt   *time.Time `json:"-" faker:"-"`
 	Name        string     `json:"name" gorm:"not null;unique_index"`
 	Description string     `gorm:"size:125000" json:"description"`
+	MinLevel    uint       `json:"minLevel"`
 }
 
 // TODO add this as second phase
