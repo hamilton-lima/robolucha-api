@@ -811,6 +811,33 @@
                 }
             }
         },
+        "/private/level-group": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find all level groups",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.LevelGroup"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/private/luchador": {
             "get": {
                 "security": [
@@ -1555,6 +1582,23 @@
                 },
                 "matchID": {
                     "type": "integer"
+                }
+            }
+        },
+        "model.LevelGroup": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "minLevel": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
