@@ -267,3 +267,16 @@ func (ds *DataSource) AddLevelGroup(c *model.LevelGroup) *model.LevelGroup {
 
 	return &levelGroup
 }
+
+// FindLevelGroup definition
+func (ds *DataSource) FindLevelGroup() *[]model.LevelGroup {
+	var result []model.LevelGroup
+
+	ds.DB.Find(&result)
+
+	log.WithFields(log.Fields{
+		"levelgroups": result,
+	}).Debug("FindLevelGroup")
+
+	return &result
+}
