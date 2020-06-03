@@ -434,6 +434,11 @@ func getUser(c *gin.Context) {
 	result.Classrooms = ds.FindAllClassroomByStudent(result.User.ID)
 	result.Settings = *ds.FindUserSettingByUser(result.User)
 	result.Level = *ds.FindUserLevelByUserID(result.User.ID)
+
+	log.WithFields(log.Fields{
+		"user": result,
+	}).Error("get-user")
+
 	c.JSON(http.StatusOK, result)
 }
 
@@ -1302,7 +1307,7 @@ func getPublicAvailableMatch(c *gin.Context) {
 	result := ds.FindPublicAvailableMatch()
 
 	log.WithFields(log.Fields{
-		"result": result,
+		"result": model.LogAvailableMatches(result),
 	}).Info("getPublicAvailableMatch")
 
 	c.JSON(http.StatusOK, result)
@@ -1327,7 +1332,7 @@ func getClassroomAvailableMatch(c *gin.Context) {
 	result := ds.FindAvailableMatchByClassroomID(id)
 
 	log.WithFields(log.Fields{
-		"result": result,
+		"result": model.LogAvailableMatches(result),
 	}).Info("getPublicAvailableMatch")
 
 	c.JSON(http.StatusOK, result)

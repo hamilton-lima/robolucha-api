@@ -42,7 +42,8 @@
   		"x":400,
   		"y":0,
   		"width":40,
-  		"height":150,
+      "height":150,
+      "life": 5,
       "blockMovement": true,
   		"type":"wall",
       "alpha": 1,
@@ -55,6 +56,7 @@
       "y": 150,
       "width": 40,
       "height": 120,
+      "life": 5,
       "type": "wall",
       "alpha": 1,
       "color": "#FF8800",
@@ -66,18 +68,30 @@
   		"y":270,
   		"width":40,
   		"height":150,
+      "life": 5,
       "blockMovement": true,
   		"type":"wall",
       "alpha": 1,
   		"color": "#FFFF00",
   		"colider": true,
   		"codes": []
-  	}
+    },
+    {
+      "x": 390,
+      "y": 0,
+      "width": 210,
+      "height": 400,
+      "alpha": 0.4,
+      "type": "region",
+      "color": "#00FF00",
+      "colider": true,
+      "codes": [{ "event": "onHitOther", "script": "endGame()" }]
+    },
   ],
   "codes": [],
   "suggestedCodes": [
-    { "event": "onStart", "script": "-- Move 1 suggested code" },
-    { "event": "onRepeat", "script": "move(1)" },
+    { "event": "onStart", "script": "-- Break the walls to move" },
+    { "event": "onRepeat", "script": "fire(1)" },
     { "event": "onHitWall", "script": "" }
   ]
 }

@@ -45,7 +45,14 @@ func CreateGameDefinition(fileName string, ds *datasource.DataSource) {
 	}).Debug("Loading gamedefinition")
 
 	var gameDefinition model.GameDefinition
-	json.Unmarshal(bytes, &gameDefinition)
+	err = json.Unmarshal(bytes, &gameDefinition)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"fileName": fileName,
+			"error":    err,
+		}).Error("Error parsing JSON of gamedefinition")
+		return
+	}
 
 	foundByName := ds.FindGameDefinitionByName(gameDefinition.Name)
 	if foundByName != nil {

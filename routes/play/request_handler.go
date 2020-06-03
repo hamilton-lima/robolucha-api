@@ -41,6 +41,11 @@ func (handler *RequestHandler) Play(availableMatch *model.AvailableMatch, luchad
 	handler.mutex.Lock()
 	matches := *handler.ds.FindActiveMatches("available_match_id = ?", availableMatch.ID)
 	var match *model.Match
+
+	log.WithFields(log.Fields{
+		"active matches": model.LogMatches(&matches),
+	}).Info("Play*******")
+
 	if len(matches) > 0 {
 		match = &matches[0]
 	}

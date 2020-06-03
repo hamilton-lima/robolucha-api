@@ -151,6 +151,7 @@ type SceneComponent struct {
 	Width            uint       `json:"width"`
 	Height           uint       `json:"height"`
 	Rotation         uint       `json:"rotation"`
+	Life             uint       `json:"life"`
 	Respawn          bool       `json:"respawn"`
 	Colider          bool       `json:"colider"`
 	ShowInRadar      bool       `json:"showInRadar"`
@@ -172,6 +173,12 @@ type GameComponent struct {
 	UserID           uint       `json:"userID,omitempty"`
 	Codes            []Code     `gorm:"many2many:gamecomponent_codes" json:"codes"`
 	Configs          []Config   `gorm:"many2many:gamecomponent_configs" json:"configs"`
+	IsNPC            bool       `json:"isNPC"`
+	X                uint       `json:"x"`
+	Y                uint       `json:"y"`
+	Life             uint       `json:"life"`
+	Angle            uint       `json:"angle"`
+	GunAngle         uint       `json:"gunAngle"`
 }
 
 // Code definition

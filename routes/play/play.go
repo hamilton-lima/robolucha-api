@@ -72,7 +72,7 @@ func play(c *gin.Context) {
 
 		luchador := requestHandler.ds.FindLuchador(user.User)
 		log.WithFields(log.Fields{
-			"luchador": luchador,
+			"luchador": model.LogGameComponent(luchador),
 			"user.id":  user.User.ID,
 		}).Info("publishJoinMatch()")
 
