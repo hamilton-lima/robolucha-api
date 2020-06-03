@@ -166,8 +166,8 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.POST("/join-classroom/:accessCode", joinClassroom)
 		privateAPI.GET("/available-match-public", getPublicAvailableMatch)
 		privateAPI.GET("/available-match-classroom/:id", getClassroomAvailableMatch)
-
 		privateAPI.POST("/page-events", addEvents)
+		privateAPI.GET("/level-group", getLevelGroup)
 
 	}
 
@@ -1380,4 +1380,21 @@ func addEvents(c *gin.Context) {
 
 	eventsDS.CreateEvent(event)
 	c.JSON(http.StatusOK, "")
+}
+
+// getLevelGroup godoc
+// @Summary find all level groups
+// @Accept json
+// @Produce json
+// @Success 200 200 {array} model.LevelGroup
+// @Security ApiKeyAuth
+// @Router /private/level-group [get]
+func getLevelGroup(c *gin.Context) {
+	result := ds.FindLevelGroup()
+
+	log.WithFields(log.Fields{
+		"result": result,
+	}).Info("getLevelGroup")
+
+	c.JSON(http.StatusOK, result)
 }

@@ -22,6 +22,17 @@ type Skill struct {
 	Description string     `gorm:"size:125000" json:"description"`
 }
 
+// LevelGroup definition
+type LevelGroup struct {
+	ID          uint       `gorm:"primary_key" json:"id"`
+	CreatedAt   time.Time  `json:"-"`
+	UpdatedAt   time.Time  `json:"-"`
+	DeletedAt   *time.Time `json:"-" faker:"-"`
+	Name        string     `json:"name" gorm:"not null;unique_index"`
+	Description string     `gorm:"size:125000" json:"description"`
+	MinLevel    uint       `json:"minLevel"`
+}
+
 // TODO add this as second phase
 // // GradingSystem definition
 // type GradingSystem struct {

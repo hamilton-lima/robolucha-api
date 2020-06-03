@@ -16,8 +16,10 @@ func LoadMetadataFromFolder(folderName string, ds *datasource.DataSource) {
 	SetupGameDefinitionFromFolder(filepath.Join(folderName, "gamedefinition"), ds)
 	SetupGradeFromFolder(filepath.Join(folderName, "grade"), ds)
 	SetupLearningObjectiveFromFolder(filepath.Join(folderName, "learning-objective"), ds)
+	SetupLevelGroupFromFolder(filepath.Join(folderName, "level-group"), ds)
 }
 
+// CreateAvailableMatches definition
 func CreateAvailableMatches(ds *datasource.DataSource) {
 
 	all := ds.FindAllGameDefinition()
