@@ -39,6 +39,9 @@
   "respawnAngle": 0,
   "respawnGunAngle": 0,
   "gameComponents": [],
+  "minLevel": 0,
+	"maxLevel": 0,
+  "unblockLevel": 5,
   "sceneComponents": [
   	{
   		"x":350,

@@ -38,6 +38,9 @@
   "respawnY": 200,
   "respawnAngle": 0,
   "respawnGunAngle": 0,
+  "minLevel": 15,
+	"maxLevel": 0,
+  "unblockLevel": 50,
   "gameComponents": [
     {
       "id": 0,

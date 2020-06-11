@@ -36,21 +36,24 @@
   "fireEnergyCost": 2,
   "respawnX": 200,
   "respawnY": 200,
+  "minLevel": 5,
+  "maxLevel": 0,
+  "unblockLevel": 10,
   "gameComponents": [],
   "sceneComponents": [
-  	{
-  		"x":400,
-  		"y":0,
-  		"width":40,
-      "height":150,
+    {
+      "x": 400,
+      "y": 0,
+      "width": 40,
+      "height": 150,
       "life": 5,
       "blockMovement": true,
-  		"type":"wall",
+      "type": "wall",
       "alpha": 1,
-  		"color": "#FFFF00",
-  		"colider": true,
-  		"codes": []
-  	},
+      "color": "#FFFF00",
+      "colider": true,
+      "codes": []
+    },
     {
       "x": 400,
       "y": 150,
@@ -63,18 +66,18 @@
       "colider": true,
       "codes": [{ "event": "onHitOther", "script": "" }]
     },
-  	{
-  		"x":400,
-  		"y":270,
-  		"width":40,
-  		"height":150,
+    {
+      "x": 400,
+      "y": 270,
+      "width": 40,
+      "height": 150,
       "life": 5,
       "blockMovement": true,
-  		"type":"wall",
+      "type": "wall",
       "alpha": 1,
-  		"color": "#FFFF00",
-  		"colider": true,
-  		"codes": []
+      "color": "#FFFF00",
+      "colider": true,
+      "codes": []
     },
     {
       "x": 390,
@@ -86,7 +89,7 @@
       "color": "#00FF00",
       "colider": true,
       "codes": [{ "event": "onHitOther", "script": "endGame()" }]
-    },
+    }
   ],
   "codes": [],
   "suggestedCodes": [
