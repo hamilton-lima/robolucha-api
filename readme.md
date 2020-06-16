@@ -64,3 +64,12 @@ insert into users(email) values('hamilton.lima@gmail.com');
 ```
 GORM_DEBUG=true
 ```
+## Run a single unit test 
+
+```
+go test gitlab.com/robolucha/robolucha-api/setup -v -run TestLoadGamedefinition -count=1
+```
+
+`-v` verbose mode
+`-count=1` no test caching
+
