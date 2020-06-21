@@ -8,8 +8,8 @@
   "luchadorSize": 60,
   "fps": 30,
   "buletSpeed": 120,
-  "name": "ALL-AGAINST-ALL",
-  "label": "All against all",
+  "name": "all-against-all-beginner",
+  "label": "All against all Beginner",
   "description": "",
   "type": "multiplayer",
   "sortOrder": 0,
@@ -34,10 +34,12 @@
   "increaseSpeedEnergyCost": 10,
   "increaseSpeedPercentage": 20,
   "fireEnergyCost": 2,
+  "minLevel": 0,
+	"maxLevel": 49,
   "gameComponents": [
     {
       "id": 0,
-      "name": "otto",
+      "name": "Gecko",
       "codes": [
         { "event": "onStart", "script": "turnGun(90)", "exception": "" },
         { "event": "onRepeat", "script": "move(20)\nfire(3)", "exception": "" },
@@ -51,7 +53,7 @@
     },
     {
       "id": 0,
-      "name": "farol",
+      "name": "Lighthouse",
       "codes": [
         {
           "event": "onRepeat",

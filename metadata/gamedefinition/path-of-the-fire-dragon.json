@@ -36,6 +36,9 @@
   "fireEnergyCost": 2,
   "respawnX": 60,
   "respawnY": 200,
+  "minLevel": 100,
+	"maxLevel": 0,
+  "unblockLevel": 0,
   "gameComponents": [],
   "sceneComponents": [
     {

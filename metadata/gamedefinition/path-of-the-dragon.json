@@ -37,6 +37,9 @@
   "respawnX": 60,
   "respawnY": 200,
   "gameComponents": [],
+  "minLevel": 55,
+	"maxLevel": 0,
+  "unblockLevel": 100,
   "sceneComponents": [
   	{
   		"x":150,
