@@ -40,6 +40,7 @@
     {
       "id": 0,
       "name": "Lizard",
+      "isNPC": true,
       "codes": [
         { "event": "onStart", "script": "turnGun(90)", "exception": "" },
         { "event": "onRepeat", "script": "move(20)\nfire(3)", "exception": "" },
@@ -54,6 +55,7 @@
     {
       "id": 0,
       "name": "Beacon",
+      "isNPC": true,
       "codes": [
         {
           "event": "onRepeat",

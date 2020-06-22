@@ -39,6 +39,7 @@
     {
       "id": 0,
       "name": "Godzilla",
+      "isNPC": true,
       "codes": [
         { "event": "onStart", "script": "turnGun(90)", "exception": "" },
         { "event": "onRepeat", "script": "move(20)\nfire(3)", "exception": "" },
@@ -53,6 +54,7 @@
     {
       "id": 0,
       "name": "Gibraltar",
+      "isNPC": true,
       "codes": [
         {
           "event": "onRepeat",
