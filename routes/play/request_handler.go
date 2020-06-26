@@ -2,12 +2,13 @@ package play
 
 import (
 	"encoding/json"
+	"sync"
+	"time"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/robolucha/robolucha-api/datasource"
 	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/pubsub"
-	"sync"
-	"time"
 )
 
 // PlayRequest definition
@@ -44,7 +45,7 @@ func (handler *RequestHandler) Play(availableMatch *model.AvailableMatch, luchad
 
 	log.WithFields(log.Fields{
 		"active matches": model.LogMatches(&matches),
-	}).Info("Play*******")
+	}).Info("Play")
 
 	if len(matches) > 0 {
 		match = &matches[0]
@@ -55,6 +56,12 @@ func (handler *RequestHandler) Play(availableMatch *model.AvailableMatch, luchad
 		handler.publishStartMatch(match)
 		handler.publishJoinMatch(match, luchadorID)
 	} else {
+		if match.GameDefinition.Type == model.GAMEDEFINITION_TYPE_TUTORIAL {
+			handler.ds.EndMatch(match)
+			match = handler.createMatch(availableMatch)
+			handler.publishStartMatch(match)
+		}
+
 		handler.publishJoinMatch(match, luchadorID)
 	}
 
