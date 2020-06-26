@@ -73,6 +73,8 @@ func LogMatch(input *Match) map[string]interface{} {
 	return log.Fields{
 		"ID":               input.ID,
 		"AvailableMatchID": input.AvailableMatchID,
+		"TimeStart":        input.TimeStart,
+		"TimeEnd":          input.TimeEnd,
 		"GameDefinition":   LogGameDefinition(&input.GameDefinition),
 	}
 }

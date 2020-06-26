@@ -655,3 +655,78 @@ func TestUpdateLuchadorCode(t *testing.T) {
 	}).Error("update (2)")
 
 }
+
+func TestCreateMatchWithNIL(t *testing.T) {
+	Setup(t)
+	defer ds.DB.Close()
+
+	match := model.Match{
+		TimeStart:          time.Now(),
+		GameDefinitionID:   1,
+		GameDefinitionData: "empty",
+		AvailableMatchID:   2,
+	}
+
+	ds.DB.Create(&match)
+
+	ds.EndMatch(&match)
+
+	assert.Assert(t, match.TimeEnd.Year() >= 2020)
+
+	log.WithFields(log.Fields{
+		"match": match,
+	}).Error("TestCreateMatchWithNIL")
+}
+func TestCreateMatch(t *testing.T) {
+	Setup(t)
+	defer ds.DB.Close()
+
+	layout := "2006-01-02T15:04:05.000Z"
+	str := "2014-11-12T11:45:26.371Z"
+	timeEnd, _ := time.Parse(layout, str)
+
+	match := model.Match{
+		TimeStart:          time.Now(),
+		TimeEnd:            timeEnd,
+		GameDefinitionID:   1,
+		GameDefinitionData: "empty",
+		AvailableMatchID:   2,
+	}
+
+	ds.DB.Create(&match)
+	ds.EndMatch(&match)
+
+	assert.Assert(t, match.TimeEnd.Year() >= 2020)
+
+	log.WithFields(log.Fields{
+		"match": match,
+	}).Error("TestCreateMatch")
+
+}
+
+func TestCreateMatchWithZeroes(t *testing.T) {
+	Setup(t)
+	defer ds.DB.Close()
+
+	match := model.Match{
+		TimeStart:          time.Now(),
+		GameDefinitionID:   1,
+		GameDefinitionData: "empty",
+		AvailableMatchID:   2,
+	}
+
+	layout := "2006-01-02T15:04:05.000Z"
+	str := "0000-00-00T00:00:00"
+	timeEnd, _ := time.Parse(layout, str)
+
+	ds.DB.Create(&match)
+
+	match.TimeEnd = timeEnd
+	ds.EndMatch(&match)
+
+	log.WithFields(log.Fields{
+		"match": match,
+	}).Error("TestCreateMatch")
+
+	assert.Assert(t, match.TimeEnd.Year() >= 2020)
+}
