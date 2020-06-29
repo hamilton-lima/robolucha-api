@@ -129,6 +129,7 @@ func NewDataSource(config *DBconfig) *DataSource {
 	DB.AutoMigrate(&model.Grade{})
 	DB.AutoMigrate(&model.LevelGroup{})
 	DB.AutoMigrate(&model.Activity{})
+	DB.AutoMigrate(&model.Assignment{})
 
 	secret := os.Getenv("API_SECRET")
 

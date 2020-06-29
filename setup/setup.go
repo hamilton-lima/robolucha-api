@@ -1,6 +1,7 @@
 package setup
 
 import (
+	"gitlab.com/robolucha/robolucha-api/utility"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -17,6 +18,7 @@ func LoadMetadataFromFolder(folderName string, ds *datasource.DataSource) {
 	SetupGradeFromFolder(filepath.Join(folderName, "grade"), ds)
 	SetupLearningObjectiveFromFolder(filepath.Join(folderName, "learning-objective"), ds)
 	SetupLevelGroupFromFolder(filepath.Join(folderName, "level-group"), ds)
+	utility.SetupBadWordListFromFolder(folderName)
 }
 
 // CreateAvailableMatches definition
