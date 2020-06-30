@@ -535,7 +535,7 @@ func updateLuchador(c *gin.Context) {
 	}
 
 	if utility.ContainsBadWord(luchador.Name) {
-		response.Errors = append(response.Errors, "Luchador name contains inappropriate word(s)g")
+		response.Errors = append(response.Errors, "Luchador name contains inappropriate language")
 	}
 
 	if ds.NameExist(luchador.ID, luchador.Name) {
