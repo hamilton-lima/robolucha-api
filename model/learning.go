@@ -80,16 +80,15 @@ type Activity struct {
 
 // Assignment definition
 type Assignment struct {
-	ID          uint       `gorm:"primary_key" json:"id"`
-	CreatedAt   time.Time  `json:"-"`
-	UpdatedAt   time.Time  `json:"-"`
-	DeletedAt   *time.Time `json:"-" faker:"-"`
-	ClassroomID uint       `json:"classroomID"`
-	Classroom   Classroom  `json:"classroom"`
-	ActivityID  uint       `json:"activityID"`
-	Activity    Activity   `json:"activity"`
-	TimeStart   time.Time  `json:"timeStart"`
-	TimeEnd     time.Time  `json:"timeEnd"`
+	ID         uint       `gorm:"primary_key" json:"id"`
+	CreatedAt  time.Time  `json:"-"`
+	UpdatedAt  time.Time  `json:"-"`
+	DeletedAt  *time.Time `json:"-" faker:"-"`
+	TimeStart  time.Time  `json:"timeStart"`
+	TimeEnd    time.Time  `json:"timeEnd"`
+	Students   []Student  `gorm:"many2many:assignment_student;"`
+	Activities []Activity `gorm:"many2many:assignment_activity;"`
+
 }
 
 // AssignmentEvaluation definition
