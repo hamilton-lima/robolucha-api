@@ -11,6 +11,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"gitlab.com/robolucha/robolucha-api/utility"
 	"math/rand"
 	"net/http"
 	"os"
@@ -531,6 +532,10 @@ func updateLuchador(c *gin.Context) {
 
 	if len(luchador.Name) > 40 {
 		response.Errors = append(response.Errors, "Luchador name length should be less or equal to 40 characters")
+	}
+
+	if utility.ContainsBadWord(luchador.Name) {
+		response.Errors = append(response.Errors, "Luchador name contains inappropriate word(s)g")
 	}
 
 	if ds.NameExist(luchador.ID, luchador.Name) {
