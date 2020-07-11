@@ -35,6 +35,7 @@ import (
 	"gitlab.com/robolucha/robolucha-api/routes/learning"
 	"gitlab.com/robolucha/robolucha-api/routes/play"
 	"gitlab.com/robolucha/robolucha-api/setup"
+	"gitlab.com/robolucha/robolucha-api/utility"
 
 	_ "gitlab.com/robolucha/robolucha-api/docs"
 )
