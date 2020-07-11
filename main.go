@@ -11,7 +11,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"gitlab.com/robolucha/robolucha-api/utility"
 	"math/rand"
 	"net/http"
 	"os"
@@ -1381,6 +1380,9 @@ func addEvents(c *gin.Context) {
 		ComponentID: request.ComponentID,
 		AppName:     request.AppName,
 		AppVersion:  request.AppVersion,
+		Value1:      request.Value1,
+		Value2:      request.Value2,
+		Value3:      request.Value3,
 	}
 
 	eventsDS.CreateEvent(event)
