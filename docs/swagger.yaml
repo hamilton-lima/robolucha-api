@@ -41,20 +41,6 @@ definitions:
       sourceURL:
         type: string
     type: object
-  model.AvailableMatch:
-    properties:
-      classroomID:
-        type: integer
-      gameDefinition:
-        $ref: '#/definitions/model.GameDefinition'
-        type: object
-      gameDefinitionID:
-        type: integer
-      id:
-        type: integer
-      name:
-        type: string
-    type: object
   model.Classroom:
     properties:
       accessCode:
@@ -244,17 +230,6 @@ definitions:
       matchID:
         type: integer
     type: object
-  model.LevelGroup:
-    properties:
-      description:
-        type: string
-      id:
-        type: integer
-      minLevel:
-        type: integer
-      name:
-        type: string
-    type: object
   model.Match:
     properties:
       availableMatchID:
@@ -314,15 +289,21 @@ definitions:
     type: object
   model.PageEventRequest:
     properties:
-      AppName:
-        type: string
-      AppVersion:
-        type: string
       action:
+        type: string
+      appName:
+        type: string
+      appVersion:
         type: string
       componentID:
         type: string
       page:
+        type: string
+      value1:
+        type: string
+      value2:
+        type: string
+      value3:
         type: string
     type: object
   model.SceneComponent:
@@ -388,15 +369,6 @@ definitions:
         type: integer
       userID:
         type: integer
-    type: object
-  model.StudentResponse:
-    properties:
-      studentID:
-        type: integer
-      userID:
-        type: integer
-      username:
-        type: string
     type: object
   model.UpdateLuchadorResponse:
     properties:
@@ -465,8 +437,71 @@ info:
   title: Robolucha API
   version: "1.0"
 paths:
+  /assignment/:id/activities:
+    patch:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: integer
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: find existing activities
+  /assignment/:id/students:
+    patch:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: integer
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: find existing activities
   /dashboard/activity:
     get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Activity'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: find existing activities
+  /dashboard/assignments:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Activity'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: find existing activities
+    post:
       consumes:
       - application/json
       produces:
@@ -491,9 +526,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/model.Classroom'
-            type: array
+            type: "200"
       security:
       - ApiKeyAuth: []
       summary: find all Classroom
@@ -507,7 +540,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/model.Classroom'
-          type: object
       produces:
       - application/json
       responses:
@@ -515,7 +547,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Classroom'
-            type: object
       security:
       - ApiKeyAuth: []
       summary: add a Classroom
@@ -535,9 +566,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/model.StudentResponse'
-            type: array
+            type: "200"
       security:
       - ApiKeyAuth: []
       summary: find all Classroom students
@@ -552,7 +581,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.UserDetails'
-            type: object
       security:
       - ApiKeyAuth: []
       summary: find The current user information
@@ -567,7 +595,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/model.ScoreList'
-          type: object
       produces:
       - application/json
       responses:
@@ -575,7 +602,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.MatchScore'
-            type: object
       security:
       - ApiKeyAuth: []
       summary: saves a match score
@@ -590,7 +616,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/model.Match'
-          type: object
       produces:
       - application/json
       responses:
@@ -598,7 +623,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Match'
-            type: object
       security:
       - ApiKeyAuth: []
       summary: ends existing match
@@ -613,7 +637,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/model.GameComponent'
-          type: object
       produces:
       - application/json
       responses:
@@ -621,7 +644,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.GameComponent'
-            type: object
       security:
       - ApiKeyAuth: []
       summary: Create Gamecomponent as Luchador
@@ -636,7 +658,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/model.GameDefinition'
-          type: object
       produces:
       - application/json
       responses:
@@ -644,7 +665,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.GameDefinition'
-            type: object
       security:
       - ApiKeyAuth: []
       summary: create Game definition
@@ -658,7 +678,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/model.GameDefinition'
-          type: object
       produces:
       - application/json
       responses:
@@ -666,7 +685,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.GameDefinition'
-            type: object
       security:
       - ApiKeyAuth: []
       summary: update Game definition
@@ -686,8 +704,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.GameDefinition'
-            type: object
+            type: "200"
       security:
       - ApiKeyAuth: []
       summary: find a game definition
@@ -707,8 +724,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.GameDefinition'
-            type: object
+            type: "200"
       security:
       - ApiKeyAuth: []
       summary: find a game definition
@@ -723,7 +739,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/model.FindLuchadorWithGamedefinition'
-          type: object
       produces:
       - application/json
       responses:
@@ -731,7 +746,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.GameComponent'
-            type: object
       security:
       - ApiKeyAuth: []
       summary: find Luchador by ID
@@ -746,7 +760,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/model.MatchMetric'
-          type: object
       produces:
       - application/json
       responses:
@@ -768,7 +781,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/model.MatchParticipant'
-          type: object
       produces:
       - application/json
       responses:
@@ -776,7 +788,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.MatchParticipant'
-            type: object
       security:
       - ApiKeyAuth: []
       summary: Adds luchador to a match
@@ -796,7 +807,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Match'
-            type: object
       security:
       - ApiKeyAuth: []
       summary: find one match
@@ -823,9 +833,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/model.AvailableMatch'
-            type: array
+            type: "200"
       security:
       - ApiKeyAuth: []
       summary: find available matches by classroom
@@ -839,9 +847,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/model.AvailableMatch'
-            type: array
+            type: "200"
       security:
       - ApiKeyAuth: []
       summary: find all public available matches
@@ -855,9 +861,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/model.GameDefinition'
-            type: array
+            type: "200"
       security:
       - ApiKeyAuth: []
       summary: find all game definitions
@@ -877,8 +881,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.GameDefinition'
-            type: object
+            type: "200"
       security:
       - ApiKeyAuth: []
       summary: find a game definition
@@ -893,7 +896,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.UserDetails'
-            type: object
       security:
       - ApiKeyAuth: []
       summary: find The current user information
@@ -913,8 +915,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Classroom'
-            type: object
+            type: "200"
       security:
       - ApiKeyAuth: []
       summary: join a classroom
@@ -929,7 +930,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/model.JoinMatch'
-          type: object
       produces:
       - application/json
       responses:
@@ -937,7 +937,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Match'
-            type: object
       security:
       - ApiKeyAuth: []
       summary: Sends message with the request to join the match
@@ -965,9 +964,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/model.LevelGroup'
-            type: array
+            type: "200"
       security:
       - ApiKeyAuth: []
       summary: find all level groups
@@ -982,7 +979,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.GameComponent'
-            type: object
       security:
       - ApiKeyAuth: []
       summary: find or create Luchador for the current user
@@ -996,7 +992,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/model.GameComponent'
-          type: object
       produces:
       - application/json
       responses:
@@ -1004,7 +999,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.UpdateLuchadorResponse'
-            type: object
       security:
       - ApiKeyAuth: []
       summary: Updates Luchador
@@ -1024,9 +1018,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/model.Config'
-            type: array
+            type: "200"
       security:
       - ApiKeyAuth: []
       summary: find maskConfig for a luchador
@@ -1040,9 +1032,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/model.Config'
-            type: array
+            type: "200"
       security:
       - ApiKeyAuth: []
       summary: create random maskConfig
@@ -1099,7 +1089,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Match'
-            type: object
       security:
       - ApiKeyAuth: []
       summary: find one match
@@ -1114,7 +1103,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/model.PageEventRequest'
-          type: object
       produces:
       - application/json
       responses:
@@ -1142,7 +1130,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Match'
-            type: object
       security:
       - ApiKeyAuth: []
       summary: request to play a match
@@ -1156,9 +1143,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/model.GameDefinition'
-            type: array
+            type: "200"
       security:
       - ApiKeyAuth: []
       summary: find tutorial GameDefinition
@@ -1173,7 +1158,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.UserSetting'
-            type: object
       security:
       - ApiKeyAuth: []
       summary: find current user userSetting
@@ -1187,7 +1171,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/model.UserSetting'
-          type: object
       produces:
       - application/json
       responses:
@@ -1195,7 +1178,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.UserSetting'
-            type: object
       security:
       - ApiKeyAuth: []
       summary: Updates user userSetting
