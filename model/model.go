@@ -118,10 +118,33 @@ type GameDefinition struct {
 	MinLevel                      uint             `json:"minLevel"`
 	MaxLevel                      uint             `json:"maxLevel"`
 	UnblockLevel                  uint             `json:"unblockLevel"`
+	TeamDefinition                TeamDefinition   `json:"teamDefinition"`
 	GameComponents                []GameComponent  `json:"gameComponents"`
 	SceneComponents               []SceneComponent `json:"sceneComponents"`
 	Codes                         []Code           `gorm:"many2many:gamedefinition_codes" json:"codes"`
 	LuchadorSuggestedCodes        []Code           `gorm:"many2many:gamedefinition_suggestedcodes" json:"suggestedCodes"`
+}
+
+type TeamDefinition struct {
+	ID               uint       `gorm:"primary_key" json:"id"`
+	CreatedAt        time.Time  `json:"-"`
+	UpdatedAt        time.Time  `json:"-"`
+	DeletedAt        *time.Time `json:"-" faker:"-"`
+	GameDefinitionID uint       `json:"gameDefinition,omitempty" faker:"-"`
+	FriendlyFire     bool       `json:"friendlyFire"`
+	Teams            []Team     `json:"teams"`
+}
+
+type Team struct {
+	ID               uint       `gorm:"primary_key" json:"id"`
+	CreatedAt        time.Time  `json:"-"`
+	UpdatedAt        time.Time  `json:"-"`
+	DeletedAt        *time.Time `json:"-" faker:"-"`
+	TeamDefinitionID uint       `json:"teamDefinition,omitempty" faker:"-"`
+	Name             string     `json:"name"`
+	Color            string     `json:"color"`
+	MinParticipants  uint       `json:"minParticipants"`
+	MaxParticipants  uint       `json:"maxParticipants"`
 }
 
 // Match definition

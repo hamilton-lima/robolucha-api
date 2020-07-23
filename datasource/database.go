@@ -119,6 +119,8 @@ func NewDataSource(config *DBconfig) *DataSource {
 	DB.AutoMigrate(&model.SceneComponent{})
 	DB.AutoMigrate(&model.GameComponent{})
 	DB.AutoMigrate(&model.GameDefinition{})
+	DB.AutoMigrate(&model.Team{})
+	DB.AutoMigrate(&model.TeamDefinition{})
 	DB.AutoMigrate(&model.Classroom{})
 	DB.AutoMigrate(&model.Student{})
 	DB.AutoMigrate(&model.AvailableMatch{})
@@ -807,6 +809,7 @@ func (ds *DataSource) UpdateGameDefinition(input *model.GameDefinition) *model.G
 		gameDefinition.MinLevel = input.MinLevel
 		gameDefinition.MaxLevel = input.MaxLevel
 		gameDefinition.UnblockLevel = input.UnblockLevel
+		gameDefinition.TeamDefinition = input.TeamDefinition
 
 		dbc := ds.DB.Save(gameDefinition)
 		if dbc.Error != nil {
