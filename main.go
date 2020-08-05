@@ -156,6 +156,8 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.PUT("/user/setting", updateUserSetting)
 		privateAPI.GET("/user/setting", findUserSetting)
 		privateAPI.GET("/match", getActiveMatches)
+		privateAPI.GET("/match-multiplayer", getActiveMultiplayerMatches)
+
 		privateAPI.GET("/match-single", getMatch)
 		privateAPI.GET("/match-config", getLuchadorConfigsForCurrentMatch)
 		privateAPI.POST("/join-match", joinMatch)
@@ -850,6 +852,25 @@ func getActiveMatches(c *gin.Context) {
 	}).Info("getActiveMatches")
 
 	c.JSON(http.StatusOK, &result)
+}
+
+// getActiveMultiplayerMatches godoc
+// @Summary find active multiplayer matches
+// @Accept json
+// @Produce json
+// @Success 200 {array} model.Match
+// @Security ApiKeyAuth
+// @Router /private/match-multiplayer [get]
+func getActiveMultiplayerMatches(c *gin.Context) {
+
+	// multiplayer matches
+	matches := ds.FindActiveMultiplayerMatches()
+
+	log.WithFields(log.Fields{
+		"matches": model.LogMatches(matches),
+	}).Info("getActiveMultiplayerMatches")
+
+	c.JSON(http.StatusOK, matches)
 }
 
 // getMatchInternal godoc
