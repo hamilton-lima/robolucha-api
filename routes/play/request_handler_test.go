@@ -7,13 +7,14 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/robolucha/robolucha-api/datasource"
 	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/pubsub"
 	"gitlab.com/robolucha/robolucha-api/routes/play"
 	"gitlab.com/robolucha/robolucha-api/test"
-	"testing"
 )
 
 var ds *datasource.DataSource
@@ -39,7 +40,7 @@ func TestPlayRequestHandler(t *testing.T) {
 	defer ds.DB.Close()
 
 	gd := model.BuildDefaultGameDefinition()
-	gd.Name = "FOOBAR"
+	gd.Name = "TestPlayRequestHandler"
 	ds.CreateGameDefinition(&gd)
 
 	am1 := model.AvailableMatch{ID: 42, GameDefinitionID: gd.ID}
@@ -78,18 +79,18 @@ func createLuchador(id uint) *model.GameComponent {
 func TestLeaveTutorial(t *testing.T) {
 	Setup(t)
 	defer ds.DB.Close()
+	handler := play.NewRequestHandler(ds, publisher)
 
 	luchador := createLuchador(1)
 
 	gd := model.BuildDefaultGameDefinition()
-	gd.Name = "FOOBAR"
+	gd.Name = "TestLeaveTutorial"
 	gd.Type = "tutorial"
-	ds.CreateGameDefinition(&gd)
+	gd.Duration = 0
+	gdCreated := ds.CreateGameDefinition(&gd)
 
-	am1 := model.AvailableMatch{ID: 42, GameDefinitionID: gd.ID}
-	am2 := model.AvailableMatch{ID: 3, GameDefinitionID: gd.ID}
-
-	handler := play.NewRequestHandler(ds, publisher)
+	am1 := model.AvailableMatch{ID: 42, GameDefinitionID: gdCreated.ID}
+	am2 := model.AvailableMatch{ID: 3, GameDefinitionID: gdCreated.ID}
 
 	match := handler.Play(&am1, luchador.ID)
 	handler.Play(&am2, 450)
@@ -103,6 +104,11 @@ func TestLeaveTutorial(t *testing.T) {
 
 	handler.LeaveTutorialMatches(luchador)
 	endMatchMessages := mockPublisher.Messages["end.match"]
+
+	log.WithFields(log.Fields{
+		"messages": mockPublisher.Messages,
+	}).Info("TestLeaveTutorial")
+
 	assert.Equal(t, len(endMatchMessages), 1)
 }
 

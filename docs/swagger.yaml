@@ -214,6 +214,9 @@ definitions:
         items:
           $ref: '#/definitions/model.Code'
         type: array
+      teamDefinition:
+        $ref: '#/definitions/model.TeamDefinition'
+        type: object
       turnGunSpeed:
         type: integer
       turnSpeed:
@@ -369,6 +372,34 @@ definitions:
         type: integer
       userID:
         type: integer
+    type: object
+  model.Team:
+    properties:
+      color:
+        type: string
+      id:
+        type: integer
+      maxParticipants:
+        type: integer
+      minParticipants:
+        type: integer
+      name:
+        type: string
+      teamDefinition:
+        type: integer
+    type: object
+  model.TeamDefinition:
+    properties:
+      friendlyFire:
+        type: boolean
+      gameDefinition:
+        type: integer
+      id:
+        type: integer
+      teams:
+        items:
+          $ref: '#/definitions/model.Team'
+        type: array
     type: object
   model.UpdateLuchadorResponse:
     properties:
@@ -1073,6 +1104,22 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: return luchador configs for current match
+  /private/match-multiplayer:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Match'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: find active multiplayer matches
   /private/match-single:
     get:
       consumes:
