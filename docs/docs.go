@@ -1091,6 +1091,33 @@ var doc = `{
                 }
             }
         },
+        "/private/match-multiplayer": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find active multiplayer matches",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Match"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/private/match-single": {
             "get": {
                 "security": [
@@ -1598,6 +1625,10 @@ var doc = `{
                         "$ref": "#/definitions/model.Code"
                     }
                 },
+                "teamDefinition": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.TeamDefinition"
+                },
                 "turnGunSpeed": {
                     "type": "integer"
                 },
@@ -1834,6 +1865,49 @@ var doc = `{
                 },
                 "userID": {
                     "type": "integer"
+                }
+            }
+        },
+        "model.Team": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "maxParticipants": {
+                    "type": "integer"
+                },
+                "minParticipants": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "teamDefinition": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.TeamDefinition": {
+            "type": "object",
+            "properties": {
+                "friendlyFire": {
+                    "type": "boolean"
+                },
+                "gameDefinition": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "teams": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Team"
+                    }
                 }
             }
         },

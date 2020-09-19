@@ -317,9 +317,10 @@ func TestGETGameDefinition(t *testing.T) {
 	assert.Assert(t, definition1.ID != definition2.ID)
 }
 
-func createMatch(gameDefinitionID uint) model.Match {
+func createMatch(availableMatchID uint, gameDefinitionID uint) model.Match {
 	match := model.Match{
 		TimeStart:        time.Now(),
+		AvailableMatchID: availableMatchID,
 		GameDefinitionID: gameDefinitionID}
 
 	ds.DB.Create(&match)
@@ -336,9 +337,9 @@ func TestFindMultiplayerMatch(t *testing.T) {
 	definition2 := createTestGameDefinition(t, model.GAMEDEFINITION_TYPE_MULTIPLAYER, 10)
 	definition3 := createTestGameDefinition(t, faker.Word(), 1)
 
-	createMatch(definition1.ID)
-	match := createMatch(definition2.ID)
-	createMatch(definition3.ID)
+	createMatch(20, definition1.ID)
+	match := createMatch(10, definition2.ID)
+	createMatch(1, definition3.ID)
 
 	definition2.Duration = 1200000
 	ds.DB.Save(&definition2)
