@@ -20,4 +20,5 @@ Logic
 
 # Lets go!
 
+- Preload teamdefinition
 
