@@ -380,6 +380,8 @@ func (ds *DataSource) FindActiveMatches(query interface{}, args ...interface{}) 
 	ds.DB.
 		Joins("left join game_definitions on matches.game_definition_id = game_definitions.id").
 		Preload("GameDefinition").
+		Preload("GameDefinition.TeamDefinition").
+		Preload("GameDefinition.TeamDefinition.Teams").
 		Preload("Participants").
 		Where("time_end < time_start").
 		Where(query, args).
@@ -480,7 +482,11 @@ func (ds *DataSource) FindMatch(id uint) *model.Match {
 func (ds *DataSource) FindMatchPreload(id uint) *model.Match {
 
 	var match model.Match
-	ds.DB.Preload("Participants").Preload("GameDefinition").Where(&model.Match{ID: id}).First(&match)
+	ds.DB.Preload("Participants").
+		Preload("GameDefinition").
+		Preload("GameDefinition.TeamDefinition").
+		Preload("GameDefinition.TeamDefinition.Teams").
+		Where(&model.Match{ID: id}).First(&match)
 
 	log.WithFields(log.Fields{
 		"id":    id,
@@ -923,6 +929,8 @@ func (ds *DataSource) FindGameDefinition(id uint) *model.GameDefinition {
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
+		Preload("TeamDefinition").
+		Preload("TeamDefinition.Teams").
 		Where(&model.GameDefinition{ID: id}).
 		First(&gameDefinition).
 		RecordNotFound() {
@@ -961,6 +969,8 @@ func (ds *DataSource) FindGameDefinitionByName(name string) *model.GameDefinitio
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
+		Preload("TeamDefinition").
+		Preload("TeamDefinition.Teams").
 		Where(&model.GameDefinition{Name: name}).
 		First(&gameDefinition).
 		RecordNotFound() {
@@ -999,6 +1009,8 @@ func (ds *DataSource) FindAllGameDefinition() *[]model.GameDefinition {
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
+		Preload("TeamDefinition").
+		Preload("TeamDefinition.Teams").
 		Order("sort_order").
 		Find(&gameDefinitions)
 
@@ -1028,6 +1040,8 @@ func (ds *DataSource) FindTutorialGameDefinition() *[]model.GameDefinition {
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
+		Preload("TeamDefinition").
+		Preload("TeamDefinition.Teams").
 		Where(&model.GameDefinition{Type: model.GAMEDEFINITION_TYPE_TUTORIAL}).
 		Order("sort_order").
 		Find(&gameDefinitions)
