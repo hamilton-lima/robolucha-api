@@ -161,7 +161,6 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.POST("/join-match", joinMatch)
 		privateAPI.GET("/game-definition-id/:id", getGameDefinitionByID)
 		privateAPI.GET("/game-definition-all", getGameDefinition)
-		// privateAPI.POST("/start-tutorial-match/:name", startTutorialMatch)
 		privateAPI.GET("/classroom", getClassroom)
 		privateAPI.POST("/classroom", addClassroom)
 		privateAPI.POST("/join-classroom/:accessCode", joinClassroom)
