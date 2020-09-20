@@ -20,5 +20,15 @@ Logic
 
 # Lets go!
 
-- Preload teamdefinition
+- Preload teamdefinition - OK
 
+Optimization of play to allow multiple API running
+- idx_available_match_state created - OK 
+
+- when finishing the match update state with null
+- Try to create match, If the creation fails, get active Match by GameDefinitionID
+- If the creation succeed, return the created Match
+- send message: match.start : runner is listening
+- remove the mutex control 
+
+join match with team information

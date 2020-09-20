@@ -153,12 +153,13 @@ type Match struct {
 	CreatedAt          time.Time       `json:"-"`
 	UpdatedAt          time.Time       `json:"-"`
 	DeletedAt          *time.Time      `json:"-" faker:"-"`
+	AvailableMatchID   uint            `gorm:"unique_index:idx_available_match_state" json:"availableMatchID"`
+	State              string          `gorm:"unique_index:idx_available_match_state;default:'created'" json:"state"`
 	TimeStart          time.Time       `json:"timeStart"`
 	TimeEnd            time.Time       `json:"timeEnd"`
 	LastTimeAlive      time.Time       `json:"lastTimeAlive"`
 	GameDefinitionID   uint            `json:"gameDefinitionID"`
 	GameDefinition     GameDefinition  `json:"gameDefinition"`
-	AvailableMatchID   uint            `json:"availableMatchID"`
 	GameDefinitionData string          `gorm:"size:125000" json:"-"`
 	Participants       []GameComponent `gorm:"many2many:match_participants" json:"participants"`
 }
