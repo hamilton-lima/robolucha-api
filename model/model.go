@@ -153,8 +153,7 @@ type Match struct {
 	CreatedAt          time.Time       `json:"-"`
 	UpdatedAt          time.Time       `json:"-"`
 	DeletedAt          *time.Time      `json:"-" faker:"-"`
-	AvailableMatchID   uint            `gorm:"unique_index:idx_available_match_state" json:"availableMatchID"`
-	State              string          `gorm:"unique_index:idx_available_match_state;default:'created'" json:"state"`
+	AvailableMatchID   uint            `json:"availableMatchID"`
 	TimeStart          time.Time       `json:"timeStart"`
 	TimeEnd            time.Time       `json:"timeEnd"`
 	LastTimeAlive      time.Time       `json:"lastTimeAlive"`

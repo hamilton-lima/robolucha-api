@@ -420,32 +420,6 @@ func (ds *DataSource) FindActiveMatches(query interface{}, args ...interface{}) 
 	return &result
 }
 
-// func (ds *DataSource) FindActiveMatchesByGameDefinitionAndParticipant(gameDefinition *model.GameDefinition, gameComponent *model.GameComponent) *model.Match {
-
-// 	matches := ds.FindActiveMatches(&model.Match{GameDefinitionID: gameDefinition.ID})
-
-// 	// var matches []model.Match
-// 	// ds.DB.Preload("Participants").
-// 	// 	Joins("left join game_definitions on matches.game_definition_id = game_definitions.id").
-// 	// 	Where(&model.Match{GameDefinitionID: gameDefinition.ID}).
-// 	// 	Where(ds.ActiveMatchesSQL()).
-// 	// 	Find(&matches)
-
-// 	log.WithFields(log.Fields{
-// 		"matches": matches,
-// 	}).Info("findActiveMatchesByGameDefinitionAndParticipant")
-
-// 	for _, match := range *matches {
-// 		for _, participant := range match.Participants {
-// 			if participant.ID == gameComponent.ID {
-// 				return &match
-// 			}
-// 		}
-// 	}
-
-// 	return nil
-// }
-
 func (ds *DataSource) FindMaskConfig(id uint) *[]model.Config {
 
 	var component model.GameComponent

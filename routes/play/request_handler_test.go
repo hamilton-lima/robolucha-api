@@ -85,7 +85,7 @@ func TestLeaveTutorial(t *testing.T) {
 
 	gd := model.BuildDefaultGameDefinition()
 	gd.Name = "TestLeaveTutorial"
-	gd.Type = "tutorial"
+	gd.Type = model.GAMEDEFINITION_TYPE_TUTORIAL
 	gd.Duration = 0
 	gdCreated := ds.CreateGameDefinition(&gd)
 
@@ -97,6 +97,7 @@ func TestLeaveTutorial(t *testing.T) {
 	handler.Play(&am1, 450)
 
 	// simulate runner adding the match participant
+	// From Runner: MatchRunnerAPI.getInstance().addMatchParticipant
 	ds.AddMatchParticipant(&model.MatchParticipant{
 		LuchadorID: luchador.ID,
 		MatchID:    match.ID,
