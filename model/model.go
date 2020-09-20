@@ -147,20 +147,31 @@ type Team struct {
 	MaxParticipants  uint       `json:"maxParticipants"`
 }
 
+// TeamParticipant definition
+type TeamParticipant struct {
+	ID         uint       `gorm:"primary_key" json:"id"`
+	CreatedAt  time.Time  `json:"-"`
+	UpdatedAt  time.Time  `json:"-"`
+	DeletedAt  *time.Time `json:"-" faker:"-"`
+	LuchadorID uint       `json:"luchadorID"`
+	TeamID     uint       `json:"teamID"`
+}
+
 // Match definition
 type Match struct {
-	ID                 uint            `gorm:"primary_key" json:"id"`
-	CreatedAt          time.Time       `json:"-"`
-	UpdatedAt          time.Time       `json:"-"`
-	DeletedAt          *time.Time      `json:"-" faker:"-"`
-	AvailableMatchID   uint            `json:"availableMatchID"`
-	TimeStart          time.Time       `json:"timeStart"`
-	TimeEnd            time.Time       `json:"timeEnd"`
-	LastTimeAlive      time.Time       `json:"lastTimeAlive"`
-	GameDefinitionID   uint            `json:"gameDefinitionID"`
-	GameDefinition     GameDefinition  `json:"gameDefinition"`
-	GameDefinitionData string          `gorm:"size:125000" json:"-"`
-	Participants       []GameComponent `gorm:"many2many:match_participants" json:"participants"`
+	ID                 uint              `gorm:"primary_key" json:"id"`
+	CreatedAt          time.Time         `json:"-"`
+	UpdatedAt          time.Time         `json:"-"`
+	DeletedAt          *time.Time        `json:"-" faker:"-"`
+	AvailableMatchID   uint              `json:"availableMatchID"`
+	TimeStart          time.Time         `json:"timeStart"`
+	TimeEnd            time.Time         `json:"timeEnd"`
+	LastTimeAlive      time.Time         `json:"lastTimeAlive"`
+	GameDefinitionID   uint              `json:"gameDefinitionID"`
+	GameDefinition     GameDefinition    `json:"gameDefinition"`
+	GameDefinitionData string            `gorm:"size:125000" json:"-"`
+	Participants       []GameComponent   `gorm:"many2many:match_participants" json:"participants"`
+	TeamParticipants   []TeamParticipant `gorm:"many2many:match_teams" json:"teamParticipants"`
 }
 
 // SceneComponent definition
@@ -296,6 +307,7 @@ type ScoreList struct {
 type MatchParticipant struct {
 	LuchadorID uint `json:"luchadorID"`
 	MatchID    uint `json:"matchID"`
+	TeamID     uint `json:"teamID"`
 }
 
 // MatchScore definition

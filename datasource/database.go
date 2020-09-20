@@ -577,13 +577,26 @@ func (ds *DataSource) AddMatchParticipant(mp *model.MatchParticipant) *model.Mat
 			log.WithFields(log.Fields{
 				"matchID":    mp.MatchID,
 				"luchadorID": mp.LuchadorID,
+				"teamID":     mp.TeamID,
 			}).Warning("Luchador is already in the match")
 
-			return &(model.MatchParticipant{MatchID: mp.MatchID, LuchadorID: mp.LuchadorID})
+			return &(model.MatchParticipant{
+				MatchID:    mp.MatchID,
+				LuchadorID: mp.LuchadorID,
+				TeamID:     mp.TeamID})
 		}
 	}
 
 	match.Participants = append(match.Participants, *component)
+
+	// adds Team participation if TeamID is present
+	if mp.TeamID > 0 {
+		match.TeamParticipants = append(match.TeamParticipants,
+			model.TeamParticipant{
+				LuchadorID: mp.LuchadorID,
+				TeamID:     mp.TeamID})
+	}
+
 	ds.DB.Save(&match)
 
 	matchPartipant := model.MatchParticipant{
