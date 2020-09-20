@@ -383,6 +383,7 @@ func (ds *DataSource) FindActiveMatches(query interface{}, args ...interface{}) 
 		Preload("GameDefinition.TeamDefinition").
 		Preload("GameDefinition.TeamDefinition.Teams").
 		Preload("Participants").
+		Preload("TeamParticipants").
 		Where("time_end < time_start").
 		Where(query, args).
 		Order("time_start desc").
@@ -442,7 +443,9 @@ func (ds *DataSource) FindMaskConfig(id uint) *[]model.Config {
 func (ds *DataSource) FindMatch(id uint) *model.Match {
 
 	var match model.Match
-	ds.DB.Preload("Participants").Where(&model.Match{ID: id}).First(&match)
+	ds.DB.Preload("Participants").
+		Preload("TeamParticipants").
+		Where(&model.Match{ID: id}).First(&match)
 
 	log.WithFields(log.Fields{
 		"id":    id,
@@ -457,6 +460,7 @@ func (ds *DataSource) FindMatchPreload(id uint) *model.Match {
 
 	var match model.Match
 	ds.DB.Preload("Participants").
+		Preload("TeamParticipants").
 		Preload("GameDefinition").
 		Preload("GameDefinition.TeamDefinition").
 		Preload("GameDefinition.TeamDefinition.Teams").
