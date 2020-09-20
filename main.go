@@ -132,8 +132,6 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		internalAPI.GET("/game-definition-id/:id", getGameDefinitionByIDInternal)
 		internalAPI.POST("/game-definition", createGameDefinition)
 		internalAPI.PUT("/game-definition", updateGameDefinition)
-
-		// internalAPI.POST("/start-match/:name", startMatch)
 		internalAPI.POST("/game-component", createGameComponent)
 		internalAPI.POST("/luchador", getLuchadorByIDAndGamedefinitionID)
 		internalAPI.POST("/match-participant", addMatchPartipant)
@@ -327,103 +325,6 @@ func updateGameDefinition(c *gin.Context) {
 
 	c.JSON(http.StatusOK, result)
 }
-
-// startMatch godoc
-// @Summary create Match
-// @Accept json
-// @Produce json
-// @Param name path string true "GameDefinition name"
-// @Success 200 {object} model.Match
-// @Security ApiKeyAuth
-// @Router /internal/start-match/{name} [post]
-// func startMatch(c *gin.Context) {
-
-// 	name := c.Param("name")
-
-// 	log.WithFields(log.Fields{
-// 		"name": name,
-// 	}).Info("startMatch")
-
-// 	gameDefinition := ds.FindGameDefinitionByName(name)
-// 	if gameDefinition == nil {
-// 		log.Info("Invalid gamedefinition name")
-// 		c.AbortWithStatus(http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	match := ds.CreateMatch(gameDefinition.ID)
-// 	if match == nil {
-// 		log.Error("Invalid Match when saving")
-// 		c.AbortWithStatus(http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	// load all the fields
-// 	match = ds.FindMatch(match.ID)
-
-// 	log.WithFields(log.Fields{
-// 		"createMatch": match,
-// 	}).Info("created match")
-
-// 	c.JSON(http.StatusOK, match)
-// }
-
-// startTutorialMatch godoc
-// @Summary create Match and publish
-// @Accept json
-// @Produce json
-// @Param name path string true "GameDefinition name"
-// @Success 200 {object} model.JoinMatch
-// @Security ApiKeyAuth
-// @Router /private/start-tutorial-match/{name} [post]
-// func startTutorialMatch(c *gin.Context) {
-
-// 	name := c.Param("name")
-
-// 	log.WithFields(log.Fields{
-// 		"name": name,
-// 	}).Info("startTutorialMatch")
-
-// 	gameDefinition := ds.FindGameDefinitionByName(name)
-// 	if gameDefinition == nil {
-// 		log.Info("Invalid gamedefinition name")
-// 		c.AbortWithStatus(http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	user := httphelper.UserFromContext(c)
-
-// 	luchador := ds.FindLuchador(user)
-// 	if luchador == nil {
-// 		log.WithFields(log.Fields{
-// 			"user": user,
-// 		}).Error("Error getting luchador for the current user")
-// 		c.AbortWithStatus(http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	match := ds.FindActiveMatchesByGameDefinitionAndParticipant(gameDefinition, luchador)
-// 	// not found will create
-// 	if match == nil {
-// 		match = ds.CreateMatch(gameDefinition.ID)
-// 		if match == nil {
-// 			log.Error("Invalid Match when saving")
-// 			c.AbortWithStatus(http.StatusBadRequest)
-// 			return
-// 		}
-// 	}
-
-// 	result := model.JoinMatch{MatchID: match.ID, LuchadorID: luchador.ID}
-// 	// publish event to run the match
-// 	resultJSON, _ := json.Marshal(result)
-// 	publisher.Publish("start.match", string(resultJSON))
-
-// 	log.WithFields(log.Fields{
-// 		"createMatch": result,
-// 	}).Info("created match")
-
-// 	c.JSON(http.StatusOK, result)
-// }
 
 // getUser godoc
 // @Summary find The current user information
