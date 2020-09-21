@@ -1185,7 +1185,7 @@ var doc = `{
                 }
             }
         },
-        "/private/play/{id}": {
+        "/private/play": {
             "post": {
                 "security": [
                     {
@@ -1201,11 +1201,13 @@ var doc = `{
                 "summary": "request to play a match",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "AvailableMatch id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "description": "PlayRequest",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.PlayRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -1651,6 +1653,9 @@ var doc = `{
                 },
                 "matchID": {
                     "type": "integer"
+                },
+                "teamID": {
+                    "type": "integer"
                 }
             }
         },
@@ -1677,6 +1682,12 @@ var doc = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/model.GameComponent"
+                    }
+                },
+                "teamParticipants": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.TeamParticipant"
                     }
                 },
                 "timeEnd": {
@@ -1714,6 +1725,9 @@ var doc = `{
                     "type": "integer"
                 },
                 "matchID": {
+                    "type": "integer"
+                },
+                "teamID": {
                     "type": "integer"
                 }
             }
@@ -1767,6 +1781,17 @@ var doc = `{
                 },
                 "value3": {
                     "type": "string"
+                }
+            }
+        },
+        "model.PlayRequest": {
+            "type": "object",
+            "properties": {
+                "availableMatchID": {
+                    "type": "integer"
+                },
+                "teamID": {
+                    "type": "integer"
                 }
             }
         },
@@ -1908,6 +1933,20 @@ var doc = `{
                     "items": {
                         "$ref": "#/definitions/model.Team"
                     }
+                }
+            }
+        },
+        "model.TeamParticipant": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "luchadorID": {
+                    "type": "integer"
+                },
+                "teamID": {
+                    "type": "integer"
                 }
             }
         },
