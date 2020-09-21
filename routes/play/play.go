@@ -1,8 +1,9 @@
 package play
 
 import (
-	log "github.com/sirupsen/logrus"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/gin-gonic/gin"
 	"gitlab.com/robolucha/robolucha-api/datasource"
@@ -30,7 +31,7 @@ type Router struct {
 
 // Setup definition
 func (router *Router) Setup(group *gin.RouterGroup) {
-	group.POST("/play/:id", play)
+	group.POST("/play", play)
 	group.POST("/leave-tutorial-match", leaveTutorialMatch)
 }
 
@@ -38,24 +39,25 @@ func (router *Router) Setup(group *gin.RouterGroup) {
 // @Summary request to play a match
 // @Accept json
 // @Produce json
-// @Param id path int true "AvailableMatch id"
+// @Param request body model.PlayRequest true "PlayRequest"
 // @Success 200 {object} model.Match
 // @Security ApiKeyAuth
-// @Router /private/play/{id} [post]
+// @Router /private/play [post]
 func play(c *gin.Context) {
 
-	id, err := httphelper.GetIntegerParam(c, "id", "play")
+	var playRequest *model.PlayRequest
+	err := c.BindJSON(&playRequest)
 	if err != nil {
 		log.Info("Invalid body content on play")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
-	input := requestHandler.FindAvailableMatchByID(id)
+	input := requestHandler.FindAvailableMatchByID(playRequest.AvailableMatchID)
 	if input == nil {
 		log.WithFields(log.Fields{
 			"message": "AvailableMatch not found",
-			"id":      id,
+			"id":      playRequest.AvailableMatchID,
 		}).Error("Invalid body content on play()")
 
 		c.AbortWithStatus(http.StatusBadRequest)
@@ -74,9 +76,10 @@ func play(c *gin.Context) {
 		log.WithFields(log.Fields{
 			"luchador": model.LogGameComponent(luchador),
 			"user.id":  user.User.ID,
-		}).Info("publishJoinMatch()")
+			"TeamID":   playRequest.TeamID,
+		}).Info("play()")
 
-		match := requestHandler.Play(input, luchador.ID)
+		match := requestHandler.Play(input, luchador.ID, playRequest.TeamID)
 
 		log.WithFields(log.Fields{
 			"Match": match,

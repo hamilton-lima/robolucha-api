@@ -55,11 +55,15 @@ func isParticipating(match *model.Match, luchadorID uint) bool {
 }
 
 // Play definition
-func (handler *RequestHandler) Play(availableMatch *model.AvailableMatch, luchadorID uint) *model.Match {
+func (handler *RequestHandler) Play(
+	availableMatch *model.AvailableMatch,
+	luchadorID uint,
+	teamID uint) *model.Match {
 
 	log.WithFields(log.Fields{
 		"availableMatch": availableMatch,
 		"luchadorID":     luchadorID,
+		"teamID":         teamID,
 	}).Info("Play")
 
 	match := handler.findMatch(availableMatch)
@@ -77,7 +81,7 @@ func (handler *RequestHandler) Play(availableMatch *model.AvailableMatch, luchad
 		}).Info("Play")
 
 		handler.publishStartMatch(match)
-		handler.publishJoinMatch(match, luchadorID)
+		handler.publishJoinMatch(match, luchadorID, teamID)
 	} else {
 		log.WithFields(log.Fields{
 			"status":  "match found",
@@ -105,7 +109,7 @@ func (handler *RequestHandler) Play(availableMatch *model.AvailableMatch, luchad
 			handler.publishStartMatch(match)
 		}
 
-		handler.publishJoinMatch(match, luchadorID)
+		handler.publishJoinMatch(match, luchadorID, teamID)
 	}
 
 	return match
@@ -173,11 +177,12 @@ func (handler *RequestHandler) publishStartMatch(match *model.Match) {
 
 }
 
-func (handler *RequestHandler) publishJoinMatch(match *model.Match, luchadorID uint) {
+func (handler *RequestHandler) publishJoinMatch(match *model.Match, luchadorID uint, teamID uint) {
 
 	join := model.JoinMatch{
 		MatchID:    match.ID,
 		LuchadorID: luchadorID,
+		TeamID:     teamID,
 	}
 
 	// publish event to run the match

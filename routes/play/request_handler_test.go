@@ -48,9 +48,9 @@ func TestPlayRequestHandler(t *testing.T) {
 
 	handler := play.NewRequestHandler(ds, publisher)
 
-	r1 := handler.Play(&am1, 432)
-	r2 := handler.Play(&am1, 450)
-	r3 := handler.Play(&am1, 450)
+	r1 := handler.Play(&am1, 432, 0)
+	r2 := handler.Play(&am1, 450, 0)
+	r3 := handler.Play(&am1, 450, 0)
 
 	startMatchMessages := mockPublisher.Messages["start.match"]
 	joinMatchMessages := mockPublisher.Messages["join.match"]
@@ -62,7 +62,7 @@ func TestPlayRequestHandler(t *testing.T) {
 	assert.Equal(t, uint(42), r2.AvailableMatchID)
 	assert.Equal(t, uint(42), r3.AvailableMatchID)
 
-	r4 := handler.Play(&am3, 777)
+	r4 := handler.Play(&am3, 777, 0)
 	assert.Equal(t, uint(3), r4.AvailableMatchID)
 
 }
@@ -92,9 +92,9 @@ func TestLeaveTutorial(t *testing.T) {
 	am1 := model.AvailableMatch{ID: 42, GameDefinitionID: gdCreated.ID}
 	am2 := model.AvailableMatch{ID: 3, GameDefinitionID: gdCreated.ID}
 
-	match := handler.Play(&am1, luchador.ID)
-	handler.Play(&am2, 450)
-	handler.Play(&am1, 450)
+	match := handler.Play(&am1, luchador.ID, 0)
+	handler.Play(&am2, 450, 0)
+	handler.Play(&am1, 450, 0)
 
 	// simulate runner adding the match participant
 	// From Runner: MatchRunnerAPI.getInstance().addMatchParticipant

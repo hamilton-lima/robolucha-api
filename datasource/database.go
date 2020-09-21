@@ -110,7 +110,10 @@ func NewDataSource(config *DBconfig) *DataSource {
 	DB.AutoMigrate(&model.Session{})
 	DB.AutoMigrate(&model.UserSetting{})
 	DB.AutoMigrate(&model.UserLevel{})
+
+	DB.AutoMigrate(&model.TeamParticipant{})
 	DB.AutoMigrate(&model.Match{})
+
 	DB.AutoMigrate(&model.Code{})
 	DB.AutoMigrate(&model.CodeHistory{})
 

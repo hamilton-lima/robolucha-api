@@ -70,6 +70,12 @@ type ActiveMatch struct {
 	TimeStart   time.Time `json:"timeStart"`
 }
 
+// PlayRequest definition
+type PlayRequest struct {
+	AvailableMatchID uint `json:"availableMatchID"`
+	TeamID           uint `json:"teamID"`
+}
+
 // GameDefinition definition
 type GameDefinition struct {
 	ID                            uint             `gorm:"primary_key" json:"id" faker:"-"`
@@ -135,6 +141,7 @@ type TeamDefinition struct {
 	Teams            []Team     `json:"teams"`
 }
 
+// Team definition
 type Team struct {
 	ID               uint       `gorm:"primary_key" json:"id"`
 	CreatedAt        time.Time  `json:"-"`
@@ -290,6 +297,7 @@ type Config struct {
 type JoinMatch struct {
 	MatchID    uint `json:"matchID"`
 	LuchadorID uint `json:"luchadorID"`
+	TeamID     uint `json:"teamID"`
 }
 
 // FindLuchadorWithGamedefinition definition
