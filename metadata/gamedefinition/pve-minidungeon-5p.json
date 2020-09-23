@@ -1,8 +1,8 @@
 {
     "id": 0,
     "duration": 1200000,
-    "minParticipants": 4,
-    "maxParticipants": 10,
+    "minParticipants": 2,
+    "maxParticipants": 5,
     "arenaWidth": 1400,
     "arenaHeight": 600,
     "bulletSize": 16,
