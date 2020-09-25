@@ -41,6 +41,20 @@ definitions:
       sourceURL:
         type: string
     type: object
+  model.AvailableMatch:
+    properties:
+      classroomID:
+        type: integer
+      gameDefinition:
+        $ref: '#/definitions/model.GameDefinition'
+        type: object
+      gameDefinitionID:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   model.Classroom:
     properties:
       accessCode:
@@ -235,6 +249,17 @@ definitions:
       teamID:
         type: integer
     type: object
+  model.LevelGroup:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      minLevel:
+        type: integer
+      name:
+        type: string
+    type: object
   model.Match:
     properties:
       availableMatchID:
@@ -387,6 +412,15 @@ definitions:
         type: integer
       userID:
         type: integer
+    type: object
+  model.StudentResponse:
+    properties:
+      studentID:
+        type: integer
+      userID:
+        type: integer
+      username:
+        type: string
     type: object
   model.Team:
     properties:
@@ -581,7 +615,9 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            items:
+              $ref: '#/definitions/model.Classroom'
+            type: array
       security:
       - ApiKeyAuth: []
       summary: find all Classroom
@@ -621,7 +657,9 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            items:
+              $ref: '#/definitions/model.StudentResponse'
+            type: array
       security:
       - ApiKeyAuth: []
       summary: find all Classroom students
@@ -759,7 +797,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            $ref: '#/definitions/model.GameDefinition'
       security:
       - ApiKeyAuth: []
       summary: find a game definition
@@ -779,7 +817,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            $ref: '#/definitions/model.GameDefinition'
       security:
       - ApiKeyAuth: []
       summary: find a game definition
@@ -888,7 +926,9 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            items:
+              $ref: '#/definitions/model.AvailableMatch'
+            type: array
       security:
       - ApiKeyAuth: []
       summary: find available matches by classroom
@@ -902,7 +942,9 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            items:
+              $ref: '#/definitions/model.AvailableMatch'
+            type: array
       security:
       - ApiKeyAuth: []
       summary: find all public available matches
@@ -916,7 +958,9 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            items:
+              $ref: '#/definitions/model.GameDefinition'
+            type: array
       security:
       - ApiKeyAuth: []
       summary: find all game definitions
@@ -936,7 +980,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            $ref: '#/definitions/model.GameDefinition'
       security:
       - ApiKeyAuth: []
       summary: find a game definition
@@ -970,7 +1014,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            $ref: '#/definitions/model.Classroom'
       security:
       - ApiKeyAuth: []
       summary: join a classroom
@@ -1019,7 +1063,9 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            items:
+              $ref: '#/definitions/model.LevelGroup'
+            type: array
       security:
       - ApiKeyAuth: []
       summary: find all level groups
@@ -1073,7 +1119,9 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            items:
+              $ref: '#/definitions/model.Config'
+            type: array
       security:
       - ApiKeyAuth: []
       summary: find maskConfig for a luchador
@@ -1087,7 +1135,9 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            items:
+              $ref: '#/definitions/model.Config'
+            type: array
       security:
       - ApiKeyAuth: []
       summary: create random maskConfig
@@ -1215,7 +1265,9 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            items:
+              $ref: '#/definitions/model.GameDefinition'
+            type: array
       security:
       - ApiKeyAuth: []
       summary: find tutorial GameDefinition

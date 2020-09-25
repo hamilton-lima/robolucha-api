@@ -176,7 +176,10 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Classroom"
+                            }
                         }
                     }
                 }
@@ -242,7 +245,10 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.StudentResponse"
+                            }
                         }
                     }
                 }
@@ -472,7 +478,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "$ref": "#/definitions/model.GameDefinition"
                         }
                     }
                 }
@@ -505,7 +511,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "$ref": "#/definitions/model.GameDefinition"
                         }
                     }
                 }
@@ -688,7 +694,10 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.AvailableMatch"
+                            }
                         }
                     }
                 }
@@ -712,7 +721,10 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.AvailableMatch"
+                            }
                         }
                     }
                 }
@@ -736,7 +748,10 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.GameDefinition"
+                            }
                         }
                     }
                 }
@@ -769,7 +784,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "$ref": "#/definitions/model.GameDefinition"
                         }
                     }
                 }
@@ -826,7 +841,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "$ref": "#/definitions/model.Classroom"
                         }
                     }
                 }
@@ -909,7 +924,10 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.LevelGroup"
+                            }
                         }
                     }
                 }
@@ -999,7 +1017,10 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Config"
+                            }
                         }
                     }
                 }
@@ -1023,7 +1044,10 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Config"
+                            }
                         }
                     }
                 }
@@ -1238,7 +1262,10 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.GameDefinition"
+                            }
                         }
                     }
                 }
@@ -1361,6 +1388,27 @@ var doc = `{
                     "type": "string"
                 },
                 "sourceURL": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.AvailableMatch": {
+            "type": "object",
+            "properties": {
+                "classroomID": {
+                    "type": "integer"
+                },
+                "gameDefinition": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.GameDefinition"
+                },
+                "gameDefinitionID": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
                 }
             }
@@ -1659,6 +1707,23 @@ var doc = `{
                 }
             }
         },
+        "model.LevelGroup": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "minLevel": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "model.Match": {
             "type": "object",
             "properties": {
@@ -1890,6 +1955,20 @@ var doc = `{
                 },
                 "userID": {
                     "type": "integer"
+                }
+            }
+        },
+        "model.StudentResponse": {
+            "type": "object",
+            "properties": {
+                "studentID": {
+                    "type": "integer"
+                },
+                "userID": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },

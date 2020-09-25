@@ -161,7 +161,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Classroom"
+                            }
                         }
                     }
                 }
@@ -227,7 +230,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.StudentResponse"
+                            }
                         }
                     }
                 }
@@ -457,7 +463,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "$ref": "#/definitions/model.GameDefinition"
                         }
                     }
                 }
@@ -490,7 +496,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "$ref": "#/definitions/model.GameDefinition"
                         }
                     }
                 }
@@ -673,7 +679,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.AvailableMatch"
+                            }
                         }
                     }
                 }
@@ -697,7 +706,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.AvailableMatch"
+                            }
                         }
                     }
                 }
@@ -721,7 +733,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.GameDefinition"
+                            }
                         }
                     }
                 }
@@ -754,7 +769,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "$ref": "#/definitions/model.GameDefinition"
                         }
                     }
                 }
@@ -811,7 +826,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "$ref": "#/definitions/model.Classroom"
                         }
                     }
                 }
@@ -894,7 +909,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.LevelGroup"
+                            }
                         }
                     }
                 }
@@ -984,7 +1002,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Config"
+                            }
                         }
                     }
                 }
@@ -1008,7 +1029,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Config"
+                            }
                         }
                     }
                 }
@@ -1223,7 +1247,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.GameDefinition"
+                            }
                         }
                     }
                 }
@@ -1346,6 +1373,27 @@
                     "type": "string"
                 },
                 "sourceURL": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.AvailableMatch": {
+            "type": "object",
+            "properties": {
+                "classroomID": {
+                    "type": "integer"
+                },
+                "gameDefinition": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.GameDefinition"
+                },
+                "gameDefinitionID": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
                 }
             }
@@ -1644,6 +1692,23 @@
                 }
             }
         },
+        "model.LevelGroup": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "minLevel": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "model.Match": {
             "type": "object",
             "properties": {
@@ -1875,6 +1940,20 @@
                 },
                 "userID": {
                     "type": "integer"
+                }
+            }
+        },
+        "model.StudentResponse": {
+            "type": "object",
+            "properties": {
+                "studentID": {
+                    "type": "integer"
+                },
+                "userID": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },
