@@ -8,19 +8,19 @@
 - Add endpoint to join match with teaminformation - OK
 
 ## Game 
-- check if should use /play or /joinMatch
-	/play should handle all scenarios do we need to call /joinMatch?
+- allow the user to choose the team - OK 
+- when calling /play add team information - OK 
+- If only one team dont ask to choose team - OK
 
-- add route to /lobby/:availableMatchID
-- if has team information and more than one ask to choose team
-- when calling /play add team information
-- then show button that redirects to /watch 
+- show page to wait while the team is formed
+	/wait
+- change score page to group results by team
 
 ## Runner
 - verify min number of team participants to start match 
 - verify max number of team participants to join match 
 - verify friendly fire 
-
+- send group participation info to match participant or score
 
 # Notes
 - Preload teamdefinition - OK
