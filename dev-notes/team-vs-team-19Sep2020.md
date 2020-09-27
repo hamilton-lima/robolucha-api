@@ -6,6 +6,7 @@
 - Preload teamdefinition on gamedefinition - OK
 - change /play to receive team information - OK 
 - Add endpoint to join match with teaminformation - OK
+- add match participant save on both arrays - OK
 
 ## Game 
 - allow the user to choose the team - OK 
@@ -13,14 +14,27 @@
 - If only one team dont ask to choose team - OK
 
 - show page to wait while the team is formed
-	/wait
+	- when loading the match we know the ID
+	- getMatch status, what are the possible status 
+		- CREATED
+		- RUNNING
+		- FINISHED
+
+	- Add status - default CREATED - OK
+	- udpate status when ends match - OK
+	- add endpoint to getMatch, based on the status show details
+	 /private/match-single - OK 
+
+	- update status from runner when starts to RUN the match - RUNNER
+	- show different UI depending on match status
+
 - change score page to group results by team
 
 ## Runner
-- verify min number of team participants to start match 
-- verify max number of team participants to join match 
-- verify friendly fire 
-- send group participation info to match participant or score
+- verify min number of team participants to start match - OK  
+- verify max number of team participants to join match - OK
+- verify friendly fire - OK
+- send group participation info to match participant or score - OK 
 
 # Notes
 - Preload teamdefinition - OK

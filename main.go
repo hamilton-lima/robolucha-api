@@ -136,6 +136,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		internalAPI.POST("/luchador", getLuchadorByIDAndGamedefinitionID)
 		internalAPI.POST("/match-participant", addMatchPartipant)
 		internalAPI.PUT("/end-match", endMatch)
+		internalAPI.PUT("/run-match", runMatch)
 		internalAPI.GET("/ready", getReady)
 		internalAPI.POST("/add-match-scores", addMatchScores)
 		internalAPI.GET("/match-single", getMatchInternal)
@@ -1030,6 +1031,41 @@ func endMatch(c *gin.Context) {
 	}).Info("result")
 
 	ds.UpdateParticipantsLevel(matchRequest.ID)
+
+	c.JSON(http.StatusOK, match)
+}
+
+// runMatch godoc
+// @Summary notify that the match is running, all participants joined
+// @Accept json
+// @Produce json
+// @Param request body model.Match true "Match"
+// @Success 200 {object} model.Match
+// @Security ApiKeyAuth
+// @Router /internal/run-match [put]
+func runMatch(c *gin.Context) {
+
+	var matchRequest *model.Match
+	err := c.BindJSON(&matchRequest)
+	if err != nil {
+		log.Info("Invalid body content on runMatch")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	match := ds.RunMatch(matchRequest)
+	if match == nil {
+		log.WithFields(log.Fields{
+			"match": matchRequest,
+		}).Error("Error calling runMatch")
+
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"match": match,
+	}).Info("result")
 
 	c.JSON(http.StatusOK, match)
 }

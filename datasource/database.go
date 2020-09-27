@@ -618,13 +618,28 @@ func (ds *DataSource) AddMatchParticipant(mp *model.MatchParticipant) *model.Mat
 	return &matchPartipant
 }
 
-func (ds *DataSource) EndMatch(match *model.Match) *model.Match {
+func (ds *DataSource) RunMatch(match *model.Match) *model.Match {
 
-	ds.DB.Model(&match).Update("time_end", time.Now())
+	ds.DB.Model(&match).
+		Select("Status").
+		Updates(model.Match{Status: model.MatchStatusRunning})
 
 	log.WithFields(log.Fields{
 		"match": model.LogMatch(match),
-	}).Info("Match time_end updated")
+	}).Info("Match is running")
+
+	return match
+}
+
+func (ds *DataSource) EndMatch(match *model.Match) *model.Match {
+
+	ds.DB.Model(&match).
+		Select("TimeEnd", "Status").
+		Updates(model.Match{TimeEnd: time.Now(), Status: model.MatchStatusFinished})
+
+	log.WithFields(log.Fields{
+		"match": model.LogMatch(match),
+	}).Info("Match TimeEnd and Status updated")
 
 	return match
 }

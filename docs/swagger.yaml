@@ -277,6 +277,8 @@ definitions:
         items:
           $ref: '#/definitions/model.GameComponent'
         type: array
+      status:
+        type: string
       teamParticipants:
         items:
           $ref: '#/definitions/model.TeamParticipant'
@@ -910,6 +912,27 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: returns application health check information
+  /internal/run-match:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Match
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.Match'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Match'
+      security:
+      - ApiKeyAuth: []
+      summary: notify that the match is running, all participants joined
   /private/available-match-classroom/{id}:
     get:
       consumes:

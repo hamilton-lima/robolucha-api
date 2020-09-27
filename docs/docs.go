@@ -667,6 +667,41 @@ var doc = `{
                 }
             }
         },
+        "/internal/run-match": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "notify that the match is running, all participants joined",
+                "parameters": [
+                    {
+                        "description": "Match",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Match"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Match"
+                        }
+                    }
+                }
+            }
+        },
         "/private/available-match-classroom/{id}": {
             "get": {
                 "security": [
@@ -1748,6 +1783,9 @@ var doc = `{
                     "items": {
                         "$ref": "#/definitions/model.GameComponent"
                     }
+                },
+                "status": {
+                    "type": "string"
                 },
                 "teamParticipants": {
                     "type": "array",

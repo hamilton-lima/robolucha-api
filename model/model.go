@@ -164,6 +164,10 @@ type TeamParticipant struct {
 	TeamID     uint       `json:"teamID"`
 }
 
+var MatchStatusCreated string = "CREATED"
+var MatchStatusRunning string = "RUNNING"
+var MatchStatusFinished string = "FINISHED"
+
 // Match definition
 type Match struct {
 	ID                 uint              `gorm:"primary_key" json:"id"`
@@ -171,6 +175,7 @@ type Match struct {
 	UpdatedAt          time.Time         `json:"-"`
 	DeletedAt          *time.Time        `json:"-" faker:"-"`
 	AvailableMatchID   uint              `json:"availableMatchID"`
+	Status             string            `json:"status"`
 	TimeStart          time.Time         `json:"timeStart"`
 	TimeEnd            time.Time         `json:"timeEnd"`
 	LastTimeAlive      time.Time         `json:"lastTimeAlive"`

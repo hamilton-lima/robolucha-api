@@ -153,6 +153,7 @@ func (handler *RequestHandler) createMatch(availableMatch *model.AvailableMatch)
 		GameDefinitionID:   gameDefinition.ID,
 		GameDefinitionData: gameDefinitionData,
 		AvailableMatchID:   availableMatch.ID,
+		Status:             model.MatchStatusCreated,
 	}
 
 	handler.ds.DB.Create(&match)
