@@ -158,6 +158,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.GET("/match-multiplayer", getActiveMultiplayerMatches)
 
 		privateAPI.GET("/match-single", getMatch)
+		privateAPI.GET("/match-score", getMatchScore)
 		privateAPI.GET("/match-config", getLuchadorConfigsForCurrentMatch)
 		privateAPI.POST("/join-match", joinMatch)
 		privateAPI.GET("/game-definition-id/:id", getGameDefinitionByID)
@@ -818,6 +819,41 @@ func getMatch(c *gin.Context) {
 	}).Info("getMatch")
 
 	c.JSON(http.StatusOK, match)
+}
+
+// getMatchScore godoc
+// @Summary find one match score
+// @Accept json
+// @Produce json
+// @Param matchID query int false "int valid"
+// @Success 200 {array} model.MatchScore
+// @Security ApiKeyAuth
+// @Router /private/match-score [get]
+func getMatchScore(c *gin.Context) {
+
+	parameter := c.Query("matchID")
+	i32, err := strconv.ParseInt(parameter, 10, 32)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"matchID": parameter,
+		}).Error("Invalid matchID on getMatchScore")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	var matchID uint
+	matchID = uint(i32)
+
+	log.WithFields(log.Fields{
+		"matchID": matchID,
+	}).Info("getMatchScore")
+
+	scores := ds.GetMatchScoresByMatchID(matchID)
+
+	log.WithFields(log.Fields{
+		"scores": scores,
+	}).Info("getMatchScores")
+
+	c.JSON(http.StatusOK, scores)
 }
 
 // getLuchadorConfigsForCurrentMatch godoc

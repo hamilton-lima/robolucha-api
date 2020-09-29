@@ -1217,6 +1217,27 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: find active multiplayer matches
+  /private/match-score:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: int valid
+        in: query
+        name: matchID
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.MatchScore'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: find one match score
   /private/match-single:
     get:
       consumes:

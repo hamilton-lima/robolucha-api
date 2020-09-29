@@ -1177,6 +1177,41 @@ var doc = `{
                 }
             }
         },
+        "/private/match-score": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find one match score",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "int valid",
+                        "name": "matchID",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.MatchScore"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/private/match-single": {
             "get": {
                 "security": [

@@ -25,8 +25,10 @@
 	- add endpoint to getMatch, based on the status show details
 	 /private/match-single - OK 
 
-	- update status from runner when starts to RUN the match - RUNNER
-	- show different UI depending on match status
+	- update status from runner when starts to RUN the match - RUNNER - OK 
+
+- show different UI depending on match status
+
 
 - change score page to group results by team
 
