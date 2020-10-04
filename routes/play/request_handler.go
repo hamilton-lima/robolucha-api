@@ -2,7 +2,6 @@ package play
 
 import (
 	"encoding/json"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/robolucha/robolucha-api/datasource"
@@ -149,7 +148,6 @@ func (handler *RequestHandler) createMatch(availableMatch *model.AvailableMatch)
 	gameDefinitionData := string(output)
 
 	match := model.Match{
-		TimeStart:          time.Now(),
 		GameDefinitionID:   gameDefinition.ID,
 		GameDefinitionData: gameDefinitionData,
 		AvailableMatchID:   availableMatch.ID,
