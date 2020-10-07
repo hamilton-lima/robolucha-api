@@ -141,10 +141,7 @@ func contains(roles []string, search string) bool {
 func SessionAllwaysValid(ds *datasource.DataSource) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		log.WithFields(log.Fields{
-			"c": c,
-		}).Info("SessionAllwaysValid")
-
+		log.Info("SessionAllwaysValid")
 		var user *model.User
 		testUserName := c.GetHeader("Authorization")
 
@@ -154,7 +151,7 @@ func SessionAllwaysValid(ds *datasource.DataSource) gin.HandlerFunc {
 		} else {
 			log.WithFields(log.Fields{
 				"testUserName": testUserName,
-			}).Error("Will create user for test")
+			}).Info("Will create user for test")
 			user = ds.CreateUser(testUserName)
 		}
 
