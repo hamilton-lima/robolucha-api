@@ -641,8 +641,7 @@ func (ds *DataSource) AddMatchParticipant(mp *model.MatchParticipant) *model.Mat
 func (ds *DataSource) RunMatch(match *model.Match) *model.Match {
 
 	ds.DB.Model(&match).
-		Select("Status").
-		Select("TimeStart").
+		Select("Status", "TimeStart").
 		Updates(model.Match{Status: model.MatchStatusRunning, TimeStart: time.Now()})
 
 	log.WithFields(log.Fields{
