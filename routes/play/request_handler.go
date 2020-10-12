@@ -2,8 +2,6 @@ package play
 
 import (
 	"encoding/json"
-	"sync"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/robolucha/robolucha-api/datasource"
@@ -21,7 +19,6 @@ type PlayRequest struct {
 type RequestHandler struct {
 	ds        *datasource.DataSource
 	publisher pubsub.Publisher
-	mutex     *sync.Mutex
 }
 
 // NewRequestHandler creates a new request handler
@@ -29,40 +26,89 @@ func NewRequestHandler(_ds *datasource.DataSource, _publisher pubsub.Publisher) 
 	handler := RequestHandler{
 		ds:        _ds,
 		publisher: _publisher,
-		mutex:     &sync.Mutex{},
 	}
 
 	return &handler
 }
 
-// Play handler.mutex keeps this executation one by one
-func (handler *RequestHandler) Play(availableMatch *model.AvailableMatch, luchadorID uint) *model.Match {
-	defer handler.mutex.Unlock()
-
-	handler.mutex.Lock()
+func (handler *RequestHandler) findMatch(availableMatch *model.AvailableMatch) *model.Match {
 	matches := *handler.ds.FindActiveMatches("available_match_id = ?", availableMatch.ID)
-	var match *model.Match
 
 	log.WithFields(log.Fields{
 		"active matches": model.LogMatches(&matches),
 	}).Info("Play")
 
 	if len(matches) > 0 {
-		match = &matches[0]
+		return &matches[0]
 	}
+	return nil
+}
 
+func isParticipating(match *model.Match, luchadorID uint) bool {
+	for _, participant := range match.Participants {
+		if participant.ID == luchadorID {
+			return true
+		}
+	}
+	return false
+}
+
+// Play definition
+func (handler *RequestHandler) Play(
+	availableMatch *model.AvailableMatch,
+	luchadorID uint,
+	teamID uint) *model.Match {
+
+	log.WithFields(log.Fields{
+		"availableMatch": availableMatch,
+		"luchadorID":     luchadorID,
+		"teamID":         teamID,
+	}).Info("Play")
+
+	match := handler.findMatch(availableMatch)
+
+	// Match dont exist TRY to create
 	if match == nil {
+		log.WithFields(log.Fields{
+			"status": "match not found",
+		}).Info("Play")
+
 		match = handler.createMatch(availableMatch)
+		log.WithFields(log.Fields{
+			"status":  "match created",
+			"matchID": match.ID,
+		}).Info("Play")
+
 		handler.publishStartMatch(match)
-		handler.publishJoinMatch(match, luchadorID)
+		handler.publishJoinMatch(match, luchadorID, teamID)
 	} else {
+		log.WithFields(log.Fields{
+			"status":  "match found",
+			"matchID": match.ID,
+		}).Info("Play")
+
+		// Match is a tutorial, reset if active
 		if match.GameDefinition.Type == model.GAMEDEFINITION_TYPE_TUTORIAL {
-			handler.ds.EndMatch(match)
+			log.WithFields(log.Fields{
+				"status":  "Match is an tutorial, end and create again",
+				"matchID": match.ID,
+			}).Info("Play")
+
+			// if is participating on a tutorial match restart it
+			if isParticipating(match, luchadorID) {
+				handler.ds.EndMatch(match)
+			}
+
 			match = handler.createMatch(availableMatch)
+			log.WithFields(log.Fields{
+				"status":  "Tutorial recreated",
+				"matchID": match.ID,
+			}).Info("Play")
+
 			handler.publishStartMatch(match)
 		}
 
-		handler.publishJoinMatch(match, luchadorID)
+		handler.publishJoinMatch(match, luchadorID, teamID)
 	}
 
 	return match
@@ -95,26 +141,6 @@ func (handler *RequestHandler) FindTutorialMatchesByParticipant(gameComponent *m
 	return result
 }
 
-// func (handler *RequestHandler) findActiveMatch(availableMatch *model.AvailableMatch) *model.Match {
-
-// 	var match model.Match
-
-// 	if handler.ds.DB.
-// 		Joins("left join game_definitions on matches.game_definition_id = game_definitions.id").
-// 		Where("available_match_id = ?", availableMatch.ID).
-// 		Where(handler.ds.ActiveMatchesSQL()).
-// 		Order("time_start desc").First(&match).
-// 		RecordNotFound() {
-// 		return nil
-// 	}
-
-// 	log.WithFields(log.Fields{
-// 		"match": match,
-// 	}).Info("findActiveMatch")
-
-// 	return &match
-// }
-
 func (handler *RequestHandler) createMatch(availableMatch *model.AvailableMatch) *model.Match {
 
 	gameDefinition := handler.ds.FindGameDefinition(availableMatch.GameDefinitionID)
@@ -122,10 +148,10 @@ func (handler *RequestHandler) createMatch(availableMatch *model.AvailableMatch)
 	gameDefinitionData := string(output)
 
 	match := model.Match{
-		TimeStart:          time.Now(),
 		GameDefinitionID:   gameDefinition.ID,
 		GameDefinitionData: gameDefinitionData,
 		AvailableMatchID:   availableMatch.ID,
+		Status:             model.MatchStatusCreated,
 	}
 
 	handler.ds.DB.Create(&match)
@@ -150,11 +176,12 @@ func (handler *RequestHandler) publishStartMatch(match *model.Match) {
 
 }
 
-func (handler *RequestHandler) publishJoinMatch(match *model.Match, luchadorID uint) {
+func (handler *RequestHandler) publishJoinMatch(match *model.Match, luchadorID uint, teamID uint) {
 
 	join := model.JoinMatch{
 		MatchID:    match.ID,
 		LuchadorID: luchadorID,
+		TeamID:     teamID,
 	}
 
 	// publish event to run the match

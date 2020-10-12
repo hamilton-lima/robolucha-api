@@ -140,7 +140,22 @@ func contains(roles []string, search string) bool {
 // SessionAllwaysValid test function for local development
 func SessionAllwaysValid(ds *datasource.DataSource) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user := ds.CreateUser("test")
+
+		log.Info("SessionAllwaysValid")
+		var user *model.User
+		testUserName := c.GetHeader("Authorization")
+
+		if testUserName == "" {
+			log.Info("no test user in the Authorization, will use default 'test'")
+			user = ds.CreateUser("test")
+		} else {
+			log.WithFields(log.Fields{
+				"testUserName": testUserName,
+			}).Info("Will create user for test")
+			user = ds.CreateUser(testUserName)
+		}
+
+		// load user details
 		level := ds.FindUserLevelByUserID(user.ID)
 		userDetails := model.UserDetails{
 			User:  user,
@@ -148,6 +163,7 @@ func SessionAllwaysValid(ds *datasource.DataSource) gin.HandlerFunc {
 			Level: *level,
 		}
 		c.Set("userDetails", userDetails)
+
 	}
 }
 

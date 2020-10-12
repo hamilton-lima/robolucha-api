@@ -41,6 +41,20 @@ definitions:
       sourceURL:
         type: string
     type: object
+  model.AvailableMatch:
+    properties:
+      classroomID:
+        type: integer
+      gameDefinition:
+        $ref: '#/definitions/model.GameDefinition'
+        type: object
+      gameDefinitionID:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   model.Classroom:
     properties:
       accessCode:
@@ -232,6 +246,19 @@ definitions:
         type: integer
       matchID:
         type: integer
+      teamID:
+        type: integer
+    type: object
+  model.LevelGroup:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      minLevel:
+        type: integer
+      name:
+        type: string
     type: object
   model.Match:
     properties:
@@ -249,6 +276,12 @@ definitions:
       participants:
         items:
           $ref: '#/definitions/model.GameComponent'
+        type: array
+      status:
+        type: string
+      teamParticipants:
+        items:
+          $ref: '#/definitions/model.TeamParticipant'
         type: array
       timeEnd:
         type: string
@@ -273,6 +306,8 @@ definitions:
       luchadorID:
         type: integer
       matchID:
+        type: integer
+      teamID:
         type: integer
     type: object
   model.MatchScore:
@@ -308,6 +343,13 @@ definitions:
         type: string
       value3:
         type: string
+    type: object
+  model.PlayRequest:
+    properties:
+      availableMatchID:
+        type: integer
+      teamID:
+        type: integer
     type: object
   model.SceneComponent:
     properties:
@@ -373,6 +415,15 @@ definitions:
       userID:
         type: integer
     type: object
+  model.StudentResponse:
+    properties:
+      studentID:
+        type: integer
+      userID:
+        type: integer
+      username:
+        type: string
+    type: object
   model.Team:
     properties:
       color:
@@ -400,6 +451,15 @@ definitions:
         items:
           $ref: '#/definitions/model.Team'
         type: array
+    type: object
+  model.TeamParticipant:
+    properties:
+      id:
+        type: integer
+      luchadorID:
+        type: integer
+      teamID:
+        type: integer
     type: object
   model.UpdateLuchadorResponse:
     properties:
@@ -557,7 +617,9 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            items:
+              $ref: '#/definitions/model.Classroom'
+            type: array
       security:
       - ApiKeyAuth: []
       summary: find all Classroom
@@ -597,7 +659,9 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            items:
+              $ref: '#/definitions/model.StudentResponse'
+            type: array
       security:
       - ApiKeyAuth: []
       summary: find all Classroom students
@@ -735,7 +799,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            $ref: '#/definitions/model.GameDefinition'
       security:
       - ApiKeyAuth: []
       summary: find a game definition
@@ -755,7 +819,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            $ref: '#/definitions/model.GameDefinition'
       security:
       - ApiKeyAuth: []
       summary: find a game definition
@@ -848,6 +912,27 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: returns application health check information
+  /internal/run-match:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Match
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.Match'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Match'
+      security:
+      - ApiKeyAuth: []
+      summary: notify that the match is running, all participants joined
   /private/available-match-classroom/{id}:
     get:
       consumes:
@@ -864,7 +949,9 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            items:
+              $ref: '#/definitions/model.AvailableMatch'
+            type: array
       security:
       - ApiKeyAuth: []
       summary: find available matches by classroom
@@ -878,7 +965,9 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            items:
+              $ref: '#/definitions/model.AvailableMatch'
+            type: array
       security:
       - ApiKeyAuth: []
       summary: find all public available matches
@@ -892,7 +981,9 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            items:
+              $ref: '#/definitions/model.GameDefinition'
+            type: array
       security:
       - ApiKeyAuth: []
       summary: find all game definitions
@@ -912,7 +1003,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            $ref: '#/definitions/model.GameDefinition'
       security:
       - ApiKeyAuth: []
       summary: find a game definition
@@ -946,7 +1037,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            $ref: '#/definitions/model.Classroom'
       security:
       - ApiKeyAuth: []
       summary: join a classroom
@@ -995,7 +1086,9 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            items:
+              $ref: '#/definitions/model.LevelGroup'
+            type: array
       security:
       - ApiKeyAuth: []
       summary: find all level groups
@@ -1049,7 +1142,9 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            items:
+              $ref: '#/definitions/model.Config'
+            type: array
       security:
       - ApiKeyAuth: []
       summary: find maskConfig for a luchador
@@ -1063,7 +1158,9 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            items:
+              $ref: '#/definitions/model.Config'
+            type: array
       security:
       - ApiKeyAuth: []
       summary: create random maskConfig
@@ -1120,6 +1217,27 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: find active multiplayer matches
+  /private/match-score:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: int valid
+        in: query
+        name: matchID
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.MatchScore'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: find one match score
   /private/match-single:
     get:
       consumes:
@@ -1160,16 +1278,17 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: add page events
-  /private/play/{id}:
+  /private/play:
     post:
       consumes:
       - application/json
       parameters:
-      - description: AvailableMatch id
-        in: path
-        name: id
+      - description: PlayRequest
+        in: body
+        name: request
         required: true
-        type: integer
+        schema:
+          $ref: '#/definitions/model.PlayRequest'
       produces:
       - application/json
       responses:
@@ -1190,7 +1309,9 @@ paths:
         "200":
           description: OK
           schema:
-            type: "200"
+            items:
+              $ref: '#/definitions/model.GameDefinition'
+            type: array
       security:
       - ApiKeyAuth: []
       summary: find tutorial GameDefinition

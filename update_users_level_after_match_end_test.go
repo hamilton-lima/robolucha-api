@@ -2,11 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 
 	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/setup"
@@ -29,8 +29,16 @@ func testStartMatch(t *testing.T, router *gin.Engine, luchadorID uint) model.Mat
 		"availableMatches": availableMatches,
 	}).Info("testStartMatch")
 
-	url := fmt.Sprintf("/private/play/%v", availableMatches[0].ID)
-	w := test.PerformRequest(router, "POST", url, "", test.API_KEY)
+	playRequest := model.PlayRequest{
+		AvailableMatchID: availableMatches[0].ID,
+		TeamID:           0,
+	}
+
+	plan, _ := json.Marshal(playRequest)
+	body := string(plan)
+
+	url := "/private/play"
+	w := test.PerformRequest(router, "POST", url, body, test.API_KEY)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response model.Match

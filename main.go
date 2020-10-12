@@ -132,12 +132,11 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		internalAPI.GET("/game-definition-id/:id", getGameDefinitionByIDInternal)
 		internalAPI.POST("/game-definition", createGameDefinition)
 		internalAPI.PUT("/game-definition", updateGameDefinition)
-
-		// internalAPI.POST("/start-match/:name", startMatch)
 		internalAPI.POST("/game-component", createGameComponent)
 		internalAPI.POST("/luchador", getLuchadorByIDAndGamedefinitionID)
 		internalAPI.POST("/match-participant", addMatchPartipant)
 		internalAPI.PUT("/end-match", endMatch)
+		internalAPI.PUT("/run-match", runMatch)
 		internalAPI.GET("/ready", getReady)
 		internalAPI.POST("/add-match-scores", addMatchScores)
 		internalAPI.GET("/match-single", getMatchInternal)
@@ -159,11 +158,11 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.GET("/match-multiplayer", getActiveMultiplayerMatches)
 
 		privateAPI.GET("/match-single", getMatch)
+		privateAPI.GET("/match-score", getMatchScore)
 		privateAPI.GET("/match-config", getLuchadorConfigsForCurrentMatch)
 		privateAPI.POST("/join-match", joinMatch)
 		privateAPI.GET("/game-definition-id/:id", getGameDefinitionByID)
 		privateAPI.GET("/game-definition-all", getGameDefinition)
-		// privateAPI.POST("/start-tutorial-match/:name", startTutorialMatch)
 		privateAPI.GET("/classroom", getClassroom)
 		privateAPI.POST("/classroom", addClassroom)
 		privateAPI.POST("/join-classroom/:accessCode", joinClassroom)
@@ -327,103 +326,6 @@ func updateGameDefinition(c *gin.Context) {
 
 	c.JSON(http.StatusOK, result)
 }
-
-// startMatch godoc
-// @Summary create Match
-// @Accept json
-// @Produce json
-// @Param name path string true "GameDefinition name"
-// @Success 200 {object} model.Match
-// @Security ApiKeyAuth
-// @Router /internal/start-match/{name} [post]
-// func startMatch(c *gin.Context) {
-
-// 	name := c.Param("name")
-
-// 	log.WithFields(log.Fields{
-// 		"name": name,
-// 	}).Info("startMatch")
-
-// 	gameDefinition := ds.FindGameDefinitionByName(name)
-// 	if gameDefinition == nil {
-// 		log.Info("Invalid gamedefinition name")
-// 		c.AbortWithStatus(http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	match := ds.CreateMatch(gameDefinition.ID)
-// 	if match == nil {
-// 		log.Error("Invalid Match when saving")
-// 		c.AbortWithStatus(http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	// load all the fields
-// 	match = ds.FindMatch(match.ID)
-
-// 	log.WithFields(log.Fields{
-// 		"createMatch": match,
-// 	}).Info("created match")
-
-// 	c.JSON(http.StatusOK, match)
-// }
-
-// startTutorialMatch godoc
-// @Summary create Match and publish
-// @Accept json
-// @Produce json
-// @Param name path string true "GameDefinition name"
-// @Success 200 {object} model.JoinMatch
-// @Security ApiKeyAuth
-// @Router /private/start-tutorial-match/{name} [post]
-// func startTutorialMatch(c *gin.Context) {
-
-// 	name := c.Param("name")
-
-// 	log.WithFields(log.Fields{
-// 		"name": name,
-// 	}).Info("startTutorialMatch")
-
-// 	gameDefinition := ds.FindGameDefinitionByName(name)
-// 	if gameDefinition == nil {
-// 		log.Info("Invalid gamedefinition name")
-// 		c.AbortWithStatus(http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	user := httphelper.UserFromContext(c)
-
-// 	luchador := ds.FindLuchador(user)
-// 	if luchador == nil {
-// 		log.WithFields(log.Fields{
-// 			"user": user,
-// 		}).Error("Error getting luchador for the current user")
-// 		c.AbortWithStatus(http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	match := ds.FindActiveMatchesByGameDefinitionAndParticipant(gameDefinition, luchador)
-// 	// not found will create
-// 	if match == nil {
-// 		match = ds.CreateMatch(gameDefinition.ID)
-// 		if match == nil {
-// 			log.Error("Invalid Match when saving")
-// 			c.AbortWithStatus(http.StatusBadRequest)
-// 			return
-// 		}
-// 	}
-
-// 	result := model.JoinMatch{MatchID: match.ID, LuchadorID: luchador.ID}
-// 	// publish event to run the match
-// 	resultJSON, _ := json.Marshal(result)
-// 	publisher.Publish("start.match", string(resultJSON))
-
-// 	log.WithFields(log.Fields{
-// 		"createMatch": result,
-// 	}).Info("created match")
-
-// 	c.JSON(http.StatusOK, result)
-// }
 
 // getUser godoc
 // @Summary find The current user information
@@ -604,7 +506,7 @@ func cleanName(name string) string {
 // @Summary find tutorial GameDefinition
 // @Accept json
 // @Produce json
-// @Success 200 200 {array} model.GameDefinition
+// @Success 200 {array} model.GameDefinition
 // @Security ApiKeyAuth
 // @Router /private/tutorial [get]
 func getTutorialGameDefinition(c *gin.Context) {
@@ -623,7 +525,7 @@ func getTutorialGameDefinition(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Luchador ID"
-// @Success 200 200 {array} model.Config
+// @Success 200 {array} model.Config
 // @Security ApiKeyAuth
 // @Router /private/mask-config/{id} [get]
 func getMaskConfig(c *gin.Context) {
@@ -654,7 +556,7 @@ func getMaskConfig(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param name path string true "GameDefinition name"
-// @Success 200 200 {object} model.GameDefinition
+// @Success 200 {object} model.GameDefinition
 // @Security ApiKeyAuth
 // @Router /internal/game-definition/{name} [get]
 func getGameDefinitionByName(c *gin.Context) {
@@ -679,7 +581,7 @@ func getGameDefinitionByName(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "GameDefinition id"
-// @Success 200 200 {object} model.GameDefinition
+// @Success 200 {object} model.GameDefinition
 // @Security ApiKeyAuth
 // @Router /internal/game-definition-id/{id} [get]
 func getGameDefinitionByIDInternal(c *gin.Context) {
@@ -691,7 +593,7 @@ func getGameDefinitionByIDInternal(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "GameDefinition id"
-// @Success 200 200 {object} model.GameDefinition
+// @Success 200 {object} model.GameDefinition
 // @Security ApiKeyAuth
 // @Router /private/game-definition-id/{id} [get]
 func getGameDefinitionByID(c *gin.Context) {
@@ -721,7 +623,7 @@ func getGameDefinitionByID(c *gin.Context) {
 // @Summary find all game definitions
 // @Accept json
 // @Produce json
-// @Success 200 200 {array} model.GameDefinition
+// @Success 200 {array} model.GameDefinition
 // @Security ApiKeyAuth
 // @Router /private/game-definition-all [get]
 func getGameDefinition(c *gin.Context) {
@@ -739,7 +641,7 @@ func getGameDefinition(c *gin.Context) {
 // @Summary create random maskConfig
 // @Accept json
 // @Produce json
-// @Success 200 200 {array} model.Config
+// @Success 200 {array} model.Config
 // @Security ApiKeyAuth
 // @Router /private/mask-random [get]
 func getRandomMaskConfig(c *gin.Context) {
@@ -917,6 +819,41 @@ func getMatch(c *gin.Context) {
 	}).Info("getMatch")
 
 	c.JSON(http.StatusOK, match)
+}
+
+// getMatchScore godoc
+// @Summary find one match score
+// @Accept json
+// @Produce json
+// @Param matchID query int false "int valid"
+// @Success 200 {array} model.MatchScore
+// @Security ApiKeyAuth
+// @Router /private/match-score [get]
+func getMatchScore(c *gin.Context) {
+
+	parameter := c.Query("matchID")
+	i32, err := strconv.ParseInt(parameter, 10, 32)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"matchID": parameter,
+		}).Error("Invalid matchID on getMatchScore")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	var matchID uint
+	matchID = uint(i32)
+
+	log.WithFields(log.Fields{
+		"matchID": matchID,
+	}).Info("getMatchScore")
+
+	scores := ds.GetMatchScoresByMatchID(matchID)
+
+	log.WithFields(log.Fields{
+		"scores": scores,
+	}).Info("getMatchScores")
+
+	c.JSON(http.StatusOK, scores)
 }
 
 // getLuchadorConfigsForCurrentMatch godoc
@@ -1134,6 +1071,41 @@ func endMatch(c *gin.Context) {
 	c.JSON(http.StatusOK, match)
 }
 
+// runMatch godoc
+// @Summary notify that the match is running, all participants joined
+// @Accept json
+// @Produce json
+// @Param request body model.Match true "Match"
+// @Success 200 {object} model.Match
+// @Security ApiKeyAuth
+// @Router /internal/run-match [put]
+func runMatch(c *gin.Context) {
+
+	var matchRequest *model.Match
+	err := c.BindJSON(&matchRequest)
+	if err != nil {
+		log.Info("Invalid body content on runMatch")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	match := ds.RunMatch(matchRequest)
+	if match == nil {
+		log.WithFields(log.Fields{
+			"match": matchRequest,
+		}).Error("Error calling runMatch")
+
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	log.WithFields(log.Fields{
+		"match": match,
+	}).Info("result")
+
+	c.JSON(http.StatusOK, match)
+}
+
 // addMatchScore godoc
 // @Summary saves a match score
 // @Accept json
@@ -1204,7 +1176,7 @@ func addMatchMetric(c *gin.Context) {
 // @Summary find all Classroom
 // @Accept json
 // @Produce json
-// @Success 200 200 {array} model.Classroom
+// @Success 200 {array} model.Classroom
 // @Security ApiKeyAuth
 // @Router /dashboard/classroom [get]
 func getClassroom(c *gin.Context) {
@@ -1223,7 +1195,7 @@ func getClassroom(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Classroom id"
-// @Success 200 200 {array} model.StudentResponse
+// @Success 200 {array} model.StudentResponse
 // @Security ApiKeyAuth
 // @Router /dashboard/classroom/students/{id} [get]
 func getClassroomStudents(c *gin.Context) {
@@ -1301,7 +1273,7 @@ func addClassroom(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param accessCode path string true "classroom access code"
-// @Success 200 200 {object} model.Classroom
+// @Success 200 {object} model.Classroom
 // @Security ApiKeyAuth
 // @Router /private/join-classroom/{accessCode} [post]
 func joinClassroom(c *gin.Context) {
@@ -1326,7 +1298,7 @@ func joinClassroom(c *gin.Context) {
 // @Summary find all public available matches
 // @Accept json
 // @Produce json
-// @Success 200 200 {array} model.AvailableMatch
+// @Success 200 {array} model.AvailableMatch
 // @Security ApiKeyAuth
 // @Router /private/available-match-public [get]
 func getPublicAvailableMatch(c *gin.Context) {
@@ -1344,7 +1316,7 @@ func getPublicAvailableMatch(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Classroom id"
-// @Success 200 200 {array} model.AvailableMatch
+// @Success 200 {array} model.AvailableMatch
 // @Security ApiKeyAuth
 // @Router /private/available-match-classroom/{id} [get]
 func getClassroomAvailableMatch(c *gin.Context) {
@@ -1415,7 +1387,7 @@ func addEvents(c *gin.Context) {
 // @Summary find all level groups
 // @Accept json
 // @Produce json
-// @Success 200 200 {array} model.LevelGroup
+// @Success 200 {array} model.LevelGroup
 // @Security ApiKeyAuth
 // @Router /private/level-group [get]
 func getLevelGroup(c *gin.Context) {

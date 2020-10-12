@@ -176,7 +176,10 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Classroom"
+                            }
                         }
                     }
                 }
@@ -242,7 +245,10 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.StudentResponse"
+                            }
                         }
                     }
                 }
@@ -472,7 +478,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "$ref": "#/definitions/model.GameDefinition"
                         }
                     }
                 }
@@ -505,7 +511,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "$ref": "#/definitions/model.GameDefinition"
                         }
                     }
                 }
@@ -661,6 +667,41 @@ var doc = `{
                 }
             }
         },
+        "/internal/run-match": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "notify that the match is running, all participants joined",
+                "parameters": [
+                    {
+                        "description": "Match",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Match"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Match"
+                        }
+                    }
+                }
+            }
+        },
         "/private/available-match-classroom/{id}": {
             "get": {
                 "security": [
@@ -688,7 +729,10 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.AvailableMatch"
+                            }
                         }
                     }
                 }
@@ -712,7 +756,10 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.AvailableMatch"
+                            }
                         }
                     }
                 }
@@ -736,7 +783,10 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.GameDefinition"
+                            }
                         }
                     }
                 }
@@ -769,7 +819,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "$ref": "#/definitions/model.GameDefinition"
                         }
                     }
                 }
@@ -826,7 +876,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "$ref": "#/definitions/model.Classroom"
                         }
                     }
                 }
@@ -909,7 +959,10 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.LevelGroup"
+                            }
                         }
                     }
                 }
@@ -999,7 +1052,10 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Config"
+                            }
                         }
                     }
                 }
@@ -1023,7 +1079,10 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Config"
+                            }
                         }
                     }
                 }
@@ -1118,6 +1177,41 @@ var doc = `{
                 }
             }
         },
+        "/private/match-score": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find one match score",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "int valid",
+                        "name": "matchID",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.MatchScore"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/private/match-single": {
             "get": {
                 "security": [
@@ -1185,7 +1279,7 @@ var doc = `{
                 }
             }
         },
-        "/private/play/{id}": {
+        "/private/play": {
             "post": {
                 "security": [
                     {
@@ -1201,11 +1295,13 @@ var doc = `{
                 "summary": "request to play a match",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "AvailableMatch id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "description": "PlayRequest",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.PlayRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -1236,7 +1332,10 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "200"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.GameDefinition"
+                            }
                         }
                     }
                 }
@@ -1359,6 +1458,27 @@ var doc = `{
                     "type": "string"
                 },
                 "sourceURL": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.AvailableMatch": {
+            "type": "object",
+            "properties": {
+                "classroomID": {
+                    "type": "integer"
+                },
+                "gameDefinition": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.GameDefinition"
+                },
+                "gameDefinitionID": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
                 }
             }
@@ -1651,6 +1771,26 @@ var doc = `{
                 },
                 "matchID": {
                     "type": "integer"
+                },
+                "teamID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.LevelGroup": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "minLevel": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
@@ -1677,6 +1817,15 @@ var doc = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/model.GameComponent"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                },
+                "teamParticipants": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.TeamParticipant"
                     }
                 },
                 "timeEnd": {
@@ -1714,6 +1863,9 @@ var doc = `{
                     "type": "integer"
                 },
                 "matchID": {
+                    "type": "integer"
+                },
+                "teamID": {
                     "type": "integer"
                 }
             }
@@ -1767,6 +1919,17 @@ var doc = `{
                 },
                 "value3": {
                     "type": "string"
+                }
+            }
+        },
+        "model.PlayRequest": {
+            "type": "object",
+            "properties": {
+                "availableMatchID": {
+                    "type": "integer"
+                },
+                "teamID": {
+                    "type": "integer"
                 }
             }
         },
@@ -1868,6 +2031,20 @@ var doc = `{
                 }
             }
         },
+        "model.StudentResponse": {
+            "type": "object",
+            "properties": {
+                "studentID": {
+                    "type": "integer"
+                },
+                "userID": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "model.Team": {
             "type": "object",
             "properties": {
@@ -1908,6 +2085,20 @@ var doc = `{
                     "items": {
                         "$ref": "#/definitions/model.Team"
                     }
+                }
+            }
+        },
+        "model.TeamParticipant": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "luchadorID": {
+                    "type": "integer"
+                },
+                "teamID": {
+                    "type": "integer"
                 }
             }
         },

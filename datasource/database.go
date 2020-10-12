@@ -110,7 +110,10 @@ func NewDataSource(config *DBconfig) *DataSource {
 	DB.AutoMigrate(&model.Session{})
 	DB.AutoMigrate(&model.UserSetting{})
 	DB.AutoMigrate(&model.UserLevel{})
+
+	DB.AutoMigrate(&model.TeamParticipant{})
 	DB.AutoMigrate(&model.Match{})
+
 	DB.AutoMigrate(&model.Code{})
 	DB.AutoMigrate(&model.CodeHistory{})
 
@@ -380,69 +383,66 @@ func (ds *DataSource) FindActiveMatches(query interface{}, args ...interface{}) 
 	ds.DB.
 		Joins("left join game_definitions on matches.game_definition_id = game_definitions.id").
 		Preload("GameDefinition").
+		Preload("GameDefinition.TeamDefinition").
+		Preload("GameDefinition.TeamDefinition.Teams").
 		Preload("Participants").
-		Where("time_end < time_start").
+		Preload("TeamParticipants").
+		Where("time_end <= time_start").
 		Where(query, args).
 		Order("time_start desc").
 		Find(&matches)
 
 	log.WithFields(log.Fields{
-		"matches": matches,
+		"matches": model.LogMatches(&matches),
 	}).Info("findActiveMatches")
 
 	result := make([]model.Match, 0)
 
 	// auto remove matches where the duration is greater than the current time
 	for _, match := range matches {
+
+		log.WithFields(log.Fields{
+			"match":    model.LogMatch(&match),
+			"duration": match.GameDefinition.Duration,
+		}).Info("findActiveMatches / postquery")
+
 		// only if the match gamedefinition has duration
 		if match.GameDefinition.Duration > 0 {
-			duration := time.Duration(match.GameDefinition.Duration) * time.Millisecond
-			startPlusDuration := match.TimeStart.Add(duration)
-			now := time.Now()
 
-			log.WithFields(log.Fields{
-				"duration":          duration,
-				"startPlusDuration": startPlusDuration,
-				"now":               now,
-				"isAfter":           startPlusDuration.After(now),
-			}).Debug("findActiveMatches/time")
-
-			if startPlusDuration.After(now) {
+			// created matches should be considered active
+			if match.Status == model.MatchStatusCreated {
 				result = append(result, match)
+
+			} else {
+				// only add to active list running matches that are within the duration
+				if match.Status == model.MatchStatusRunning {
+					duration := time.Duration(match.GameDefinition.Duration) * time.Millisecond
+					startPlusDuration := match.TimeStart.Add(duration)
+					now := time.Now()
+
+					log.WithFields(log.Fields{
+						"duration":          duration,
+						"startPlusDuration": startPlusDuration,
+						"now":               now,
+						"isAfter":           startPlusDuration.After(now),
+					}).Info("findActiveMatches/time")
+
+					if startPlusDuration.After(now) {
+						result = append(result, match)
+					}
+				}
 			}
 		} else {
 			result = append(result, match)
 		}
 	}
 
+	log.WithFields(log.Fields{
+		"matches": model.LogMatches(&result),
+	}).Info("findActiveMatches / result")
+
 	return &result
 }
-
-// func (ds *DataSource) FindActiveMatchesByGameDefinitionAndParticipant(gameDefinition *model.GameDefinition, gameComponent *model.GameComponent) *model.Match {
-
-// 	matches := ds.FindActiveMatches(&model.Match{GameDefinitionID: gameDefinition.ID})
-
-// 	// var matches []model.Match
-// 	// ds.DB.Preload("Participants").
-// 	// 	Joins("left join game_definitions on matches.game_definition_id = game_definitions.id").
-// 	// 	Where(&model.Match{GameDefinitionID: gameDefinition.ID}).
-// 	// 	Where(ds.ActiveMatchesSQL()).
-// 	// 	Find(&matches)
-
-// 	log.WithFields(log.Fields{
-// 		"matches": matches,
-// 	}).Info("findActiveMatchesByGameDefinitionAndParticipant")
-
-// 	for _, match := range *matches {
-// 		for _, participant := range match.Participants {
-// 			if participant.ID == gameComponent.ID {
-// 				return &match
-// 			}
-// 		}
-// 	}
-
-// 	return nil
-// }
 
 func (ds *DataSource) FindMaskConfig(id uint) *[]model.Config {
 
@@ -466,7 +466,9 @@ func (ds *DataSource) FindMaskConfig(id uint) *[]model.Config {
 func (ds *DataSource) FindMatch(id uint) *model.Match {
 
 	var match model.Match
-	ds.DB.Preload("Participants").Where(&model.Match{ID: id}).First(&match)
+	ds.DB.Preload("Participants").
+		Preload("TeamParticipants").
+		Where(&model.Match{ID: id}).First(&match)
 
 	log.WithFields(log.Fields{
 		"id":    id,
@@ -480,7 +482,12 @@ func (ds *DataSource) FindMatch(id uint) *model.Match {
 func (ds *DataSource) FindMatchPreload(id uint) *model.Match {
 
 	var match model.Match
-	ds.DB.Preload("Participants").Preload("GameDefinition").Where(&model.Match{ID: id}).First(&match)
+	ds.DB.Preload("Participants").
+		Preload("TeamParticipants").
+		Preload("GameDefinition").
+		Preload("GameDefinition.TeamDefinition").
+		Preload("GameDefinition.TeamDefinition.Teams").
+		Where(&model.Match{ID: id}).First(&match)
 
 	log.WithFields(log.Fields{
 		"id":    id,
@@ -597,13 +604,26 @@ func (ds *DataSource) AddMatchParticipant(mp *model.MatchParticipant) *model.Mat
 			log.WithFields(log.Fields{
 				"matchID":    mp.MatchID,
 				"luchadorID": mp.LuchadorID,
+				"teamID":     mp.TeamID,
 			}).Warning("Luchador is already in the match")
 
-			return &(model.MatchParticipant{MatchID: mp.MatchID, LuchadorID: mp.LuchadorID})
+			return &(model.MatchParticipant{
+				MatchID:    mp.MatchID,
+				LuchadorID: mp.LuchadorID,
+				TeamID:     mp.TeamID})
 		}
 	}
 
 	match.Participants = append(match.Participants, *component)
+
+	// adds Team participation if TeamID is present
+	if mp.TeamID > 0 {
+		match.TeamParticipants = append(match.TeamParticipants,
+			model.TeamParticipant{
+				LuchadorID: mp.LuchadorID,
+				TeamID:     mp.TeamID})
+	}
+
 	ds.DB.Save(&match)
 
 	matchPartipant := model.MatchParticipant{
@@ -618,13 +638,28 @@ func (ds *DataSource) AddMatchParticipant(mp *model.MatchParticipant) *model.Mat
 	return &matchPartipant
 }
 
-func (ds *DataSource) EndMatch(match *model.Match) *model.Match {
+func (ds *DataSource) RunMatch(match *model.Match) *model.Match {
 
-	ds.DB.Model(&match).Update("time_end", time.Now())
+	ds.DB.Model(&match).
+		Select("Status", "TimeStart").
+		Updates(model.Match{Status: model.MatchStatusRunning, TimeStart: time.Now()})
 
 	log.WithFields(log.Fields{
 		"match": model.LogMatch(match),
-	}).Info("Match time_end updated")
+	}).Info("Match is running")
+
+	return match
+}
+
+func (ds *DataSource) EndMatch(match *model.Match) *model.Match {
+
+	ds.DB.Model(&match).
+		Select("TimeEnd", "Status").
+		Updates(model.Match{TimeEnd: time.Now(), Status: model.MatchStatusFinished})
+
+	log.WithFields(log.Fields{
+		"match": model.LogMatch(match),
+	}).Info("Match TimeEnd and Status updated")
 
 	return match
 }
@@ -923,6 +958,8 @@ func (ds *DataSource) FindGameDefinition(id uint) *model.GameDefinition {
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
+		Preload("TeamDefinition").
+		Preload("TeamDefinition.Teams").
 		Where(&model.GameDefinition{ID: id}).
 		First(&gameDefinition).
 		RecordNotFound() {
@@ -961,6 +998,8 @@ func (ds *DataSource) FindGameDefinitionByName(name string) *model.GameDefinitio
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
+		Preload("TeamDefinition").
+		Preload("TeamDefinition.Teams").
 		Where(&model.GameDefinition{Name: name}).
 		First(&gameDefinition).
 		RecordNotFound() {
@@ -999,6 +1038,8 @@ func (ds *DataSource) FindAllGameDefinition() *[]model.GameDefinition {
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
+		Preload("TeamDefinition").
+		Preload("TeamDefinition.Teams").
 		Order("sort_order").
 		Find(&gameDefinitions)
 
@@ -1028,6 +1069,8 @@ func (ds *DataSource) FindTutorialGameDefinition() *[]model.GameDefinition {
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
+		Preload("TeamDefinition").
+		Preload("TeamDefinition.Teams").
 		Where(&model.GameDefinition{Type: model.GAMEDEFINITION_TYPE_TUTORIAL}).
 		Order("sort_order").
 		Find(&gameDefinitions)

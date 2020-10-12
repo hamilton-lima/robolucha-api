@@ -70,6 +70,12 @@ type ActiveMatch struct {
 	TimeStart   time.Time `json:"timeStart"`
 }
 
+// PlayRequest definition
+type PlayRequest struct {
+	AvailableMatchID uint `json:"availableMatchID"`
+	TeamID           uint `json:"teamID"`
+}
+
 // GameDefinition definition
 type GameDefinition struct {
 	ID                            uint             `gorm:"primary_key" json:"id" faker:"-"`
@@ -135,6 +141,7 @@ type TeamDefinition struct {
 	Teams            []Team     `json:"teams"`
 }
 
+// Team definition
 type Team struct {
 	ID               uint       `gorm:"primary_key" json:"id"`
 	CreatedAt        time.Time  `json:"-"`
@@ -147,20 +154,36 @@ type Team struct {
 	MaxParticipants  uint       `json:"maxParticipants"`
 }
 
+// TeamParticipant definition
+type TeamParticipant struct {
+	ID         uint       `gorm:"primary_key" json:"id"`
+	CreatedAt  time.Time  `json:"-"`
+	UpdatedAt  time.Time  `json:"-"`
+	DeletedAt  *time.Time `json:"-" faker:"-"`
+	LuchadorID uint       `json:"luchadorID"`
+	TeamID     uint       `json:"teamID"`
+}
+
+var MatchStatusCreated string = "CREATED"
+var MatchStatusRunning string = "RUNNING"
+var MatchStatusFinished string = "FINISHED"
+
 // Match definition
 type Match struct {
-	ID                 uint            `gorm:"primary_key" json:"id"`
-	CreatedAt          time.Time       `json:"-"`
-	UpdatedAt          time.Time       `json:"-"`
-	DeletedAt          *time.Time      `json:"-" faker:"-"`
-	TimeStart          time.Time       `json:"timeStart"`
-	TimeEnd            time.Time       `json:"timeEnd"`
-	LastTimeAlive      time.Time       `json:"lastTimeAlive"`
-	GameDefinitionID   uint            `json:"gameDefinitionID"`
-	GameDefinition     GameDefinition  `json:"gameDefinition"`
-	AvailableMatchID   uint            `json:"availableMatchID"`
-	GameDefinitionData string          `gorm:"size:125000" json:"-"`
-	Participants       []GameComponent `gorm:"many2many:match_participants" json:"participants"`
+	ID                 uint              `gorm:"primary_key" json:"id"`
+	CreatedAt          time.Time         `json:"-"`
+	UpdatedAt          time.Time         `json:"-"`
+	DeletedAt          *time.Time        `json:"-" faker:"-"`
+	AvailableMatchID   uint              `json:"availableMatchID"`
+	Status             string            `json:"status"`
+	TimeStart          time.Time         `json:"timeStart"`
+	TimeEnd            time.Time         `json:"timeEnd"`
+	LastTimeAlive      time.Time         `json:"lastTimeAlive"`
+	GameDefinitionID   uint              `json:"gameDefinitionID"`
+	GameDefinition     GameDefinition    `json:"gameDefinition"`
+	GameDefinitionData string            `gorm:"size:125000" json:"-"`
+	Participants       []GameComponent   `gorm:"many2many:match_participants" json:"participants"`
+	TeamParticipants   []TeamParticipant `gorm:"many2many:match_teams" json:"teamParticipants"`
 }
 
 // SceneComponent definition
@@ -279,6 +302,7 @@ type Config struct {
 type JoinMatch struct {
 	MatchID    uint `json:"matchID"`
 	LuchadorID uint `json:"luchadorID"`
+	TeamID     uint `json:"teamID"`
 }
 
 // FindLuchadorWithGamedefinition definition
@@ -296,6 +320,7 @@ type ScoreList struct {
 type MatchParticipant struct {
 	LuchadorID uint `json:"luchadorID"`
 	MatchID    uint `json:"matchID"`
+	TeamID     uint `json:"teamID"`
 }
 
 // MatchScore definition
