@@ -167,7 +167,7 @@ func TestLuchadorUpdateRandomMask(t *testing.T) {
 	log.WithFields(log.Fields{
 		"response.Errors":   response.Errors,
 		"response.Luchador": response.Luchador,
-	}).Debug("after luchador update")
+	}).Warn("after luchador update")
 
 	// check if no errors exist in the response
 	assert.Equal(t, 0, len(response.Errors))
