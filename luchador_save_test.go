@@ -3,11 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -76,7 +74,8 @@ func GetLuchador(t *testing.T) model.GameComponent {
 }
 
 func TestLuchadorUpdateDuplicatedNameSameUser(t *testing.T) {
-	luchador := Setup(t)
+	userName := "foo"
+	luchador := SetupWithUserName(t, userName)
 	defer ds.DB.Close()
 
 	plan2, _ := json.Marshal(luchador)
@@ -86,7 +85,7 @@ func TestLuchadorUpdateDuplicatedNameSameUser(t *testing.T) {
 		"luchador": luchador.Name,
 	}).Debug("luchador before same name update")
 
-	w := test.PerformRequestNoAuth(router, "PUT", "/private/luchador", body2)
+	w := test.PerformRequest(router, "PUT", "/private/luchador", body2, userName)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response model.UpdateLuchadorResponse
@@ -142,7 +141,6 @@ func TestLuchadorUpdateName(t *testing.T) {
 }
 func TestLuchadorUpdateRandomMask(t *testing.T) {
 	userName := "me"
-	rand.Seed(time.Now().UTC().UnixNano())
 	luchador := SetupWithUserName(t, userName)
 	defer ds.DB.Close()
 
@@ -179,7 +177,7 @@ func TestLuchadorUpdateRandomMask(t *testing.T) {
 	AssertConfigMatch(t, updatedConfigs, response.Luchador.Configs)
 
 	// check if configs are updated in the subsequent GET of luchador
-	afterUpdateLuchador := GetLuchador(t)
+	afterUpdateLuchador := GetLuchadorWithName(t, userName)
 	assert.Equal(t, len(updatedConfigs), len(afterUpdateLuchador.Configs))
 	AssertConfigMatch(t, updatedConfigs, afterUpdateLuchador.Configs)
 
