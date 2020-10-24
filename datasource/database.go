@@ -1091,6 +1091,30 @@ func (ds *DataSource) FindTutorialGameDefinition() *[]model.GameDefinition {
 	return &gameDefinitions
 }
 
+func (ds *DataSource) FindGameDefinitionByOwner(ownerID uint) *[]model.GameDefinition {
+	var gameDefinitions []model.GameDefinition
+
+	ds.DB.
+		Preload("GameComponents").
+		Preload("GameComponents.Codes").
+		Preload("GameComponents.Configs").
+		Preload("SceneComponents").
+		Preload("SceneComponents.Codes").
+		Preload("Codes").
+		Preload("LuchadorSuggestedCodes").
+		Preload("TeamDefinition").
+		Preload("TeamDefinition.Teams").
+		Where(&model.GameDefinition{OwnerUserID: ownerID}).
+		Order("name").
+		Find(&gameDefinitions)
+
+	for i := range gameDefinitions {
+		resetGameDefinitionArrays(&gameDefinitions[i])
+	}
+
+	return &gameDefinitions
+}
+
 func resetGameDefinitionArrays(gameDefinition *model.GameDefinition) {
 	if gameDefinition.GameComponents == nil {
 		gameDefinition.GameComponents = make([]model.GameComponent, 0)

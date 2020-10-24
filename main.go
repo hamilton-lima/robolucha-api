@@ -33,6 +33,7 @@ import (
 	"gitlab.com/robolucha/robolucha-api/pubsub"
 	"gitlab.com/robolucha/robolucha-api/routes"
 	"gitlab.com/robolucha/robolucha-api/routes/learning"
+	"gitlab.com/robolucha/robolucha-api/routes/mapeditor"
 	"gitlab.com/robolucha/robolucha-api/routes/play"
 	"gitlab.com/robolucha/robolucha-api/setup"
 	"gitlab.com/robolucha/robolucha-api/utility"
@@ -187,6 +188,9 @@ func createRouter(internalAPIKey string, logRequestBody string,
 
 	playRouter := play.Init(ds, publisher)
 	routes.Use(privateAPI, playRouter)
+
+	mapeditorRouter := mapeditor.Init(ds, publisher)
+	routes.Use(privateAPI, mapeditorRouter)
 
 	return router
 }
