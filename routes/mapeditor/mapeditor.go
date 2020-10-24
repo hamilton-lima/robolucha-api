@@ -158,7 +158,7 @@ func (handler *RequestHandler) Update(userID uint, gameDefinition *model.GameDef
 	}
 
 	// must be the owner to update it
-	if foundByID.ID != userID {
+	if foundByID.OwnerUserID != userID {
 		log.WithFields(log.Fields{}).Info("current user dont OWNS this gamedefinition, cant be updated")
 		return errors.New("current user DOES NOT OWN this Gamedefinition")
 	}

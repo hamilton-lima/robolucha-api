@@ -129,3 +129,17 @@ func TestUpdateNewOne(t *testing.T) {
 	err := handler.Update(1, &gd)
 	assert.True(t, err != nil)
 }
+
+func TestUpdateNotOwner(t *testing.T) {
+	Setup(t)
+	defer ds.DB.Close()
+
+	// creates a system game definition
+	gd := model.BuildDefaultGameDefinition()
+	gd.Name = "Me AGAIN"
+	gd.OwnerUserID = 14
+	ds.CreateGameDefinition(&gd)
+
+	err := handler.Update(1, &gd)
+	assert.True(t, err != nil)
+}
