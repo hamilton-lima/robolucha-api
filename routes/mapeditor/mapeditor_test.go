@@ -101,3 +101,31 @@ func TestAdd(t *testing.T) {
 	assert.True(t, result[0].ID != 0)
 
 }
+
+func TestUpdateAlreadyExist(t *testing.T) {
+	Setup(t)
+	defer ds.DB.Close()
+
+	// creates a system game definition
+	gd := model.BuildDefaultGameDefinition()
+	gd.Name = "Me AGAIN"
+	ds.CreateGameDefinition(&gd)
+
+	other := model.BuildDefaultGameDefinition()
+	other.Name = "Me AGAIN"
+
+	err := handler.Update(1, &other)
+	assert.True(t, err != nil)
+}
+
+func TestUpdateNewOne(t *testing.T) {
+	Setup(t)
+	defer ds.DB.Close()
+
+	// creates a system game definition
+	gd := model.BuildDefaultGameDefinition()
+	gd.Name = "Me AGAIN"
+
+	err := handler.Update(1, &gd)
+	assert.True(t, err != nil)
+}
