@@ -62,7 +62,7 @@ func (router *Router) Setup(group *gin.RouterGroup) {
 // @Router /private/mapeditor [get]
 func getMyGameDefinitions(c *gin.Context) {
 	user := httphelper.UserDetailsFromContext(c)
-	gameDefinitions := requestHandler.ds.FindGameDefinitionByOwner(user.User.ID)
+	gameDefinitions := requestHandler.Find(user.User.ID)
 	c.JSON(http.StatusOK, gameDefinitions)
 }
 
@@ -123,6 +123,12 @@ func updateMyGameDefinition(c *gin.Context) {
 	}
 }
 
+// Find godoc
+func (handler *RequestHandler) Find(userID uint) *[]model.GameDefinition {
+	return handler.ds.FindGameDefinitionByOwner(userID)
+}
+
+// Add godoc
 func (handler *RequestHandler) Add(userID uint, gameDefinition *model.GameDefinition) error {
 	foundByName := handler.ds.FindGameDefinitionByName(gameDefinition.Name)
 	if foundByName != nil {
@@ -134,7 +140,7 @@ func (handler *RequestHandler) Add(userID uint, gameDefinition *model.GameDefini
 		gameDefinition.ID = 0
 		gameDefinition.OwnerUserID = userID
 
-		createResult := requestHandler.ds.CreateGameDefinition(gameDefinition)
+		createResult := handler.ds.CreateGameDefinition(gameDefinition)
 		log.WithFields(log.Fields{
 			"gameDefinition": createResult,
 		}).Info("gamedefinition CREATED")
@@ -142,6 +148,7 @@ func (handler *RequestHandler) Add(userID uint, gameDefinition *model.GameDefini
 	}
 }
 
+// Update godoc
 func (handler *RequestHandler) Update(userID uint, gameDefinition *model.GameDefinition) error {
 	foundByID := handler.ds.FindGameDefinition(gameDefinition.ID)
 	// must exist to be updated

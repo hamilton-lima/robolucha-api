@@ -1,4 +1,4 @@
-package mapeditor_test
+package mapeditor
 
 import (
 	"os"
@@ -19,6 +19,7 @@ var ds *datasource.DataSource
 var mockPublisher *test.MockPublisher
 var publisher pubsub.Publisher
 var router *gin.Engine
+var handler *RequestHandler
 
 func Setup(t *testing.T) {
 	log.SetFormatter(&log.JSONFormatter{})
@@ -31,6 +32,7 @@ func Setup(t *testing.T) {
 
 	mockPublisher = &test.MockPublisher{}
 	publisher = mockPublisher
+	handler = NewRequestHandler(ds, publisher)
 }
 
 func TestEmptyResult(t *testing.T) {
@@ -43,7 +45,7 @@ func TestEmptyResult(t *testing.T) {
 	ds.CreateGameDefinition(&gd)
 
 	// no gamedefinition should return
-	gameDefinitions := ds.FindGameDefinitionByOwner(1)
+	gameDefinitions := handler.Find(1)
 	assert.Equal(t, len(*gameDefinitions), 0)
 }
 
@@ -58,8 +60,44 @@ func TestAssignOwner(t *testing.T) {
 	ds.CreateGameDefinition(&gd)
 
 	// no gamedefinition should return
-	gameDefinitions := ds.FindGameDefinitionByOwner(2)
+	gameDefinitions := handler.Find(2)
 	result := *gameDefinitions
 	assert.Equal(t, len(result), 1)
 	assert.Equal(t, result[0].Name, "MY-GAME")
+}
+
+func TestAddAlreadyExist(t *testing.T) {
+	Setup(t)
+	defer ds.DB.Close()
+
+	// creates a system game definition
+	gd := model.BuildDefaultGameDefinition()
+	gd.Name = "Me AGAIN"
+	ds.CreateGameDefinition(&gd)
+
+	err := handler.Add(1, &gd)
+	assert.True(t, err != nil)
+}
+func TestAdd(t *testing.T) {
+	Setup(t)
+	defer ds.DB.Close()
+
+	// creates a system game definition
+	gd := model.BuildDefaultGameDefinition()
+	gd.Name = "Me AGAIN"
+	ds.CreateGameDefinition(&gd)
+
+	// should add with no issues
+	gd.Name = "SOME OTHER"
+	err := handler.Add(1, &gd)
+	assert.True(t, err == nil)
+
+	// check if ID different
+	gameDefinitions := handler.Find(1)
+	result := *gameDefinitions
+	assert.Equal(t, len(result), 1)
+	assert.Equal(t, result[0].Name, "SOME OTHER")
+	assert.True(t, result[0].ID != gd.ID)
+	assert.True(t, result[0].ID != 0)
+
 }
