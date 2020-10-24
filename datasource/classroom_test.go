@@ -1,11 +1,12 @@
 package datasource
 
 import (
+	"os"
+	"testing"
+
 	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/test"
 	"gotest.tools/assert"
-	"os"
-	"testing"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -16,6 +17,7 @@ func Setup(t *testing.T) {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.WarnLevel)
+	os.Setenv("GIN_MODE", "release")
 
 	err := os.Remove(test.DB_NAME)
 	if err != nil {
