@@ -99,7 +99,6 @@ func TestAdd(t *testing.T) {
 	assert.Equal(t, result[0].Name, "SOME OTHER")
 	assert.True(t, result[0].ID != gd.ID)
 	assert.True(t, result[0].ID != 0)
-
 }
 
 func TestUpdateAlreadyExist(t *testing.T) {
@@ -142,4 +141,38 @@ func TestUpdateNotOwner(t *testing.T) {
 
 	err := handler.Update(1, &gd)
 	assert.True(t, err != nil)
+}
+
+func TestUpdateName(t *testing.T) {
+	Setup(t)
+	defer ds.DB.Close()
+
+	// creates a system game definition
+	gd := model.BuildDefaultGameDefinition()
+	gd.Name = "Me AGAIN"
+	ds.CreateGameDefinition(&gd)
+
+	// should add with no issues
+	gd.Name = "SOME OTHER"
+	err := handler.Add(1, &gd)
+	assert.True(t, err == nil)
+
+	// check if ID different
+	gameDefinitions := handler.Find(1)
+	result := *gameDefinitions
+	assert.Equal(t, len(result), 1)
+	assert.Equal(t, result[0].Name, "SOME OTHER")
+	assert.True(t, result[0].ID != gd.ID)
+	assert.True(t, result[0].ID != 0)
+
+	// should Update name with no issues
+	result[0].Name = "SOME OTHER(2)"
+	err = handler.Update(1, &result[0])
+	assert.True(t, err == nil)
+
+	gameDefinitions = handler.Find(1)
+	result2 := *gameDefinitions
+	assert.Equal(t, len(result2), 1)
+	assert.Equal(t, result2[0].ID, result[0].ID)
+	assert.Equal(t, "SOME OTHER(2)", result2[0].Name)
 }

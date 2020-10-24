@@ -799,7 +799,7 @@ func (ds *DataSource) AddMatchScores(ms *model.ScoreList) *model.ScoreList {
 
 func (ds *DataSource) UpdateGameDefinition(input *model.GameDefinition) *model.GameDefinition {
 
-	gameDefinition := ds.FindGameDefinitionByName(input.Name)
+	gameDefinition := ds.FindGameDefinition(input.ID)
 
 	if gameDefinition != nil {
 
@@ -812,6 +812,7 @@ func (ds *DataSource) UpdateGameDefinition(input *model.GameDefinition) *model.G
 		gameDefinition.LuchadorSize = input.LuchadorSize
 		gameDefinition.Fps = input.Fps
 		gameDefinition.BuletSpeed = input.BuletSpeed
+		gameDefinition.Name = input.Name
 		gameDefinition.Label = input.Label
 		gameDefinition.Description = input.Description
 		gameDefinition.Type = input.Type
