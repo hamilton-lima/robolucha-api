@@ -124,6 +124,7 @@ type GameDefinition struct {
 	MinLevel                      uint             `json:"minLevel"`
 	MaxLevel                      uint             `json:"maxLevel"`
 	UnblockLevel                  uint             `json:"unblockLevel"`
+	OwnerUserID                   uint             `json:"ownerUserID"`
 	TeamDefinition                TeamDefinition   `json:"teamDefinition"`
 	GameComponents                []GameComponent  `json:"gameComponents"`
 	SceneComponents               []SceneComponent `json:"sceneComponents"`
