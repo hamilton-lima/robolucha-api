@@ -845,6 +845,7 @@ func (ds *DataSource) UpdateGameDefinition(input *model.GameDefinition) *model.G
 		gameDefinition.MaxLevel = input.MaxLevel
 		gameDefinition.UnblockLevel = input.UnblockLevel
 		gameDefinition.TeamDefinition = input.TeamDefinition
+		gameDefinition.OwnerUserID = input.OwnerUserID
 
 		dbc := ds.DB.Save(gameDefinition)
 		if dbc.Error != nil {
