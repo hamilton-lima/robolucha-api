@@ -21,7 +21,7 @@ func testCreateGameDefinition() {
 	ds.CreateGameDefinition(&gd)
 }
 
-func testStartMatch(t *testing.T, router *gin.Engine, luchadorID uint) model.Match {
+func testStartMatch(t *testing.T, router *gin.Engine, luchadorID uint, userName string) model.Match {
 	setup.CreateAvailableMatches(ds)
 	availableMatches := *ds.FindPublicAvailableMatch()
 
@@ -38,7 +38,7 @@ func testStartMatch(t *testing.T, router *gin.Engine, luchadorID uint) model.Mat
 	body := string(plan)
 
 	url := "/private/play"
-	w := test.PerformRequest(router, "POST", url, body, test.API_KEY)
+	w := test.PerformRequest(router, "POST", url, body, userName)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response model.Match
@@ -60,9 +60,9 @@ func testEndMatch(t *testing.T, router *gin.Engine, match model.Match) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
-func testGetUser(t *testing.T, router *gin.Engine) model.UserDetails {
+func testGetUser(t *testing.T, router *gin.Engine, userName string) model.UserDetails {
 	url := "/private/get-user"
-	w := test.PerformRequest(router, "GET", url, "", test.API_KEY)
+	w := test.PerformRequest(router, "GET", url, "", userName)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
@@ -86,7 +86,8 @@ func testAddParticipantToMatch(t *testing.T, matchID uint, luchadorID uint) {
 }
 
 func TestUpdateUserLevelAfterMatchEnds(t *testing.T) {
-	luchador := Setup(t)
+	userName := "someOtherPlayer"
+	luchador := SetupWithUserName(t, userName)
 	defer ds.DB.Close()
 
 	// Create a gamedefinition with unblockLevel == 16
@@ -94,7 +95,7 @@ func TestUpdateUserLevelAfterMatchEnds(t *testing.T) {
 
 	// This is the request from game to start the match and generate the event
 	// that an user is joining a match
-	match := testStartMatch(t, router, luchador.ID)
+	match := testStartMatch(t, router, luchador.ID, userName)
 
 	// This call would be done by the runner
 	testAddParticipantToMatch(t, match.ID, luchador.ID)
@@ -103,7 +104,7 @@ func TestUpdateUserLevelAfterMatchEnds(t *testing.T) {
 	// AND updates match participants user levels
 	testEndMatch(t, router, match)
 
-	userDetails := testGetUser(t, router)
+	userDetails := testGetUser(t, router, userName)
 	log.WithFields(log.Fields{
 		"userDetails": userDetails,
 	}).Info("user details after match ends")

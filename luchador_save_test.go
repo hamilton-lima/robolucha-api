@@ -22,7 +22,15 @@ import (
 var router *gin.Engine
 var mockPublisher *test.MockPublisher
 
+func SetupWithUserName(t *testing.T, userName string) *model.GameComponent {
+	return setupImpl(t, userName)
+}
+
 func Setup(t *testing.T) *model.GameComponent {
+	return setupImpl(t, "")
+}
+
+func setupImpl(t *testing.T, userName string) *model.GameComponent {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.WarnLevel)
@@ -41,11 +49,26 @@ func Setup(t *testing.T) *model.GameComponent {
 
 	router = createRouter(test.API_KEY, "true", auth.SessionAllwaysValid, auth.SessionAllwaysValid)
 
-	luchador := GetLuchador(t)
+	var luchador model.GameComponent
+	if userName == "" {
+		luchador = GetLuchador(t)
+	} else {
+		luchador = GetLuchadorWithName(t, userName)
+	}
+
 	return &luchador
 }
 
+func GetLuchadorWithName(t *testing.T, userName string) model.GameComponent {
+	// send the Authorization header to define the user name
+	getLuchador := test.PerformRequest(router, "GET", "/private/luchador", "", userName)
+	var luchador model.GameComponent
+	json.Unmarshal(getLuchador.Body.Bytes(), &luchador)
+	return luchador
+}
+
 func GetLuchador(t *testing.T) model.GameComponent {
+	// send the Authorization header to define the user name
 	getLuchador := test.PerformRequestNoAuth(router, "GET", "/private/luchador", "")
 	var luchador model.GameComponent
 	json.Unmarshal(getLuchador.Body.Bytes(), &luchador)
@@ -118,8 +141,9 @@ func TestLuchadorUpdateName(t *testing.T) {
 
 }
 func TestLuchadorUpdateRandomMask(t *testing.T) {
+	userName := "me"
 	rand.Seed(time.Now().UTC().UnixNano())
-	luchador := Setup(t)
+	luchador := SetupWithUserName(t, userName)
 	defer ds.DB.Close()
 
 	// assign new random Configs to update the luchador
@@ -136,7 +160,7 @@ func TestLuchadorUpdateRandomMask(t *testing.T) {
 	plan2, _ := json.Marshal(luchador)
 	body2 := string(plan2)
 
-	w := test.PerformRequestNoAuth(router, "PUT", "/private/luchador", body2)
+	w := test.PerformRequest(router, "PUT", "/private/luchador", body2, userName)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response model.UpdateLuchadorResponse
