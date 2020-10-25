@@ -1186,6 +1186,21 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: update gamedefition for this user
+  /private/mapeditor/default:
+    get:
+      consumes:
+      - application/json
+      operationId: getDefaultGameDefinition
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.GameDefinition'
+      security:
+      - ApiKeyAuth: []
+      summary: get default game definition
   /private/mask-config/{id}:
     get:
       consumes:

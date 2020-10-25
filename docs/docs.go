@@ -1121,6 +1121,31 @@ var doc = `{
                 }
             }
         },
+        "/private/mapeditor/default": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "get default game definition",
+                "operationId": "getDefaultGameDefinition",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.GameDefinition"
+                        }
+                    }
+                }
+            }
+        },
         "/private/mask-config/{id}": {
             "get": {
                 "security": [
