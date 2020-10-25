@@ -49,6 +49,7 @@ type Router struct {
 // Setup definition
 func (router *Router) Setup(group *gin.RouterGroup) {
 	group.GET("/mapeditor", getMyGameDefinitions)
+	group.GET("/mapeditor/default", getDefaultGameDefinition)
 	group.POST("/mapeditor", addMyGameDefinition)
 	group.PUT("/mapeditor", updateMyGameDefinition)
 }
@@ -64,6 +65,19 @@ func getMyGameDefinitions(c *gin.Context) {
 	user := httphelper.UserDetailsFromContext(c)
 	gameDefinitions := requestHandler.Find(user.User.ID)
 	c.JSON(http.StatusOK, gameDefinitions)
+}
+
+// getDefaultGameDefinition godoc
+// @ID getDefaultGameDefinition
+// @Summary get default game definition
+// @Accept json
+// @Produce json
+// @Success 200 {object} model.GameDefinition
+// @Security ApiKeyAuth
+// @Router /private/mapeditor/default [get]
+func getDefaultGameDefinition(c *gin.Context) {
+	defaultGameDefinition := requestHandler.GetDefault()
+	c.JSON(http.StatusOK, defaultGameDefinition)
 }
 
 // addMyGameDefinition godoc
@@ -126,6 +140,11 @@ func updateMyGameDefinition(c *gin.Context) {
 // Find godoc
 func (handler *RequestHandler) Find(userID uint) *[]model.GameDefinition {
 	return handler.ds.FindGameDefinitionByOwner(userID)
+}
+
+// GetDefault godoc
+func (handler *RequestHandler) GetDefault() model.GameDefinition {
+	return model.BuildDefaultGameDefinition()
 }
 
 // Add godoc

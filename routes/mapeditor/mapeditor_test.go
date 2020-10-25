@@ -176,3 +176,15 @@ func TestUpdateName(t *testing.T) {
 	assert.Equal(t, result2[0].ID, result[0].ID)
 	assert.Equal(t, "SOME OTHER(2)", result2[0].Name)
 }
+
+func TestGetDefault(t *testing.T) {
+	Setup(t)
+	defer ds.DB.Close()
+
+	gd := handler.GetDefault()
+
+	assert.True(t, gd.MinParticipants > 0)
+	assert.True(t, gd.MaxParticipants > 0)
+	assert.True(t, gd.ArenaWidth > 0)
+	assert.True(t, gd.ArenaHeight > 0)
+}
