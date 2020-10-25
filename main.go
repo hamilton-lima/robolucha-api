@@ -632,7 +632,7 @@ func getGameDefinitionByID(c *gin.Context) {
 // @Router /private/game-definition-all [get]
 func getGameDefinition(c *gin.Context) {
 
-	result := ds.FindAllGameDefinition()
+	result := ds.FindAllSystemGameDefinition()
 
 	log.WithFields(log.Fields{
 		"result": result,

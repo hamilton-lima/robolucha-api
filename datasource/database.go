@@ -1029,7 +1029,7 @@ func (ds *DataSource) FindGameDefinitionByName(name string) *model.GameDefinitio
 	return &gameDefinition
 }
 
-func (ds *DataSource) FindAllGameDefinition() *[]model.GameDefinition {
+func (ds *DataSource) FindAllSystemGameDefinition() *[]model.GameDefinition {
 	var gameDefinitions []model.GameDefinition
 
 	ds.DB.
@@ -1042,6 +1042,7 @@ func (ds *DataSource) FindAllGameDefinition() *[]model.GameDefinition {
 		Preload("LuchadorSuggestedCodes").
 		Preload("TeamDefinition").
 		Preload("TeamDefinition.Teams").
+		Where(&model.GameDefinition{OwnerUserID: 0}).
 		Order("sort_order").
 		Find(&gameDefinitions)
 
@@ -1055,7 +1056,7 @@ func (ds *DataSource) FindAllGameDefinition() *[]model.GameDefinition {
 
 	log.WithFields(log.Fields{
 		"gameDefinitions": gameDefinitions,
-	}).Debug("findAllGameDefinition")
+	}).Debug("FindAllSystemGameDefinition")
 
 	return &gameDefinitions
 }
