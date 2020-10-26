@@ -1,11 +1,11 @@
 package learning
 
 import (
+	"net/http"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/robolucha/robolucha-api/httphelper"
 	"gitlab.com/robolucha/robolucha-api/model"
-	"gitlab.com/robolucha/robolucha-api/utility"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"gitlab.com/robolucha/robolucha-api/datasource"
@@ -54,13 +54,6 @@ func (router *Router) Setup(group *gin.RouterGroup) {
 	group.DELETE("/assignment/:id", delAssignment)
 	group.PATCH("/assignment/:id/students", updateAssignmentStudents)
 	group.PATCH("/assignment/:id/activities", updateAssignmentActivities)
-	group.GET("/badword", checkBadWord)
-
-}
-
-func checkBadWord(context *gin.Context) {
-	sentence := context.Query("sentence")
-	context.JSON(http.StatusOK, utility.ContainsBadWord(sentence))
 }
 
 // updateAssignmentActivities godoc
@@ -92,7 +85,6 @@ func updateAssignmentStudents(c *gin.Context) {
 	result := requestHandler.ds.UpdateAssignmentStudents(id, studentIds)
 	c.JSON(http.StatusOK, result)
 }
-
 
 // getActivity godoc
 // @Summary find existing activities
@@ -168,4 +160,3 @@ func delAssignment(c *gin.Context) {
 	requestHandler.ds.DeleteAssignment(id)
 	c.JSON(http.StatusOK, id)
 }
-

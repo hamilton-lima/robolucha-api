@@ -37,7 +37,7 @@ func (ds *DataSource) AddClassroom(c *model.Classroom) *model.Classroom {
 	}).Debug("after addClassroom")
 
 	// create avaialable match for all existing gamedefinitions
-	all := ds.FindAllGameDefinition()
+	all := ds.FindAllSystemGameDefinition()
 	for _, gd := range *all {
 
 		am := model.AvailableMatch{GameDefinitionID: gd.ID, Name: gd.Name, ClassroomID: classroom.ID}
