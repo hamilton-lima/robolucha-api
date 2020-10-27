@@ -1,6 +1,8 @@
 package model
 
 import (
+	"fmt"
+
 	log "github.com/sirupsen/logrus"
 )
 
@@ -40,7 +42,7 @@ func LogAvailableMatches(matches *[]AvailableMatch) map[string]interface{} {
 	result := log.Fields{}
 
 	for _, match := range *matches {
-		result[string(match.ID)] = LogAvailableMatch(&match)
+		result[fmt.Sprint(match.ID)] = LogAvailableMatch(&match)
 	}
 
 	return result
@@ -85,7 +87,7 @@ func LogMatches(matches *[]Match) map[string]interface{} {
 	result := log.Fields{}
 
 	for _, match := range *matches {
-		result[string(match.ID)] = LogMatch(&match)
+		result[fmt.Sprint(match.ID)] = LogMatch(&match)
 	}
 
 	return result

@@ -1,15 +1,19 @@
 # prepare builder
-FROM golang:1.12.6 as builder
+FROM golang:1.15.3 as builder
 
 RUN mkdir -p /usr/local/share/robolucha-api
 WORKDIR /usr/local/share/robolucha-api/
 
-# get dependencies
-COPY go.mod /usr/local/share/robolucha-api/
-RUN go get 
+# set go cache folder 
+RUN go env
+RUN export GO111MODULE=off
 
+# get dependencies
 # copy source code
 COPY . /usr/local/share/robolucha-api/
+# COPY go.sum /usr/local/share/robolucha-api/
+# COPY go.mod /usr/local/share/robolucha-api/
+RUN go get -d -v
 
 # copy metadata files
 RUN cp -r metadata /tmp/metadata
