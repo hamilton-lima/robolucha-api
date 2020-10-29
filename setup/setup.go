@@ -1,10 +1,11 @@
 package setup
 
 import (
-	"gitlab.com/robolucha/robolucha-api/utility"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"gitlab.com/robolucha/robolucha-api/utility"
 
 	log "github.com/sirupsen/logrus"
 
@@ -24,7 +25,7 @@ func LoadMetadataFromFolder(folderName string, ds *datasource.DataSource) {
 // CreateAvailableMatches definition
 func CreateAvailableMatches(ds *datasource.DataSource) {
 
-	all := ds.FindAllGameDefinition()
+	all := ds.FindAllSystemGameDefinition()
 	for _, gd := range *all {
 		ds.CreateAvailableMatchIfDontExist(gd.ID, gd.Name)
 	}

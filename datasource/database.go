@@ -799,7 +799,7 @@ func (ds *DataSource) AddMatchScores(ms *model.ScoreList) *model.ScoreList {
 
 func (ds *DataSource) UpdateGameDefinition(input *model.GameDefinition) *model.GameDefinition {
 
-	gameDefinition := ds.FindGameDefinitionByName(input.Name)
+	gameDefinition := ds.FindGameDefinition(input.ID)
 
 	if gameDefinition != nil {
 
@@ -812,6 +812,7 @@ func (ds *DataSource) UpdateGameDefinition(input *model.GameDefinition) *model.G
 		gameDefinition.LuchadorSize = input.LuchadorSize
 		gameDefinition.Fps = input.Fps
 		gameDefinition.BuletSpeed = input.BuletSpeed
+		gameDefinition.Name = input.Name
 		gameDefinition.Label = input.Label
 		gameDefinition.Description = input.Description
 		gameDefinition.Type = input.Type
@@ -845,6 +846,7 @@ func (ds *DataSource) UpdateGameDefinition(input *model.GameDefinition) *model.G
 		gameDefinition.MaxLevel = input.MaxLevel
 		gameDefinition.UnblockLevel = input.UnblockLevel
 		gameDefinition.TeamDefinition = input.TeamDefinition
+		gameDefinition.OwnerUserID = input.OwnerUserID
 
 		dbc := ds.DB.Save(gameDefinition)
 		if dbc.Error != nil {
@@ -1027,7 +1029,7 @@ func (ds *DataSource) FindGameDefinitionByName(name string) *model.GameDefinitio
 	return &gameDefinition
 }
 
-func (ds *DataSource) FindAllGameDefinition() *[]model.GameDefinition {
+func (ds *DataSource) FindAllSystemGameDefinition() *[]model.GameDefinition {
 	var gameDefinitions []model.GameDefinition
 
 	ds.DB.
@@ -1040,6 +1042,7 @@ func (ds *DataSource) FindAllGameDefinition() *[]model.GameDefinition {
 		Preload("LuchadorSuggestedCodes").
 		Preload("TeamDefinition").
 		Preload("TeamDefinition.Teams").
+		Where(&model.GameDefinition{OwnerUserID: 0}).
 		Order("sort_order").
 		Find(&gameDefinitions)
 
@@ -1053,7 +1056,7 @@ func (ds *DataSource) FindAllGameDefinition() *[]model.GameDefinition {
 
 	log.WithFields(log.Fields{
 		"gameDefinitions": gameDefinitions,
-	}).Debug("findAllGameDefinition")
+	}).Debug("FindAllSystemGameDefinition")
 
 	return &gameDefinitions
 }
@@ -1086,6 +1089,30 @@ func (ds *DataSource) FindTutorialGameDefinition() *[]model.GameDefinition {
 	log.WithFields(log.Fields{
 		"gameDefinitions": gameDefinitions,
 	}).Debug("findTutorialGameDefinition")
+
+	return &gameDefinitions
+}
+
+func (ds *DataSource) FindGameDefinitionByOwner(ownerID uint) *[]model.GameDefinition {
+	var gameDefinitions []model.GameDefinition
+
+	ds.DB.
+		Preload("GameComponents").
+		Preload("GameComponents.Codes").
+		Preload("GameComponents.Configs").
+		Preload("SceneComponents").
+		Preload("SceneComponents.Codes").
+		Preload("Codes").
+		Preload("LuchadorSuggestedCodes").
+		Preload("TeamDefinition").
+		Preload("TeamDefinition.Teams").
+		Where(&model.GameDefinition{OwnerUserID: ownerID}).
+		Order("name").
+		Find(&gameDefinitions)
+
+	for i := range gameDefinitions {
+		resetGameDefinitionArrays(&gameDefinitions[i])
+	}
 
 	return &gameDefinitions
 }

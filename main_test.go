@@ -317,11 +317,12 @@ func TestGETGameDefinition(t *testing.T) {
 	assert.Assert(t, definition1.ID != definition2.ID)
 }
 
-func createMatch(availableMatchID uint, gameDefinitionID uint) model.Match {
+func createMatch(availableMatchID uint, gameDefinitionID uint, status string) model.Match {
 	match := model.Match{
 		TimeStart:        time.Now(),
 		AvailableMatchID: availableMatchID,
-		GameDefinitionID: gameDefinitionID}
+		GameDefinitionID: gameDefinitionID,
+		Status:           status}
 
 	ds.DB.Create(&match)
 	return match
@@ -332,20 +333,25 @@ func TestFindMultiplayerMatch(t *testing.T) {
 	// log.SetLevel(log.InfoLevel)
 	// ds.DB.LogMode(true)
 	defer ds.DB.Close()
+	userName := "foo"
 
 	definition1 := createTestGameDefinition(t, model.GAMEDEFINITION_TYPE_TUTORIAL, 20)
 	definition2 := createTestGameDefinition(t, model.GAMEDEFINITION_TYPE_MULTIPLAYER, 10)
 	definition3 := createTestGameDefinition(t, faker.Word(), 1)
 
-	createMatch(20, definition1.ID)
-	match := createMatch(10, definition2.ID)
-	createMatch(1, definition3.ID)
+	// var MatchStatusCreated string = "CREATED"
+	// var MatchStatusRunning string = "RUNNING"
+	// var MatchStatusFinished string = "FINISHED"
+
+	createMatch(20, definition1.ID, model.MatchStatusCreated)
+	match := createMatch(10, definition2.ID, model.MatchStatusCreated)
+	createMatch(1, definition3.ID, model.MatchStatusFinished)
 
 	definition2.Duration = 1200000
 	ds.DB.Save(&definition2)
 
 	router := createRouter(test.API_KEY, "true", auth.SessionAllwaysValid, auth.SessionAllwaysValid)
-	w := test.PerformRequestNoAuth(router, "GET", "/private/match", "")
+	w := test.PerformRequest(router, "GET", "/private/match", "", userName)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var matches []model.ActiveMatch
