@@ -289,6 +289,10 @@ type CodeHistory struct {
 	Code      *Code      `json:"code,omitempty"`
 }
 
+type BulkConfig struct {
+	Configs []Config `json:"configs"`
+}
+
 // Config definition
 type Config struct {
 	ID        uint       `gorm:"primary_key" json:"id,omitempty" faker:"-"`

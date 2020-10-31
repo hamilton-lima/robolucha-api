@@ -2,6 +2,7 @@ package model
 
 import (
 	"math/rand"
+	"time"
 )
 
 var maskShape = []string{
@@ -106,7 +107,7 @@ var MaskShapes = map[string][]string{
 
 // RandomConfig creates a random Luchador Config
 func RandomConfig() []Config {
-
+	rand.Seed(time.Now().UnixNano())
 	list := []Config{}
 
 	for _, color := range MaskColors {

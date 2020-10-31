@@ -1209,6 +1209,42 @@ var doc = `{
                 }
             }
         },
+        "/private/mask-random-bulk/{amount}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "create random maskConfig in bulk",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Amount of random configs, max 2048",
+                        "name": "amount",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.BulkConfig"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/private/match": {
             "get": {
                 "security": [
@@ -1601,6 +1637,17 @@ var doc = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "model.BulkConfig": {
+            "type": "object",
+            "properties": {
+                "configs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Config"
+                    }
                 }
             }
         },
