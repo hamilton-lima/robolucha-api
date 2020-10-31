@@ -153,6 +153,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.PUT("/luchador", updateLuchador)
 		privateAPI.GET("/mask-config/:id", getMaskConfig)
 		privateAPI.GET("/mask-random", getRandomMaskConfig)
+		privateAPI.GET("/mask-random-bulk/:amount", getBulkRandomMaskConfig)
 		privateAPI.PUT("/user/setting", updateUserSetting)
 		privateAPI.GET("/user/setting", findUserSetting)
 		privateAPI.GET("/match", getActiveMatches)
@@ -658,6 +659,46 @@ func getRandomMaskConfig(c *gin.Context) {
 	}).Info("getRandomMaskConfig")
 
 	c.JSON(http.StatusOK, configs)
+}
+
+// getBulkRandomMaskConfig godoc
+// @Summary create random maskConfig in bulk
+// @Accept json
+// @Produce json
+// @Param amount path int true "Amount of random configs, max 2048"
+// @Success 200 {array} model.BulkConfig
+// @Security ApiKeyAuth
+// @Router /private/mask-random-bulk/{amount} [get]
+func getBulkRandomMaskConfig(c *gin.Context) {
+
+	pamount := c.Param("amount")
+	amount, err := strconv.Atoi(pamount)
+	if err != nil {
+		log.Info("Invalid amount")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	if amount > 2048 {
+		amount = 2048
+	}
+
+	log.WithFields(log.Fields{
+		"amount": amount,
+	}).Info("getBulkRandomMaskConfig")
+
+	result := make([]model.BulkConfig, 0)
+
+	for i := 0; i < amount; i++ {
+		configs := model.RandomConfig()
+		result = append(result, model.BulkConfig{Configs: configs})
+	}
+
+	log.WithFields(log.Fields{
+		"result": result,
+	}).Info("getBulkRandomMaskConfig")
+
+	c.JSON(http.StatusOK, result)
 }
 
 // createGameComponent godoc

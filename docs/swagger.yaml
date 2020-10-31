@@ -55,6 +55,13 @@ definitions:
       name:
         type: string
     type: object
+  model.BulkConfig:
+    properties:
+      configs:
+        items:
+          $ref: '#/definitions/model.Config'
+        type: array
+    type: object
   model.Classroom:
     properties:
       accessCode:
@@ -1239,6 +1246,28 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: create random maskConfig
+  /private/mask-random-bulk/{amount}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Amount of random configs, max 2048
+        in: path
+        name: amount
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.BulkConfig'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: create random maskConfig in bulk
   /private/match:
     get:
       consumes:
