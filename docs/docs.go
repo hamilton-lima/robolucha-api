@@ -2134,6 +2134,9 @@ var doc = `{
                 "id": {
                     "type": "integer"
                 },
+                "length": {
+                    "type": "integer"
+                },
                 "life": {
                     "type": "integer"
                 },

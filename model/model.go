@@ -197,6 +197,7 @@ type SceneComponent struct {
 	X                uint       `json:"x"`
 	Y                uint       `json:"y"`
 	Width            uint       `json:"width"`
+	Length           uint       `json:"length"`
 	Height           uint       `json:"height"`
 	Rotation         uint       `json:"rotation"`
 	Life             uint       `json:"life"`

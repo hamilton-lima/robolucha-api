@@ -124,7 +124,9 @@ func updateMyGameDefinition(c *gin.Context) {
 	var gameDefinition *model.GameDefinition
 	err := c.BindJSON(&gameDefinition)
 	if err != nil {
-		log.Info("Invalid body content on updateMyGameDefinition")
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Info("Invalid body content on updateMyGameDefinition")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
