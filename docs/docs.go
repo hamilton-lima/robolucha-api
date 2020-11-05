@@ -2160,6 +2160,9 @@ var doc = `{
                 },
                 "y": {
                     "type": "integer"
+                },
+                "z": {
+                    "type": "integer"
                 }
             }
         },

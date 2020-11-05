@@ -196,6 +196,7 @@ type SceneComponent struct {
 	GameDefinitionID uint       `json:"gameDefinition,omitempty" faker:"-"`
 	X                uint       `json:"x"`
 	Y                uint       `json:"y"`
+	Z                uint       `json:"z"`
 	Width            uint       `json:"width"`
 	Length           uint       `json:"length"`
 	Height           uint       `json:"height"`
