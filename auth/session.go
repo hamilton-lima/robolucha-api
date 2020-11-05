@@ -184,3 +184,47 @@ func KeyIsValid(key string) gin.HandlerFunc {
 		log.Info("VALID Authorization key")
 	}
 }
+
+func UserBelongsToRole(c *gin.Context, role string) bool {
+
+	authorization, err := c.Request.Cookie(cookieName)
+	if err != nil {
+		log.Debug("Error reading authorization cookie")
+		return false
+	}
+
+	if authorization.Value == "" {
+		log.Debug("No Authorization cookie")
+		return false
+	}
+
+	key := os.Getenv(getkeeperEncryptionKey)
+	sessionUser, err := GetUser(authorization.Value, key)
+	if err != nil {
+		log.Debug("Error reading user from authorization cookie")
+		return false
+	}
+
+	if sessionUser.Username == "" {
+		log.WithFields(log.Fields{
+			"authorization": authorization,
+			"cookie-name":   cookieName,
+			"sessionUser":   sessionUser,
+		}).Info("Invalid Session")
+		return false
+	} else {
+		log.WithFields(log.Fields{
+			"sessionUser": sessionUser,
+		}).Info("User Authorized")
+	}
+
+	if contains(sessionUser.Roles, role) {
+		log.WithFields(log.Fields{
+			"sessionUser": sessionUser,
+			"role":        role,
+		}).Info("User HAS role")
+		return true
+	}
+
+	return false
+}

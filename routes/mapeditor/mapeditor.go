@@ -7,10 +7,15 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/gin-gonic/gin"
+	"gitlab.com/robolucha/robolucha-api/auth"
 	"gitlab.com/robolucha/robolucha-api/datasource"
 	"gitlab.com/robolucha/robolucha-api/httphelper"
 	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/pubsub"
+)
+
+const (
+	systemEditorRole = "SYSTEM_EDITOR"
 )
 
 // Init receive database and message queue objects
@@ -63,8 +68,15 @@ func (router *Router) Setup(group *gin.RouterGroup) {
 // @Router /private/mapeditor [get]
 func getMyGameDefinitions(c *gin.Context) {
 	user := httphelper.UserDetailsFromContext(c)
-	gameDefinitions := requestHandler.Find(user.User.ID)
-	c.JSON(http.StatusOK, gameDefinitions)
+
+	if auth.UserBelongsToRole(c, systemEditorRole) {
+		gameDefinitions := requestHandler.FindAll()
+		c.JSON(http.StatusOK, gameDefinitions)
+	} else {
+		gameDefinitions := requestHandler.Find(user.User.ID)
+		c.JSON(http.StatusOK, gameDefinitions)
+	}
+
 }
 
 // getDefaultGameDefinition godoc
@@ -131,7 +143,10 @@ func updateMyGameDefinition(c *gin.Context) {
 		return
 	}
 
-	err = requestHandler.Update(user.User.ID, gameDefinition)
+	// dont check ownership when user is a system editor
+	checkOwnerShip := auth.UserBelongsToRole(c, systemEditorRole)
+
+	err = requestHandler.Update(user.User.ID, gameDefinition, checkOwnerShip)
 	if err != nil {
 		c.AbortWithStatus(http.StatusConflict)
 	} else {
@@ -142,6 +157,11 @@ func updateMyGameDefinition(c *gin.Context) {
 // Find godoc
 func (handler *RequestHandler) Find(userID uint) *[]model.GameDefinition {
 	return handler.ds.FindGameDefinitionByOwner(userID)
+}
+
+// FindAll godoc
+func (handler *RequestHandler) FindAll() *[]model.GameDefinition {
+	return handler.ds.FindAllSystemGameDefinition()
 }
 
 // GetDefault godoc
@@ -170,7 +190,7 @@ func (handler *RequestHandler) Add(userID uint, gameDefinition *model.GameDefini
 }
 
 // Update godoc
-func (handler *RequestHandler) Update(userID uint, gameDefinition *model.GameDefinition) error {
+func (handler *RequestHandler) Update(userID uint, gameDefinition *model.GameDefinition, checkOwnerShip bool) error {
 	foundByID := handler.ds.FindGameDefinition(gameDefinition.ID)
 	// must exist to be updated
 	if foundByID == nil {
@@ -179,12 +199,14 @@ func (handler *RequestHandler) Update(userID uint, gameDefinition *model.GameDef
 	}
 
 	// must be the owner to update it
-	if foundByID.OwnerUserID != userID {
-		log.WithFields(log.Fields{
-			"foundByID.OwnerUserID": foundByID.OwnerUserID,
-			"userID":                userID,
-		}).Info("current user dont OWNS this gamedefinition, cant be updated")
-		return errors.New("current user DOES NOT OWN this Gamedefinition")
+	if checkOwnerShip {
+		if foundByID.OwnerUserID != userID {
+			log.WithFields(log.Fields{
+				"foundByID.OwnerUserID": foundByID.OwnerUserID,
+				"userID":                userID,
+			}).Info("current user dont OWNS this gamedefinition, cant be updated")
+			return errors.New("current user DOES NOT OWN this Gamedefinition")
+		}
 	}
 
 	foundByName := handler.ds.FindGameDefinitionByName(gameDefinition.Name)
