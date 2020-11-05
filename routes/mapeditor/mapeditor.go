@@ -144,7 +144,7 @@ func updateMyGameDefinition(c *gin.Context) {
 	}
 
 	// dont check ownership when user is a system editor
-	checkOwnerShip := auth.UserBelongsToRole(c, systemEditorRole)
+	checkOwnerShip := !auth.UserBelongsToRole(c, systemEditorRole)
 
 	err = requestHandler.Update(user.User.ID, gameDefinition, checkOwnerShip)
 	if err != nil {
