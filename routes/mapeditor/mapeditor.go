@@ -144,9 +144,9 @@ func updateMyGameDefinition(c *gin.Context) {
 	}
 
 	// dont check ownership when user is a system editor
-	checkOwnerShip := !auth.UserBelongsToRole(c, systemEditorRole)
+	skipCheckOwnerShip := auth.UserBelongsToRole(c, systemEditorRole)
 
-	err = requestHandler.Update(user.User.ID, gameDefinition, checkOwnerShip)
+	err = requestHandler.Update(user.User.ID, gameDefinition, skipCheckOwnerShip)
 	if err != nil {
 		c.AbortWithStatus(http.StatusConflict)
 	} else {
@@ -190,7 +190,7 @@ func (handler *RequestHandler) Add(userID uint, gameDefinition *model.GameDefini
 }
 
 // Update godoc
-func (handler *RequestHandler) Update(userID uint, gameDefinition *model.GameDefinition, checkOwnerShip bool) error {
+func (handler *RequestHandler) Update(userID uint, gameDefinition *model.GameDefinition, skipCheckOwnerShip bool) error {
 	foundByID := handler.ds.FindGameDefinition(gameDefinition.ID)
 	// must exist to be updated
 	if foundByID == nil {
@@ -199,7 +199,7 @@ func (handler *RequestHandler) Update(userID uint, gameDefinition *model.GameDef
 	}
 
 	// must be the owner to update it
-	if checkOwnerShip {
+	if !skipCheckOwnerShip {
 		if foundByID.OwnerUserID != userID {
 			log.WithFields(log.Fields{
 				"foundByID.OwnerUserID": foundByID.OwnerUserID,
