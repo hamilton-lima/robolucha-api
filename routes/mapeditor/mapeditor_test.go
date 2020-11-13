@@ -113,7 +113,7 @@ func TestUpdateAlreadyExist(t *testing.T) {
 	other := model.BuildDefaultGameDefinition()
 	other.Name = "Me AGAIN"
 
-	err := handler.Update(1, &other)
+	err := handler.Update(1, &other, false)
 	assert.True(t, err != nil)
 }
 
@@ -125,7 +125,7 @@ func TestUpdateNewOne(t *testing.T) {
 	gd := model.BuildDefaultGameDefinition()
 	gd.Name = "Me AGAIN"
 
-	err := handler.Update(1, &gd)
+	err := handler.Update(1, &gd, false)
 	assert.True(t, err != nil)
 }
 
@@ -139,7 +139,7 @@ func TestUpdateNotOwner(t *testing.T) {
 	gd.OwnerUserID = 14
 	ds.CreateGameDefinition(&gd)
 
-	err := handler.Update(1, &gd)
+	err := handler.Update(1, &gd, false)
 	assert.True(t, err != nil)
 }
 
@@ -167,7 +167,7 @@ func TestUpdateName(t *testing.T) {
 
 	// should Update name with no issues
 	result[0].Name = "SOME OTHER(2)"
-	err = handler.Update(1, &result[0])
+	err = handler.Update(1, &result[0], false)
 	assert.True(t, err == nil)
 
 	gameDefinitions = handler.Find(1)
