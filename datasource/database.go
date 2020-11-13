@@ -124,6 +124,7 @@ func NewDataSource(config *DBconfig) *DataSource {
 	DB.AutoMigrate(&model.GameDefinition{})
 	DB.AutoMigrate(&model.Team{})
 	DB.AutoMigrate(&model.TeamDefinition{})
+	DB.AutoMigrate(&model.NarrativeDefinition{})
 	DB.AutoMigrate(&model.Classroom{})
 	DB.AutoMigrate(&model.Student{})
 	DB.AutoMigrate(&model.AvailableMatch{})
@@ -385,6 +386,7 @@ func (ds *DataSource) FindActiveMatches(query interface{}, args ...interface{}) 
 		Preload("GameDefinition").
 		Preload("GameDefinition.TeamDefinition").
 		Preload("GameDefinition.TeamDefinition.Teams").
+		Preload("GameDefinition.NarrativeDefinitions").
 		Preload("Participants").
 		Preload("TeamParticipants").
 		Where("time_end <= time_start").
@@ -487,6 +489,7 @@ func (ds *DataSource) FindMatchPreload(id uint) *model.Match {
 		Preload("GameDefinition").
 		Preload("GameDefinition.TeamDefinition").
 		Preload("GameDefinition.TeamDefinition.Teams").
+		Preload("GameDefinition.NarrativeDefinitions").
 		Where(&model.Match{ID: id}).First(&match)
 
 	log.WithFields(log.Fields{
@@ -872,6 +875,18 @@ func (ds *DataSource) UpdateGameDefinition(input *model.GameDefinition) *model.G
 			}
 		}
 
+		ds.DB.Model(gameDefinition).Association("NarrativeDefinitions").Replace(input.NarrativeDefinitions)
+		dbc = ds.DB.Save(gameDefinition)
+		if dbc.Error != nil {
+			log.WithFields(log.Fields{
+				"error":               dbc.Error,
+				"gameDefinition.Name": gameDefinition.Name,
+				"step":                "NarrativeDefinitions",
+			}).Error("Error updating updateGameDefinition")
+
+			return nil
+		}
+
 		ds.DB.Model(gameDefinition).Association("GameComponents").Replace(input.GameComponents)
 		dbc = ds.DB.Save(gameDefinition)
 		if dbc.Error != nil {
@@ -962,6 +977,7 @@ func (ds *DataSource) FindGameDefinition(id uint) *model.GameDefinition {
 		Preload("LuchadorSuggestedCodes").
 		Preload("TeamDefinition").
 		Preload("TeamDefinition.Teams").
+		Preload("NarrativeDefinitions").
 		Where(&model.GameDefinition{ID: id}).
 		First(&gameDefinition).
 		RecordNotFound() {
@@ -1002,6 +1018,7 @@ func (ds *DataSource) FindGameDefinitionByName(name string) *model.GameDefinitio
 		Preload("LuchadorSuggestedCodes").
 		Preload("TeamDefinition").
 		Preload("TeamDefinition.Teams").
+		Preload("NarrativeDefinitions").
 		Where(&model.GameDefinition{Name: name}).
 		First(&gameDefinition).
 		RecordNotFound() {
@@ -1042,6 +1059,7 @@ func (ds *DataSource) FindAllSystemGameDefinition() *[]model.GameDefinition {
 		Preload("LuchadorSuggestedCodes").
 		Preload("TeamDefinition").
 		Preload("TeamDefinition.Teams").
+		Preload("NarrativeDefinitions").
 		Where(&model.GameDefinition{OwnerUserID: 0}).
 		Order("sort_order").
 		Find(&gameDefinitions)
@@ -1074,6 +1092,7 @@ func (ds *DataSource) FindTutorialGameDefinition() *[]model.GameDefinition {
 		Preload("LuchadorSuggestedCodes").
 		Preload("TeamDefinition").
 		Preload("TeamDefinition.Teams").
+		Preload("NarrativeDefinitions").
 		Where(&model.GameDefinition{Type: model.GAMEDEFINITION_TYPE_TUTORIAL}).
 		Order("sort_order").
 		Find(&gameDefinitions)
@@ -1106,6 +1125,7 @@ func (ds *DataSource) FindGameDefinitionByOwner(ownerID uint) *[]model.GameDefin
 		Preload("LuchadorSuggestedCodes").
 		Preload("TeamDefinition").
 		Preload("TeamDefinition.Teams").
+		Preload("NarrativeDefinitions").
 		Where(&model.GameDefinition{OwnerUserID: ownerID}).
 		Order("name").
 		Find(&gameDefinitions)
