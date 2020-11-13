@@ -1862,6 +1862,12 @@ var doc = `{
                 "name": {
                     "type": "string"
                 },
+                "narrativeDefinitions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.NarrativeDefinition"
+                    }
+                },
                 "ownerUserID": {
                     "type": "integer"
                 },
@@ -2061,6 +2067,32 @@ var doc = `{
                 },
                 "score": {
                     "type": "integer"
+                }
+            }
+        },
+        "model.NarrativeDefinition": {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "type": "string"
+                },
+                "gameDefinition": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "mediaID": {
+                    "type": "string"
+                },
+                "sortOrder": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },
