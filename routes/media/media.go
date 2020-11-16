@@ -55,7 +55,7 @@ func (router *Router) Setup(group *gin.RouterGroup) {
 // @Accept json
 // @Produce json
 // @Param request body model.MediaRequest true "MediaRequest"
-// @Success 200 {array} model.Media
+// @Success 200 {object} model.Media
 // @Security ApiKeyAuth
 // @Router /private/media [post]
 func addMedia(c *gin.Context) {
@@ -71,7 +71,6 @@ func addMedia(c *gin.Context) {
 
 	response := requestHandler.AddMedia(request, user.ID)
 	log.WithFields(log.Fields{
-		"request":  request,
 		"response": response,
 	}).Info("addMedia")
 

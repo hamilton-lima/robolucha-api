@@ -1430,10 +1430,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.Media"
-                            }
+                            "$ref": "#/definitions/model.Media"
                         }
                     }
                 }

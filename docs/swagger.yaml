@@ -1426,9 +1426,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/model.Media'
-            type: array
+            $ref: '#/definitions/model.Media'
       security:
       - ApiKeyAuth: []
       summary: add media
