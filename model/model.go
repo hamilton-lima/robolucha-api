@@ -78,58 +78,72 @@ type PlayRequest struct {
 
 // GameDefinition definition
 type GameDefinition struct {
-	ID                            uint             `gorm:"primary_key" json:"id" faker:"-"`
-	CreatedAt                     time.Time        `json:"-"`
-	UpdatedAt                     time.Time        `json:"-"`
-	DeletedAt                     *time.Time       `json:"-" faker:"-"`
-	Duration                      uint64           `json:"duration"`
-	MinParticipants               uint             `json:"minParticipants"`
-	MaxParticipants               uint             `json:"maxParticipants"`
-	ArenaWidth                    uint             `json:"arenaWidth"`
-	ArenaHeight                   uint             `json:"arenaHeight"`
-	BulletSize                    uint             `json:"bulletSize"`
-	LuchadorSize                  uint             `json:"luchadorSize"`
-	Fps                           uint             `json:"fps"`
-	BuletSpeed                    uint             `json:"buletSpeed"`
-	Name                          string           `gorm:"not null;unique_index" json:"name"`
-	Label                         string           `json:"label"`
-	Description                   string           `json:"description"`
-	Type                          string           `json:"type"`
-	SortOrder                     uint             `json:"sortOrder"`
-	RadarAngle                    uint             `json:"radarAngle"`
-	RadarRadius                   uint             `json:"radarRadius"`
-	PunchAngle                    uint             `json:"punchAngle"`
-	Life                          uint             `json:"life"`
-	Energy                        uint             `json:"energy"`
-	PunchDamage                   uint             `json:"punchDamage"`
-	PunchCoolDown                 uint             `json:"punchCoolDown"`
-	MoveSpeed                     uint             `json:"moveSpeed"`
-	TurnSpeed                     uint             `json:"turnSpeed"`
-	TurnGunSpeed                  uint             `json:"turnGunSpeed"`
-	RespawnCooldown               uint             `json:"respawnCooldown"`
-	MaxFireCooldown               uint             `json:"maxFireCooldown"`
-	MinFireDamage                 uint             `json:"minFireDamage"`
-	MaxFireDamage                 uint             `json:"maxFireDamage"`
-	MinFireAmount                 uint             `json:"minFireAmount"`
-	MaxFireAmount                 uint             `json:"maxFireAmount"`
-	RestoreEnergyperSecond        uint             `json:"restoreEnergyperSecond"`
-	RecycledLuchadorEnergyRestore uint             `json:"recycledLuchadorEnergyRestore"`
-	IncreaseSpeedEnergyCost       uint             `json:"increaseSpeedEnergyCost"`
-	IncreaseSpeedPercentage       uint             `json:"increaseSpeedPercentage"`
-	FireEnergyCost                uint             `json:"fireEnergyCost"`
-	RespawnX                      uint             `json:"respawnX"`
-	RespawnY                      uint             `json:"respawnY"`
-	RespawnAngle                  uint             `json:"respawnAngle"`
-	RespawnGunAngle               uint             `json:"respawnGunAngle"`
-	MinLevel                      uint             `json:"minLevel"`
-	MaxLevel                      uint             `json:"maxLevel"`
-	UnblockLevel                  uint             `json:"unblockLevel"`
-	OwnerUserID                   uint             `json:"ownerUserID"`
-	TeamDefinition                TeamDefinition   `json:"teamDefinition"`
-	GameComponents                []GameComponent  `json:"gameComponents"`
-	SceneComponents               []SceneComponent `json:"sceneComponents"`
-	Codes                         []Code           `gorm:"many2many:gamedefinition_codes" json:"codes"`
-	LuchadorSuggestedCodes        []Code           `gorm:"many2many:gamedefinition_suggestedcodes" json:"suggestedCodes"`
+	ID                            uint                  `gorm:"primary_key" json:"id" faker:"-"`
+	CreatedAt                     time.Time             `json:"-"`
+	UpdatedAt                     time.Time             `json:"-"`
+	DeletedAt                     *time.Time            `json:"-" faker:"-"`
+	Duration                      uint64                `json:"duration"`
+	MinParticipants               uint                  `json:"minParticipants"`
+	MaxParticipants               uint                  `json:"maxParticipants"`
+	ArenaWidth                    uint                  `json:"arenaWidth"`
+	ArenaHeight                   uint                  `json:"arenaHeight"`
+	BulletSize                    uint                  `json:"bulletSize"`
+	LuchadorSize                  uint                  `json:"luchadorSize"`
+	Fps                           uint                  `json:"fps"`
+	BuletSpeed                    uint                  `json:"buletSpeed"`
+	Name                          string                `gorm:"not null;unique_index" json:"name"`
+	Label                         string                `json:"label"`
+	Description                   string                `json:"description"`
+	Type                          string                `json:"type"`
+	SortOrder                     uint                  `json:"sortOrder"`
+	RadarAngle                    uint                  `json:"radarAngle"`
+	RadarRadius                   uint                  `json:"radarRadius"`
+	PunchAngle                    uint                  `json:"punchAngle"`
+	Life                          uint                  `json:"life"`
+	Energy                        uint                  `json:"energy"`
+	PunchDamage                   uint                  `json:"punchDamage"`
+	PunchCoolDown                 uint                  `json:"punchCoolDown"`
+	MoveSpeed                     uint                  `json:"moveSpeed"`
+	TurnSpeed                     uint                  `json:"turnSpeed"`
+	TurnGunSpeed                  uint                  `json:"turnGunSpeed"`
+	RespawnCooldown               uint                  `json:"respawnCooldown"`
+	MaxFireCooldown               uint                  `json:"maxFireCooldown"`
+	MinFireDamage                 uint                  `json:"minFireDamage"`
+	MaxFireDamage                 uint                  `json:"maxFireDamage"`
+	MinFireAmount                 uint                  `json:"minFireAmount"`
+	MaxFireAmount                 uint                  `json:"maxFireAmount"`
+	RestoreEnergyperSecond        uint                  `json:"restoreEnergyperSecond"`
+	RecycledLuchadorEnergyRestore uint                  `json:"recycledLuchadorEnergyRestore"`
+	IncreaseSpeedEnergyCost       uint                  `json:"increaseSpeedEnergyCost"`
+	IncreaseSpeedPercentage       uint                  `json:"increaseSpeedPercentage"`
+	FireEnergyCost                uint                  `json:"fireEnergyCost"`
+	RespawnX                      uint                  `json:"respawnX"`
+	RespawnY                      uint                  `json:"respawnY"`
+	RespawnAngle                  uint                  `json:"respawnAngle"`
+	RespawnGunAngle               uint                  `json:"respawnGunAngle"`
+	MinLevel                      uint                  `json:"minLevel"`
+	MaxLevel                      uint                  `json:"maxLevel"`
+	UnblockLevel                  uint                  `json:"unblockLevel"`
+	OwnerUserID                   uint                  `json:"ownerUserID"`
+	TeamDefinition                TeamDefinition        `json:"teamDefinition"`
+	NarrativeDefinitions          []NarrativeDefinition `json:"narrativeDefinitions"`
+	GameComponents                []GameComponent       `json:"gameComponents"`
+	SceneComponents               []SceneComponent      `json:"sceneComponents"`
+	Codes                         []Code                `gorm:"many2many:gamedefinition_codes" json:"codes"`
+	LuchadorSuggestedCodes        []Code                `gorm:"many2many:gamedefinition_suggestedcodes" json:"suggestedCodes"`
+}
+
+type NarrativeDefinition struct {
+	ID               uint       `gorm:"primary_key" json:"id"`
+	CreatedAt        time.Time  `json:"-"`
+	UpdatedAt        time.Time  `json:"-"`
+	DeletedAt        *time.Time `json:"-" faker:"-"`
+	GameDefinitionID uint       `json:"gameDefinition,omitempty" faker:"-"`
+	Event            string     `json:"event"`
+	MediaID          string     `json:"mediaID"`
+	Type             string     `json:"type"`
+	Text             string     `gorm:"size:125000" json:"text"`
+	SortOrder        string     `json:"sortOrder"`
 }
 
 type TeamDefinition struct {

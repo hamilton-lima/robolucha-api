@@ -201,6 +201,10 @@ definitions:
         type: integer
       name:
         type: string
+      narrativeDefinitions:
+        items:
+          $ref: '#/definitions/model.NarrativeDefinition'
+        type: array
       ownerUserID:
         type: integer
       punchAngle:
@@ -333,6 +337,23 @@ definitions:
         type: integer
       score:
         type: integer
+    type: object
+  model.NarrativeDefinition:
+    properties:
+      event:
+        type: string
+      gameDefinition:
+        type: integer
+      id:
+        type: integer
+      mediaID:
+        type: string
+      sortOrder:
+        type: string
+      text:
+        type: string
+      type:
+        type: string
     type: object
   model.PageEventRequest:
     properties:
