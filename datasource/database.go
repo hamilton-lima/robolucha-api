@@ -125,6 +125,7 @@ func NewDataSource(config *DBconfig) *DataSource {
 	DB.AutoMigrate(&model.Team{})
 	DB.AutoMigrate(&model.TeamDefinition{})
 	DB.AutoMigrate(&model.NarrativeDefinition{})
+	DB.AutoMigrate(&model.Media{})
 	DB.AutoMigrate(&model.Classroom{})
 	DB.AutoMigrate(&model.Student{})
 	DB.AutoMigrate(&model.AvailableMatch{})
