@@ -1401,6 +1401,44 @@ var doc = `{
                 }
             }
         },
+        "/private/media": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "add media",
+                "parameters": [
+                    {
+                        "description": "MediaRequest",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.MediaRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Media"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/private/page-events": {
             "post": {
                 "security": [
@@ -2070,6 +2108,40 @@ var doc = `{
                 }
             }
         },
+        "model.Media": {
+            "type": "object",
+            "properties": {
+                "fileName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "narrativeDefinition": {
+                    "type": "integer"
+                },
+                "thumbnail": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.MediaRequest": {
+            "type": "object",
+            "properties": {
+                "base64Data": {
+                    "type": "string"
+                },
+                "fileName": {
+                    "type": "string"
+                }
+            }
+        },
         "model.NarrativeDefinition": {
             "type": "object",
             "properties": {
@@ -2082,11 +2154,12 @@ var doc = `{
                 "id": {
                     "type": "integer"
                 },
-                "mediaID": {
-                    "type": "string"
+                "media": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.Media"
                 },
                 "sortOrder": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "text": {
                     "type": "string"

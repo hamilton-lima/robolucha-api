@@ -338,6 +338,28 @@ definitions:
       score:
         type: integer
     type: object
+  model.Media:
+    properties:
+      fileName:
+        type: string
+      id:
+        type: integer
+      narrativeDefinition:
+        type: integer
+      thumbnail:
+        type: string
+      url:
+        type: string
+      userID:
+        type: integer
+    type: object
+  model.MediaRequest:
+    properties:
+      base64Data:
+        type: string
+      fileName:
+        type: string
+    type: object
   model.NarrativeDefinition:
     properties:
       event:
@@ -346,10 +368,11 @@ definitions:
         type: integer
       id:
         type: integer
-      mediaID:
-        type: string
+      media:
+        $ref: '#/definitions/model.Media'
+        type: object
       sortOrder:
-        type: string
+        type: integer
       text:
         type: string
       type:
@@ -1386,6 +1409,29 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: find one match
+  /private/media:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: MediaRequest
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.MediaRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Media'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: add media
   /private/page-events:
     post:
       consumes:
