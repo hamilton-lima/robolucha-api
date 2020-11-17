@@ -157,6 +157,7 @@ type Media struct {
 	CreatedAt             time.Time  `json:"-"`
 	UpdatedAt             time.Time  `json:"-"`
 	DeletedAt             *time.Time `json:"-" faker:"-"`
+	GameDefinitionID      uint       `json:"gameDefinition,omitempty" faker:"-"`
 	NarrativeDefinitionID uint       `json:"narrativeDefinition,omitempty" faker:"-"`
 	UserID                uint       `json:"userID,omitempty"`
 	FileName              string     `json:"fileName"`

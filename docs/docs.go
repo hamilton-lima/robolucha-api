@@ -2115,6 +2115,9 @@ var doc = `{
                 "fileName": {
                     "type": "string"
                 },
+                "gameDefinition": {
+                    "type": "integer"
+                },
                 "id": {
                     "type": "integer"
                 },
