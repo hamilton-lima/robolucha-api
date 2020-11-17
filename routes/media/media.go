@@ -7,9 +7,12 @@ import (
 	"net/http"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
+	"bytes"
+	"image"
 
+	"github.com/disintegration/imaging"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"gitlab.com/robolucha/robolucha-api/datasource"
 	"gitlab.com/robolucha/robolucha-api/httphelper"
 	"gitlab.com/robolucha/robolucha-api/model"
@@ -98,18 +101,37 @@ func after(text string, find string) string {
 func (handler *RequestHandler) AddMedia(request *model.MediaRequest, userID uint) model.Media {
 
 	name := fmt.Sprintf("./upload-%v", request.FileName)
-	// base64 := after(request.Base64Data, "data:image/png;base64,")
+	thumbnail := fmt.Sprintf("./thumb-%v", request.FileName)
+
+	// removes "data:image/png;base64," from the beginning of the data
 	base64 := after(request.Base64Data, ",")
 	data, _ := b64.StdEncoding.DecodeString(base64)
-	err := ioutil.WriteFile(name, data, 0666)
-	first := request.Base64Data[0:100]
-	first2 := base64[0:100]
 
-	log.WithFields(log.Fields{
-		"err aaaaaaaaaaaaaa": err,
-		"base64 data":        first,
-		"base64 data2 ":      first2,
-	}).Info("addMedia")
+	img, _, err := image.Decode(bytes.NewReader(data))
+	if err != nil {
+		log.WithFields(log.Fields{
+			"step": "error creating image",
+			"err":  err,
+		}).Error("addMedia")
+	}
+
+	dstImage800 := imaging.Resize(img, 300, 0, imaging.Lanczos)
+
+	err = ioutil.WriteFile(name, data, 0666)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"step": "error writing temp image file",
+			"err":  err,
+		}).Error("addMedia")
+	}
+
+	err = imaging.Save(dstImage800, thumbnail)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"step": "error saving thumbnail temp image file ",
+			"err":  err,
+		}).Error("addMedia")
+	}
 
 	// upload the file here
 	media := model.Media{
