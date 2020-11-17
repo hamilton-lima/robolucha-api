@@ -1,7 +1,11 @@
 package media
 
 import (
+	b64 "encoding/base64"
+	"fmt"
+	"io/ioutil"
 	"net/http"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 
@@ -77,8 +81,35 @@ func addMedia(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+func after(text string, find string) string {
+	found := strings.LastIndex(text, find)
+	if found == -1 {
+		return ""
+	}
+
+	pos := found + len(find)
+	if pos >= len(text) {
+		return ""
+	}
+	return text[pos:len(text)]
+}
+
 // Add godoc
 func (handler *RequestHandler) AddMedia(request *model.MediaRequest, userID uint) model.Media {
+
+	name := fmt.Sprintf("./upload-%v", request.FileName)
+	// base64 := after(request.Base64Data, "data:image/png;base64,")
+	base64 := after(request.Base64Data, ",")
+	data, _ := b64.StdEncoding.DecodeString(base64)
+	err := ioutil.WriteFile(name, data, 0666)
+	first := request.Base64Data[0:100]
+	first2 := base64[0:100]
+
+	log.WithFields(log.Fields{
+		"err aaaaaaaaaaaaaa": err,
+		"base64 data":        first,
+		"base64 data2 ":      first2,
+	}).Info("addMedia")
 
 	// upload the file here
 	media := model.Media{
