@@ -125,6 +125,7 @@ func NewDataSource(config *DBconfig) *DataSource {
 	DB.AutoMigrate(&model.Team{})
 	DB.AutoMigrate(&model.TeamDefinition{})
 	DB.AutoMigrate(&model.NarrativeDefinition{})
+	DB.AutoMigrate(&model.Media{})
 	DB.AutoMigrate(&model.Classroom{})
 	DB.AutoMigrate(&model.Student{})
 	DB.AutoMigrate(&model.AvailableMatch{})
@@ -384,9 +385,11 @@ func (ds *DataSource) FindActiveMatches(query interface{}, args ...interface{}) 
 	ds.DB.
 		Joins("left join game_definitions on matches.game_definition_id = game_definitions.id").
 		Preload("GameDefinition").
+		Preload("GameDefinition.Media").
 		Preload("GameDefinition.TeamDefinition").
 		Preload("GameDefinition.TeamDefinition.Teams").
 		Preload("GameDefinition.NarrativeDefinitions").
+		Preload("GameDefinition.NarrativeDefinitions.Media").
 		Preload("Participants").
 		Preload("TeamParticipants").
 		Where("time_end <= time_start").
@@ -487,9 +490,11 @@ func (ds *DataSource) FindMatchPreload(id uint) *model.Match {
 	ds.DB.Preload("Participants").
 		Preload("TeamParticipants").
 		Preload("GameDefinition").
+		Preload("GameDefinition.Media").
 		Preload("GameDefinition.TeamDefinition").
 		Preload("GameDefinition.TeamDefinition.Teams").
 		Preload("GameDefinition.NarrativeDefinitions").
+		Preload("GameDefinition.NarrativeDefinitions.Media").
 		Where(&model.Match{ID: id}).First(&match)
 
 	log.WithFields(log.Fields{
@@ -849,6 +854,7 @@ func (ds *DataSource) UpdateGameDefinition(input *model.GameDefinition) *model.G
 		gameDefinition.MaxLevel = input.MaxLevel
 		gameDefinition.UnblockLevel = input.UnblockLevel
 		gameDefinition.TeamDefinition = input.TeamDefinition
+		gameDefinition.Media = input.Media
 		gameDefinition.OwnerUserID = input.OwnerUserID
 
 		dbc := ds.DB.Save(gameDefinition)
@@ -975,9 +981,11 @@ func (ds *DataSource) FindGameDefinition(id uint) *model.GameDefinition {
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
+		Preload("Media").
 		Preload("TeamDefinition").
 		Preload("TeamDefinition.Teams").
 		Preload("NarrativeDefinitions").
+		Preload("NarrativeDefinitions.Media").
 		Where(&model.GameDefinition{ID: id}).
 		First(&gameDefinition).
 		RecordNotFound() {
@@ -1016,9 +1024,11 @@ func (ds *DataSource) FindGameDefinitionByName(name string) *model.GameDefinitio
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
+		Preload("Media").
 		Preload("TeamDefinition").
 		Preload("TeamDefinition.Teams").
 		Preload("NarrativeDefinitions").
+		Preload("NarrativeDefinitions.Media").
 		Where(&model.GameDefinition{Name: name}).
 		First(&gameDefinition).
 		RecordNotFound() {
@@ -1057,9 +1067,11 @@ func (ds *DataSource) FindAllSystemGameDefinition() *[]model.GameDefinition {
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
+		Preload("Media").
 		Preload("TeamDefinition").
 		Preload("TeamDefinition.Teams").
 		Preload("NarrativeDefinitions").
+		Preload("NarrativeDefinitions.Media").
 		Where(&model.GameDefinition{OwnerUserID: 0}).
 		Order("sort_order").
 		Find(&gameDefinitions)
@@ -1090,9 +1102,11 @@ func (ds *DataSource) FindTutorialGameDefinition() *[]model.GameDefinition {
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
+		Preload("Media").
 		Preload("TeamDefinition").
 		Preload("TeamDefinition.Teams").
 		Preload("NarrativeDefinitions").
+		Preload("NarrativeDefinitions.Media").
 		Where(&model.GameDefinition{Type: model.GAMEDEFINITION_TYPE_TUTORIAL}).
 		Order("sort_order").
 		Find(&gameDefinitions)
@@ -1123,9 +1137,11 @@ func (ds *DataSource) FindGameDefinitionByOwner(ownerID uint) *[]model.GameDefin
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
+		Preload("Media").
 		Preload("TeamDefinition").
 		Preload("TeamDefinition.Teams").
 		Preload("NarrativeDefinitions").
+		Preload("NarrativeDefinitions.Media").
 		Where(&model.GameDefinition{OwnerUserID: ownerID}).
 		Order("name").
 		Find(&gameDefinitions)

@@ -126,6 +126,7 @@ type GameDefinition struct {
 	UnblockLevel                  uint                  `json:"unblockLevel"`
 	OwnerUserID                   uint                  `json:"ownerUserID"`
 	TeamDefinition                TeamDefinition        `json:"teamDefinition"`
+	Media                         Media                 `json:"media"`
 	NarrativeDefinitions          []NarrativeDefinition `json:"narrativeDefinitions"`
 	GameComponents                []GameComponent       `json:"gameComponents"`
 	SceneComponents               []SceneComponent      `json:"sceneComponents"`
@@ -140,10 +141,28 @@ type NarrativeDefinition struct {
 	DeletedAt        *time.Time `json:"-" faker:"-"`
 	GameDefinitionID uint       `json:"gameDefinition,omitempty" faker:"-"`
 	Event            string     `json:"event"`
-	MediaID          string     `json:"mediaID"`
+	Media            Media      `json:"media"`
 	Type             string     `json:"type"`
 	Text             string     `gorm:"size:125000" json:"text"`
-	SortOrder        string     `json:"sortOrder"`
+	SortOrder        uint       `json:"sortOrder"`
+}
+
+type MediaRequest struct {
+	FileName   string `json:"fileName"`
+	Base64Data string `json:"base64Data"`
+}
+
+type Media struct {
+	ID                    uint       `gorm:"primary_key" json:"id"`
+	CreatedAt             time.Time  `json:"-"`
+	UpdatedAt             time.Time  `json:"-"`
+	DeletedAt             *time.Time `json:"-" faker:"-"`
+	GameDefinitionID      uint       `json:"gameDefinition,omitempty" faker:"-"`
+	NarrativeDefinitionID uint       `json:"narrativeDefinition,omitempty" faker:"-"`
+	UserID                uint       `json:"userID,omitempty"`
+	FileName              string     `json:"fileName"`
+	URL                   string     `json:"url"`
+	Thumbnail             string     `json:"thumbnail"`
 }
 
 type TeamDefinition struct {

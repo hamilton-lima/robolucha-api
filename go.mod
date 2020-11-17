@@ -4,15 +4,18 @@ go 1.15
 
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
+	github.com/aws/aws-sdk-go v1.35.29
 	github.com/bxcodec/faker/v3 v3.5.0
 	github.com/cheekybits/is v0.0.0-20150225183255-68e9c0620927 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/disintegration/imaging v1.6.2
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-openapi/spec v0.19.11 // indirect
 	github.com/go-openapi/swag v0.19.11 // indirect
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/go-sql-driver/mysql v1.5.0
+	github.com/gofrs/uuid v3.3.0+incompatible
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/gomodule/redigo v1.8.2
 	github.com/jinzhu/copier v0.0.0-20201025035756-632e723a6687
