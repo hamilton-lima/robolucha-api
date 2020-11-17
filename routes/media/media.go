@@ -165,6 +165,24 @@ func (handler *RequestHandler) AddMedia(request *model.MediaRequest, userID uint
 		}).Error("addMedia")
 	}
 
+	err = os.Remove(name)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"step": "error removing temp file",
+			"name": name,
+			"err":  err,
+		}).Error("addMedia")
+	}
+
+	err = os.Remove(thumbnail)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"step": "error removing thumbnail temp file",
+			"name": thumbnail,
+			"err":  err,
+		}).Error("addMedia")
+	}
+
 	log.WithFields(log.Fields{
 		"step":            "after upload",
 		"uploadThumbnail": uploadThumbnail,
