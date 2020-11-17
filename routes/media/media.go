@@ -115,7 +115,7 @@ func (handler *RequestHandler) AddMedia(request *model.MediaRequest, userID uint
 		}).Error("addMedia")
 	}
 
-	dstImage800 := imaging.Resize(img, 300, 0, imaging.Lanczos)
+	dstImage800 := imaging.Resize(img, 300, 0, imaging.NearestNeighbor)
 
 	err = ioutil.WriteFile(name, data, 0666)
 	if err != nil {
@@ -125,7 +125,7 @@ func (handler *RequestHandler) AddMedia(request *model.MediaRequest, userID uint
 		}).Error("addMedia")
 	}
 
-	err = imaging.Save(dstImage800, thumbnail)
+	err = imaging.Save(dstImage800, thumbnail, imaging.JPEGQuality(85))
 	if err != nil {
 		log.WithFields(log.Fields{
 			"step": "error saving thumbnail temp image file ",
