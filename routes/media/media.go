@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 
 	"bytes"
@@ -17,6 +18,10 @@ import (
 	"gitlab.com/robolucha/robolucha-api/httphelper"
 	"gitlab.com/robolucha/robolucha-api/model"
 	"gitlab.com/robolucha/robolucha-api/pubsub"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
 // Init receive database and message queue objects
@@ -128,19 +133,75 @@ func (handler *RequestHandler) AddMedia(request *model.MediaRequest, userID uint
 	err = imaging.Save(dstImage800, thumbnail, imaging.JPEGQuality(85))
 	if err != nil {
 		log.WithFields(log.Fields{
-			"step": "error saving thumbnail temp image file ",
+			"step": "error saving thumbnail temp image file",
 			"err":  err,
 		}).Error("addMedia")
 	}
+
+	// upload files
+	uploadOriginal, errOriginal := upload(name)
+	if errOriginal != nil {
+		log.WithFields(log.Fields{
+			"step": "error uploading original file",
+			"err":  errOriginal,
+		}).Error("addMedia")
+	}
+
+	uploadThumbnail, errThumb := upload(thumbnail)
+	if errThumb != nil {
+		log.WithFields(log.Fields{
+			"step": "error uploading thumbnail",
+			"err":  errThumb,
+		}).Error("addMedia")
+	}
+
+	log.WithFields(log.Fields{
+		"step":            "after upload",
+		"uploadThumbnail": uploadThumbnail,
+		"uploadOriginal":  uploadOriginal,
+	}).Info("addMedia")
 
 	// upload the file here
 	media := model.Media{
 		UserID:    userID,
 		FileName:  request.FileName,
-		URL:       "",
-		Thumbnail: "",
+		URL:       uploadOriginal.Location,
+		Thumbnail: uploadThumbnail.Location,
 	}
 
 	handler.ds.DB.Create(&media)
 	return media
+}
+
+func upload(fileName string) (*s3manager.UploadOutput, error) {
+	// https://jto.nyc3.digitaloceanspaces.com
+	// The session the S3 Uploader will use
+	endpoint := "nyc3.digitaloceanspaces.com"
+	region := "nyc3"
+	sess := session.Must(session.NewSession(&aws.Config{
+		Endpoint: &endpoint,
+		Region:   &region,
+	}))
+
+	// Create an uploader with the session and default options
+	uploader := s3manager.NewUploader(sess)
+
+	f, err := os.Open(fileName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open file %q, %v", fileName, err)
+	}
+
+	myBucket := "game-robolucha"
+	// Upload the file to S3.
+	result, err := uploader.Upload(&s3manager.UploadInput{
+		Bucket: aws.String(myBucket),
+		Key:    aws.String(fileName),
+		Body:   f,
+		ACL:    aws.String("public-read"),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to upload file, %v", err)
+	}
+
+	return result, err
 }
