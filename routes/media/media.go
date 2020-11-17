@@ -22,6 +22,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+
+	"github.com/gofrs/uuid"
 )
 
 // Init receive database and message queue objects
@@ -105,8 +107,16 @@ func after(text string, find string) string {
 // Add godoc
 func (handler *RequestHandler) AddMedia(request *model.MediaRequest, userID uint) model.Media {
 
-	name := fmt.Sprintf("./upload-%v", request.FileName)
-	thumbnail := fmt.Sprintf("./thumb-%v", request.FileName)
+	u2, err := uuid.NewV4()
+	if err != nil {
+		log.WithFields(log.Fields{
+			"step": "error generating UUID",
+			"err":  err,
+		}).Error("addMedia")
+	}
+
+	name := fmt.Sprintf("/tmp/%v-%v", u2, request.FileName)
+	thumbnail := fmt.Sprintf("/tmp/%v-thumb-%v", u2, request.FileName)
 
 	// removes "data:image/png;base64," from the beginning of the data
 	base64 := after(request.Base64Data, ",")
