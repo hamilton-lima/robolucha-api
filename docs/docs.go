@@ -1879,6 +1879,10 @@ var doc = `{
                 "maxParticipants": {
                     "type": "integer"
                 },
+                "media": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.Media"
+                },
                 "minFireAmount": {
                     "type": "integer"
                 },

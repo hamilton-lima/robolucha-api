@@ -189,6 +189,9 @@ definitions:
         type: integer
       maxParticipants:
         type: integer
+      media:
+        $ref: '#/definitions/model.Media'
+        type: object
       minFireAmount:
         type: integer
       minFireDamage:
