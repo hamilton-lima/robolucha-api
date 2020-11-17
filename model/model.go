@@ -126,6 +126,7 @@ type GameDefinition struct {
 	UnblockLevel                  uint                  `json:"unblockLevel"`
 	OwnerUserID                   uint                  `json:"ownerUserID"`
 	TeamDefinition                TeamDefinition        `json:"teamDefinition"`
+	Media                         Media                 `json:"media"`
 	NarrativeDefinitions          []NarrativeDefinition `json:"narrativeDefinitions"`
 	GameComponents                []GameComponent       `json:"gameComponents"`
 	SceneComponents               []SceneComponent      `json:"sceneComponents"`

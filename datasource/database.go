@@ -385,6 +385,7 @@ func (ds *DataSource) FindActiveMatches(query interface{}, args ...interface{}) 
 	ds.DB.
 		Joins("left join game_definitions on matches.game_definition_id = game_definitions.id").
 		Preload("GameDefinition").
+		Preload("GameDefinition.Media").
 		Preload("GameDefinition.TeamDefinition").
 		Preload("GameDefinition.TeamDefinition.Teams").
 		Preload("GameDefinition.NarrativeDefinitions").
@@ -489,6 +490,7 @@ func (ds *DataSource) FindMatchPreload(id uint) *model.Match {
 	ds.DB.Preload("Participants").
 		Preload("TeamParticipants").
 		Preload("GameDefinition").
+		Preload("GameDefinition.Media").
 		Preload("GameDefinition.TeamDefinition").
 		Preload("GameDefinition.TeamDefinition.Teams").
 		Preload("GameDefinition.NarrativeDefinitions").
@@ -852,6 +854,7 @@ func (ds *DataSource) UpdateGameDefinition(input *model.GameDefinition) *model.G
 		gameDefinition.MaxLevel = input.MaxLevel
 		gameDefinition.UnblockLevel = input.UnblockLevel
 		gameDefinition.TeamDefinition = input.TeamDefinition
+		gameDefinition.Media = input.Media
 		gameDefinition.OwnerUserID = input.OwnerUserID
 
 		dbc := ds.DB.Save(gameDefinition)
@@ -978,6 +981,7 @@ func (ds *DataSource) FindGameDefinition(id uint) *model.GameDefinition {
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
+		Preload("Media").
 		Preload("TeamDefinition").
 		Preload("TeamDefinition.Teams").
 		Preload("NarrativeDefinitions").
@@ -1020,6 +1024,7 @@ func (ds *DataSource) FindGameDefinitionByName(name string) *model.GameDefinitio
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
+		Preload("Media").
 		Preload("TeamDefinition").
 		Preload("TeamDefinition.Teams").
 		Preload("NarrativeDefinitions").
@@ -1062,6 +1067,7 @@ func (ds *DataSource) FindAllSystemGameDefinition() *[]model.GameDefinition {
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
+		Preload("Media").
 		Preload("TeamDefinition").
 		Preload("TeamDefinition.Teams").
 		Preload("NarrativeDefinitions").
@@ -1096,6 +1102,7 @@ func (ds *DataSource) FindTutorialGameDefinition() *[]model.GameDefinition {
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
+		Preload("Media").
 		Preload("TeamDefinition").
 		Preload("TeamDefinition.Teams").
 		Preload("NarrativeDefinitions").
@@ -1130,6 +1137,7 @@ func (ds *DataSource) FindGameDefinitionByOwner(ownerID uint) *[]model.GameDefin
 		Preload("SceneComponents.Codes").
 		Preload("Codes").
 		Preload("LuchadorSuggestedCodes").
+		Preload("Media").
 		Preload("TeamDefinition").
 		Preload("TeamDefinition.Teams").
 		Preload("NarrativeDefinitions").
