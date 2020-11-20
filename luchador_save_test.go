@@ -191,3 +191,28 @@ func TestLuchadorUpdateRandomMask(t *testing.T) {
 	assert.True(t, mockPublisher.LastChannel == channel)
 
 }
+
+func TestLuchadorUpdateBlocklyCode(t *testing.T) {
+	luchador := Setup(t)
+	defer ds.DB.Close()
+
+	// first try to change to a valid name
+	luchador.Name = "lucharito"
+	luchador.Codes = make([]model.Code, 1)
+	luchador.Codes[0] = model.Code{Event: "onStart", Script: "turnGun(90)"}
+
+	response := UpdateLuchador(t, router, luchador)
+
+	luchador1 := response.Luchador
+	luchador1.Codes[0].Blockly = "<xml></xml>"
+
+	response = UpdateLuchador(t, router, luchador1)
+
+	assert.Equal(t, "lucharito", response.Luchador.Name)
+	assert.Equal(t, "<xml></xml>", response.Luchador.Codes[0].Blockly)
+
+	log.WithFields(log.Fields{
+		"expected": response,
+	}).Error("TestLuchadorUpdateBlocklyCode")
+
+}
