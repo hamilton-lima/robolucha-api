@@ -79,6 +79,8 @@ definitions:
     type: object
   model.Code:
     properties:
+      blockly:
+        type: string
       event:
         type: string
       exception:

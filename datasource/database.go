@@ -328,6 +328,7 @@ func applyCodeChanges(current []model.Code, updated []model.Code) []model.Code {
 		for i, currentCode := range current {
 			if currentCode.Event == newCode.Event && currentCode.GameDefinitionID == newCode.GameDefinitionID {
 				current[i].Script = newCode.Script
+				current[i].Blockly = newCode.Blockly
 				found = true
 				break
 			}

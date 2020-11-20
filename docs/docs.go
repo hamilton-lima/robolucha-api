@@ -1712,6 +1712,9 @@ var doc = `{
         "model.Code": {
             "type": "object",
             "properties": {
+                "blockly": {
+                    "type": "string"
+                },
                 "event": {
                     "type": "string"
                 },
