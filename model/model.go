@@ -271,8 +271,8 @@ type Code struct {
 	UpdatedAt        time.Time  `json:"-"`
 	DeletedAt        *time.Time `json:"-" faker:"-"`
 	Event            string     `json:"event"`
-	Script           string     `json:"script"`
-	Blockly          string     `json:"blockly"`
+	Script           string     `json:"script" gorm:"size:125000"`
+	Blockly          string     `json:"blockly" gorm:"size:125000"`
 	Version          uint       `json:"version"`
 	Exception        string     `json:"exception"`
 	GameDefinitionID uint       `json:"gameDefinition" faker:"-"`
