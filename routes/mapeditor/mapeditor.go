@@ -14,10 +14,6 @@ import (
 	"gitlab.com/robolucha/robolucha-api/pubsub"
 )
 
-const (
-	systemEditorRole = "SYSTEM_EDITOR"
-)
-
 // Init receive database and message queue objects
 func Init(_ds *datasource.DataSource, _publisher pubsub.Publisher) *Router {
 	requestHandler = NewRequestHandler(_ds, _publisher)
@@ -69,7 +65,7 @@ func (router *Router) Setup(group *gin.RouterGroup) {
 func getMyGameDefinitions(c *gin.Context) {
 	user := httphelper.UserDetailsFromContext(c)
 
-	if auth.UserBelongsToRole(c, systemEditorRole) {
+	if auth.UserBelongsToRole(user, auth.SystemEditorRole) {
 		gameDefinitions := requestHandler.FindAll()
 		c.JSON(http.StatusOK, gameDefinitions)
 	} else {
@@ -144,7 +140,7 @@ func updateMyGameDefinition(c *gin.Context) {
 	}
 
 	// dont check ownership when user is a system editor
-	skipCheckOwnerShip := auth.UserBelongsToRole(c, systemEditorRole)
+	skipCheckOwnerShip := auth.UserBelongsToRole(user, auth.SystemEditorRole)
 
 	err = requestHandler.Update(user.User.ID, gameDefinition, skipCheckOwnerShip)
 	if err != nil {
