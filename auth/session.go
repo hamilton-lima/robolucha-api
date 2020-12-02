@@ -14,6 +14,7 @@ const (
 	cookieName             = "kc-access"
 	getkeeperEncryptionKey = "GATEKEEPER_ENCRYPTION_KEY"
 	dashboardRole          = "dashboard_user"
+	SystemEditorRole       = "SYSTEM_EDITOR"
 )
 
 // SessionValidatorFactory definition
@@ -159,7 +160,7 @@ func SessionAllwaysValid(ds *datasource.DataSource) gin.HandlerFunc {
 		level := ds.FindUserLevelByUserID(user.ID)
 		userDetails := model.UserDetails{
 			User:  user,
-			Roles: []string{dashboardRole},
+			Roles: []string{dashboardRole, SystemEditorRole},
 			Level: *level,
 		}
 		c.Set("userDetails", userDetails)
@@ -185,42 +186,11 @@ func KeyIsValid(key string) gin.HandlerFunc {
 	}
 }
 
-func UserBelongsToRole(c *gin.Context, role string) bool {
+func UserBelongsToRole(userDetails *model.UserDetails, role string) bool {
 
-	authorization, err := c.Request.Cookie(cookieName)
-	if err != nil {
-		log.Debug("Error reading authorization cookie")
-		return false
-	}
-
-	if authorization.Value == "" {
-		log.Debug("No Authorization cookie")
-		return false
-	}
-
-	key := os.Getenv(getkeeperEncryptionKey)
-	sessionUser, err := GetUser(authorization.Value, key)
-	if err != nil {
-		log.Debug("Error reading user from authorization cookie")
-		return false
-	}
-
-	if sessionUser.Username == "" {
+	if contains(userDetails.Roles, role) {
 		log.WithFields(log.Fields{
-			"authorization": authorization,
-			"cookie-name":   cookieName,
-			"sessionUser":   sessionUser,
-		}).Info("Invalid Session")
-		return false
-	} else {
-		log.WithFields(log.Fields{
-			"sessionUser": sessionUser,
-		}).Info("User Authorized")
-	}
-
-	if contains(sessionUser.Roles, role) {
-		log.WithFields(log.Fields{
-			"sessionUser": sessionUser,
+			"userDetails": userDetails,
 			"role":        role,
 		}).Info("User HAS role")
 		return true
