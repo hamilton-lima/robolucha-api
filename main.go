@@ -92,7 +92,7 @@ func main() {
 	if disableAuth == "true" {
 		router = createRouter(internalAPIKey, logRequestBody, auth.SessionAllwaysValid, auth.SessionAllwaysValid)
 	} else {
-		router = createRouter(internalAPIKey, logRequestBody, auth.SessionIsValid, auth.SessionIsValidAndDashBoardUser)
+		router = createRouter(internalAPIKey, logRequestBody, auth.SessionIsValid, auth.SessionIsValid)
 	}
 
 	router.Run(":" + port)
