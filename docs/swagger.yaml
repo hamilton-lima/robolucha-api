@@ -210,6 +210,8 @@ definitions:
         items:
           $ref: '#/definitions/model.NarrativeDefinition'
         type: array
+      nextGamedefinitionID:
+        type: integer
       ownerUserID:
         type: integer
       punchAngle:
