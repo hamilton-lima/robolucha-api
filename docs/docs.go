@@ -1910,6 +1910,9 @@ var doc = `{
                         "$ref": "#/definitions/model.NarrativeDefinition"
                     }
                 },
+                "nextGamedefinitionID": {
+                    "type": "integer"
+                },
                 "ownerUserID": {
                     "type": "integer"
                 },

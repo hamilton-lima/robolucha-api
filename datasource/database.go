@@ -857,6 +857,7 @@ func (ds *DataSource) UpdateGameDefinition(input *model.GameDefinition) *model.G
 		gameDefinition.TeamDefinition = input.TeamDefinition
 		gameDefinition.Media = input.Media
 		gameDefinition.OwnerUserID = input.OwnerUserID
+		gameDefinition.NextGamedefinitionID = input.NextGamedefinitionID
 
 		dbc := ds.DB.Save(gameDefinition)
 		if dbc.Error != nil {
