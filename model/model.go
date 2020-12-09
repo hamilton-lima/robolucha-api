@@ -125,6 +125,7 @@ type GameDefinition struct {
 	MaxLevel                      uint                  `json:"maxLevel"`
 	UnblockLevel                  uint                  `json:"unblockLevel"`
 	OwnerUserID                   uint                  `json:"ownerUserID"`
+	NextGamedefinitionID          uint                  `json:"nextGamedefinitionID"`
 	TeamDefinition                TeamDefinition        `json:"teamDefinition"`
 	Media                         Media                 `json:"media"`
 	NarrativeDefinitions          []NarrativeDefinition `json:"narrativeDefinitions"`
