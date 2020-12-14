@@ -177,6 +177,29 @@ func (ds *DataSource) FindAvailableMatchByClassroomID(id uint) *[]model.Availabl
 	return &result
 }
 
+// FindAvailableMatchOwnedByUser definition
+func (ds *DataSource) FindAvailableMatchOwnedByUser(ownerID uint) *[]model.AvailableMatch {
+
+	var result []model.AvailableMatch
+
+	ds.DB.
+		Joins("join game_definitions on game_definitions.id = game_definition_id").
+		Where("game_definitions.owner_user_id = ? ", ownerID).
+		Find(&result)
+
+	log.WithFields(log.Fields{
+		"availableMatches": result,
+		"owner":            ownerID,
+	}).Info("FindAvailableMatchOwnedByUser")
+
+	// load game definition details
+	for n, availableMatch := range result {
+		result[n].GameDefinition = ds.FindGameDefinition(availableMatch.GameDefinitionID)
+	}
+
+	return &result
+}
+
 // BuildStudentResponse definition
 func (ds *DataSource) BuildStudentResponse(students []model.Student) []model.StudentResponse {
 	result := make([]model.StudentResponse, len(students))

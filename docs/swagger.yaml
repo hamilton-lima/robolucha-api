@@ -999,6 +999,22 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: notify that the match is running, all participants joined
+  /private/available-match-classroom-owned:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.AvailableMatch'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: find available matches by classroom owned by the user
   /private/available-match-classroom/{id}:
     get:
       consumes:
