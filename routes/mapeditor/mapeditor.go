@@ -284,7 +284,12 @@ func (handler *RequestHandler) UpdateAvailability(userID uint, availability *mod
 	// load all Available matches for this gamedefinition
 	var availableMatches []model.AvailableMatch
 	filter := model.AvailableMatch{GameDefinitionID: availability.GameDefinitionID}
-	handler.ds.DB.Where(&filter).First(&availableMatches)
+	handler.ds.DB.Where(&filter).Find(&availableMatches)
+
+	log.WithFields(log.Fields{
+		"availableMatches": availableMatches,
+		"availability":     availability,
+	}).Info("Before the matches")
 
 	// check records to delete
 	for _, search := range availableMatches {
