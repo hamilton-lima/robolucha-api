@@ -474,3 +474,8 @@ type PageEvent struct {
 	Value2      string     `json:"value2"`
 	Value3      string     `json:"value3"`
 }
+
+type GameDefinitionClassroomAvailability struct {
+	GameDefinitionID uint   `json:"gameDefinitionID"`
+	Classrooms       []uint `json:"classrooms"`
+}

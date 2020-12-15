@@ -171,6 +171,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.POST("/join-classroom/:accessCode", joinClassroom)
 		privateAPI.GET("/available-match-public", getPublicAvailableMatch)
 		privateAPI.GET("/available-match-classroom/:id", getClassroomAvailableMatch)
+		privateAPI.GET("/available-match-classroom-owned", getClassroomAvailableMatchOwned)
 		privateAPI.POST("/page-events", addEvents)
 		privateAPI.GET("/level-group", getLevelGroup)
 
@@ -1381,6 +1382,28 @@ func getClassroomAvailableMatch(c *gin.Context) {
 	log.WithFields(log.Fields{
 		"result": model.LogAvailableMatches(result),
 	}).Info("getPublicAvailableMatch")
+
+	c.JSON(http.StatusOK, result)
+}
+
+// getClassroomAvailableMatchOwned godoc
+// @Summary find available matches by classroom owned by the user
+// @Accept json
+// @Produce json
+// @Success 200 {array} model.AvailableMatch
+// @Security ApiKeyAuth
+// @Router /private/available-match-classroom-owned [get]
+func getClassroomAvailableMatchOwned(c *gin.Context) {
+	details := httphelper.UserDetailsFromContext(c)
+
+	// dont check ownership when user is a system editor
+	skipCheckOwnerShip := auth.UserBelongsToRole(details, auth.SystemEditorRole)
+
+	result := ds.FindAvailableMatchOwnedByUser(details.User.ID, skipCheckOwnerShip)
+
+	log.WithFields(log.Fields{
+		"result": model.LogAvailableMatches(result),
+	}).Info("getClassroomAvailableMatchOwned")
 
 	c.JSON(http.StatusOK, result)
 }

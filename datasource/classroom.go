@@ -36,19 +36,19 @@ func (ds *DataSource) AddClassroom(c *model.Classroom) *model.Classroom {
 		"classroom": classroom,
 	}).Debug("after addClassroom")
 
-	// create avaialable match for all existing gamedefinitions
-	all := ds.FindAllSystemGameDefinition()
-	for _, gd := range *all {
+	// // create avaialable match for all existing gamedefinitions
+	// all := ds.FindAllSystemGameDefinition()
+	// for _, gd := range *all {
 
-		am := model.AvailableMatch{GameDefinitionID: gd.ID, Name: gd.Name, ClassroomID: classroom.ID}
-		ds.DB.Where(&am).FirstOrCreate(&am)
+	// 	am := model.AvailableMatch{GameDefinitionID: gd.ID, Name: gd.Name, ClassroomID: classroom.ID}
+	// 	ds.DB.Where(&am).FirstOrCreate(&am)
 
-		log.WithFields(log.Fields{
-			"gameDefinitionID": gd.ID,
-			"AvailableMatch":   am,
-			"classroom":        classroom,
-		}).Debug("AddClassroom")
-	}
+	// 	log.WithFields(log.Fields{
+	// 		"gameDefinitionID": gd.ID,
+	// 		"AvailableMatch":   am,
+	// 		"classroom":        classroom,
+	// 	}).Debug("AddClassroom")
+	// }
 
 	return &classroom
 }
@@ -168,6 +168,37 @@ func (ds *DataSource) FindAvailableMatchByClassroomID(id uint) *[]model.Availabl
 	log.WithFields(log.Fields{
 		"availableMatch": result,
 	}).Debug("findAvailableMatchByClassroomID")
+
+	// load game definition details
+	for n, availableMatch := range result {
+		result[n].GameDefinition = ds.FindGameDefinition(availableMatch.GameDefinitionID)
+	}
+
+	return &result
+}
+
+// FindAvailableMatchOwnedByUser definition
+func (ds *DataSource) FindAvailableMatchOwnedByUser(ownerID uint, skipCheckOwnerShip bool) *[]model.AvailableMatch {
+
+	var result []model.AvailableMatch
+
+	if skipCheckOwnerShip {
+		ds.DB.
+			Joins("join game_definitions on game_definitions.id = game_definition_id").
+			Where("game_definitions.owner_user_id = ? OR game_definitions.owner_user_id = 0", ownerID).
+			Find(&result)
+	} else {
+		ds.DB.
+			Joins("join game_definitions on game_definitions.id = game_definition_id").
+			Where("game_definitions.owner_user_id = ? ", ownerID).
+			Find(&result)
+	}
+
+	log.WithFields(log.Fields{
+		"availableMatches":   result,
+		"owner":              ownerID,
+		"skipCheckOwnerShip": skipCheckOwnerShip,
+	}).Info("FindAvailableMatchOwnedByUser")
 
 	// load game definition details
 	for n, availableMatch := range result {

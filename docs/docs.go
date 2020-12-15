@@ -702,6 +702,33 @@ var doc = `{
                 }
             }
         },
+        "/private/available-match-classroom-owned": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find available matches by classroom owned by the user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.AvailableMatch"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/private/available-match-classroom/{id}": {
             "get": {
                 "security": [
@@ -1141,6 +1168,41 @@ var doc = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/model.GameDefinition"
+                        }
+                    }
+                }
+            }
+        },
+        "/private/mapeditor/update-classroom-map-availability": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "update gamedefition availability by classroom",
+                "parameters": [
+                    {
+                        "description": "availability",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.GameDefinitionClassroomAvailability"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
@@ -1981,6 +2043,20 @@ var doc = `{
                     "type": "string"
                 },
                 "unblockLevel": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.GameDefinitionClassroomAvailability": {
+            "type": "object",
+            "properties": {
+                "classrooms": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "gameDefinitionID": {
                     "type": "integer"
                 }
             }
