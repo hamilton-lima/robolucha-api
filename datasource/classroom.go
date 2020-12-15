@@ -36,19 +36,19 @@ func (ds *DataSource) AddClassroom(c *model.Classroom) *model.Classroom {
 		"classroom": classroom,
 	}).Debug("after addClassroom")
 
-	// create avaialable match for all existing gamedefinitions
-	all := ds.FindAllSystemGameDefinition()
-	for _, gd := range *all {
+	// // create avaialable match for all existing gamedefinitions
+	// all := ds.FindAllSystemGameDefinition()
+	// for _, gd := range *all {
 
-		am := model.AvailableMatch{GameDefinitionID: gd.ID, Name: gd.Name, ClassroomID: classroom.ID}
-		ds.DB.Where(&am).FirstOrCreate(&am)
+	// 	am := model.AvailableMatch{GameDefinitionID: gd.ID, Name: gd.Name, ClassroomID: classroom.ID}
+	// 	ds.DB.Where(&am).FirstOrCreate(&am)
 
-		log.WithFields(log.Fields{
-			"gameDefinitionID": gd.ID,
-			"AvailableMatch":   am,
-			"classroom":        classroom,
-		}).Debug("AddClassroom")
-	}
+	// 	log.WithFields(log.Fields{
+	// 		"gameDefinitionID": gd.ID,
+	// 		"AvailableMatch":   am,
+	// 		"classroom":        classroom,
+	// 	}).Debug("AddClassroom")
+	// }
 
 	return &classroom
 }
