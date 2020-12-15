@@ -1173,6 +1173,41 @@ var doc = `{
                 }
             }
         },
+        "/private/mapeditor/update-classroom-map-availability": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "update gamedefition availability by classroom",
+                "parameters": [
+                    {
+                        "description": "availability",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.GameDefinitionClassroomAvailability"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/private/mask-config/{id}": {
             "get": {
                 "security": [
@@ -2008,6 +2043,20 @@ var doc = `{
                     "type": "string"
                 },
                 "unblockLevel": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.GameDefinitionClassroomAvailability": {
+            "type": "object",
+            "properties": {
+                "classrooms": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "gameDefinitionID": {
                     "type": "integer"
                 }
             }

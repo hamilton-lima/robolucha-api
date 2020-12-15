@@ -52,6 +52,7 @@ func (router *Router) Setup(group *gin.RouterGroup) {
 	group.GET("/mapeditor", getMyGameDefinitions)
 	group.GET("/mapeditor/default", getDefaultGameDefinition)
 	group.POST("/mapeditor", addMyGameDefinition)
+	group.POST("/mapeditor/update-classroom-map-availability", updateClassroomMapAvailability)
 	group.PUT("/mapeditor", updateMyGameDefinition)
 }
 
@@ -150,6 +151,39 @@ func updateMyGameDefinition(c *gin.Context) {
 	}
 }
 
+// updateMyGameDefinition godoc
+// @Summary update gamedefition availability by classroom
+// @Accept json
+// @Produce json
+// @Param request body model.GameDefinitionClassroomAvailability true "availability"
+// @Success 200 {string} string
+// @Security ApiKeyAuth
+// @Router /private/mapeditor/update-classroom-map-availability [post]
+func updateClassroomMapAvailability(c *gin.Context) {
+	user := httphelper.UserDetailsFromContext(c)
+
+	// parse body parameter
+	var availability *model.GameDefinitionClassroomAvailability
+	err := c.BindJSON(&availability)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"err": err,
+		}).Info("Invalid body content on updateClassroomMapAvailability")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	// dont check ownership when user is a system editor
+	skipCheckOwnerShip := auth.UserBelongsToRole(user, auth.SystemEditorRole)
+
+	err = requestHandler.UpdateAvailability(user.User.ID, availability, skipCheckOwnerShip)
+	if err != nil {
+		c.AbortWithStatus(http.StatusConflict)
+	} else {
+		c.JSON(http.StatusOK, "")
+	}
+}
+
 // Find godoc
 func (handler *RequestHandler) Find(userID uint) *[]model.GameDefinition {
 	return handler.ds.FindGameDefinitionByOwner(userID)
@@ -222,5 +256,81 @@ func (handler *RequestHandler) Update(userID uint, gameDefinition *model.GameDef
 		}).Info("gamedefinition UPDATED")
 		return nil
 	}
+
+}
+
+// err = requestHandler.UpdateAvailability(user.User.ID, availability, skipCheckOwnerShip)
+
+// Update godoc
+func (handler *RequestHandler) UpdateAvailability(userID uint, availability *model.GameDefinitionClassroomAvailability, skipCheckOwnerShip bool) error {
+	foundByID := handler.ds.FindGameDefinition(availability.GameDefinitionID)
+	// must exist to be updated
+	if foundByID == nil {
+		log.WithFields(log.Fields{}).Info("gamedefinition DOES NOT EXIST, cant be updated")
+		return errors.New("Gamedefinition DOES NOT exist")
+	}
+
+	// must be the owner to update it
+	if !skipCheckOwnerShip {
+		if foundByID.OwnerUserID != userID {
+			log.WithFields(log.Fields{
+				"foundByID.OwnerUserID": foundByID.OwnerUserID,
+				"userID":                userID,
+			}).Info("current user dont OWNS this gamedefinition, cant be updated")
+			return errors.New("current user DOES NOT OWN this Gamedefinition")
+		}
+	}
+
+	// load all Available matches for this gamedefinition
+	var availableMatches []model.AvailableMatch
+	filter := model.AvailableMatch{GameDefinitionID: availability.GameDefinitionID}
+	handler.ds.DB.Where(&filter).First(&availableMatches)
+
+	// check records to delete
+	for _, search := range availableMatches {
+		found := false
+		for _, classroom := range availability.Classrooms {
+			if search.ClassroomID == classroom {
+				found = true
+				break
+			}
+		}
+
+		// this available match was not found in the list
+		if !found {
+			log.WithFields(log.Fields{
+				"availableMatch": search,
+			}).Info("remove available match")
+			handler.ds.DB.Delete(&search)
+		}
+	}
+
+	// check records to insert
+	for _, classroom := range availability.Classrooms {
+		found := false
+		for _, availableMatch := range availableMatches {
+			if availableMatch.ClassroomID == classroom {
+				found = true
+				break
+			}
+		}
+
+		// no available match was found for this classroom, CREATE ONE
+		if !found {
+			log.WithFields(log.Fields{
+				"classroom": classroom,
+			}).Info("add missing availability")
+
+			availableMatch := model.AvailableMatch{
+				Name:             foundByID.Name,
+				ClassroomID:      classroom,
+				GameDefinitionID: availability.GameDefinitionID,
+			}
+
+			handler.ds.DB.Model(&availableMatch).Create(&availableMatch)
+		}
+	}
+
+	return nil
 
 }
