@@ -178,18 +178,26 @@ func (ds *DataSource) FindAvailableMatchByClassroomID(id uint) *[]model.Availabl
 }
 
 // FindAvailableMatchOwnedByUser definition
-func (ds *DataSource) FindAvailableMatchOwnedByUser(ownerID uint) *[]model.AvailableMatch {
+func (ds *DataSource) FindAvailableMatchOwnedByUser(ownerID uint, skipCheckOwnerShip bool) *[]model.AvailableMatch {
 
 	var result []model.AvailableMatch
 
-	ds.DB.
-		Joins("join game_definitions on game_definitions.id = game_definition_id").
-		Where("game_definitions.owner_user_id = ? ", ownerID).
-		Find(&result)
+	if skipCheckOwnerShip {
+		ds.DB.
+			Joins("join game_definitions on game_definitions.id = game_definition_id").
+			Where("game_definitions.owner_user_id = ? OR game_definitions.owner_user_id = 0", ownerID).
+			Find(&result)
+	} else {
+		ds.DB.
+			Joins("join game_definitions on game_definitions.id = game_definition_id").
+			Where("game_definitions.owner_user_id = ? ", ownerID).
+			Find(&result)
+	}
 
 	log.WithFields(log.Fields{
-		"availableMatches": result,
-		"owner":            ownerID,
+		"availableMatches":   result,
+		"owner":              ownerID,
+		"skipCheckOwnerShip": skipCheckOwnerShip,
 	}).Info("FindAvailableMatchOwnedByUser")
 
 	// load game definition details

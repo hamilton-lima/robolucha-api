@@ -259,8 +259,6 @@ func (handler *RequestHandler) Update(userID uint, gameDefinition *model.GameDef
 
 }
 
-// err = requestHandler.UpdateAvailability(user.User.ID, availability, skipCheckOwnerShip)
-
 // Update godoc
 func (handler *RequestHandler) UpdateAvailability(userID uint, availability *model.GameDefinitionClassroomAvailability, skipCheckOwnerShip bool) error {
 	foundByID := handler.ds.FindGameDefinition(availability.GameDefinitionID)

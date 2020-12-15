@@ -1394,8 +1394,12 @@ func getClassroomAvailableMatch(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /private/available-match-classroom-owned [get]
 func getClassroomAvailableMatchOwned(c *gin.Context) {
-	user := httphelper.UserFromContext(c)
-	result := ds.FindAvailableMatchOwnedByUser(user.ID)
+	details := httphelper.UserDetailsFromContext(c)
+
+	// dont check ownership when user is a system editor
+	skipCheckOwnerShip := auth.UserBelongsToRole(details, auth.SystemEditorRole)
+
+	result := ds.FindAvailableMatchOwnedByUser(details.User.ID, skipCheckOwnerShip)
 
 	log.WithFields(log.Fields{
 		"result": model.LogAvailableMatches(result),
