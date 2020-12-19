@@ -172,6 +172,7 @@ func createRouter(internalAPIKey string, logRequestBody string,
 		privateAPI.GET("/available-match-public", getPublicAvailableMatch)
 		privateAPI.GET("/available-match-classroom/:id", getClassroomAvailableMatch)
 		privateAPI.GET("/available-match-classroom-owned", getClassroomAvailableMatchOwned)
+		privateAPI.GET("/available-match-classroom-joined", getClassroomAvailableMatchJoined)
 		privateAPI.POST("/page-events", addEvents)
 		privateAPI.GET("/level-group", getLevelGroup)
 
@@ -1404,6 +1405,25 @@ func getClassroomAvailableMatchOwned(c *gin.Context) {
 	log.WithFields(log.Fields{
 		"result": model.LogAvailableMatches(result),
 	}).Info("getClassroomAvailableMatchOwned")
+
+	c.JSON(http.StatusOK, result)
+}
+
+// getClassroomAvailableMatchJoined godoc
+// @Summary find available matches by classroom joined by the user
+// @Accept json
+// @Produce json
+// @Success 200 {array} model.AvailableMatch
+// @Security ApiKeyAuth
+// @Router /private/available-match-classroom-joined [get]
+func getClassroomAvailableMatchJoined(c *gin.Context) {
+	details := httphelper.UserDetailsFromContext(c)
+
+	result := ds.FindAvailableMatchJoinedByUser(details.User.ID)
+
+	log.WithFields(log.Fields{
+		"result": model.LogAvailableMatches(result),
+	}).Info("getClassroomAvailableMatchJoined")
 
 	c.JSON(http.StatusOK, result)
 }

@@ -702,6 +702,33 @@ var doc = `{
                 }
             }
         },
+        "/private/available-match-classroom-joined": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "find available matches by classroom joined by the user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.AvailableMatch"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/private/available-match-classroom-owned": {
             "get": {
                 "security": [
