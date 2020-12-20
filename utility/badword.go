@@ -2,12 +2,13 @@ package utility
 
 import (
 	"bufio"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var badWordFragmentMap map[string]bool
@@ -99,12 +100,43 @@ func isBad(sentence string) bool {
 	vet := strings.Split(sentence, " ")
 	for _, s := range vet {
 		if badWordFragmentMap[s] || badWordMap[s] {
+
+			log.WithFields(log.Fields{
+				"reason":                "fragment or map",
+				"sentence":              sentence,
+				"s":                     s,
+				"badWordFragmentMap[s]": badWordFragmentMap[s],
+				"badWordMap[s]":         badWordMap[s],
+			}).Info("isBad")
+
 			return true
 		}
 	}
 
+	cleanSentence := strings.ReplaceAll(sentence, " ", "")
+
 	for word := range badWordFragmentMap {
-		if strings.Contains(strings.ReplaceAll(sentence, " ", ""), strings.ReplaceAll(word, " ", "")) {
+		wordNoSpace := strings.ReplaceAll(word, " ", "")
+
+		// check if starts with
+		if strings.HasPrefix(cleanSentence, wordNoSpace) {
+			log.WithFields(log.Fields{
+				"reason":   "starts with",
+				"sentence": cleanSentence,
+				"word":     wordNoSpace,
+			}).Info("isBad")
+
+			return true
+		}
+
+		// check if ends with
+		if strings.HasSuffix(cleanSentence, wordNoSpace) {
+			log.WithFields(log.Fields{
+				"reason":   "ends with",
+				"sentence": cleanSentence,
+				"word":     wordNoSpace,
+			}).Info("isBad")
+
 			return true
 		}
 	}
