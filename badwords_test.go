@@ -32,8 +32,8 @@ func TestWhenCu_ShouldBeTrue(t *testing.T) {
 	}
 }
 
-func TestWhenCunhado_ShouldBeFalse(t *testing.T) {
-	if utility.ContainsBadWord("CUnhado") {
+func TestWhenCunhado_ShouldBeTrue(t *testing.T) {
+	if !utility.ContainsBadWord("CUnhado") {
 		t.Fail()
 	}
 }
@@ -46,6 +46,12 @@ func TestWhenContains_ShouldBeTrue(t *testing.T) {
 
 func TestWhenContainsDuplication_ShouldBeTrue(t *testing.T) {
 	if !utility.ContainsBadWord("Asss$$") {
+		t.Fail()
+	}
+}
+
+func TestCompositeWord(t *testing.T) {
+	if !utility.ContainsBadWord("maior cuzao") {
 		t.Fail()
 	}
 }
