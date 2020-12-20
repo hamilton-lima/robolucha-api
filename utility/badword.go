@@ -99,46 +99,75 @@ func changeSpecialChars(sentence string) string {
 func isBad(sentence string) bool {
 	vet := strings.Split(sentence, " ")
 	for _, s := range vet {
-		if badWordFragmentMap[s] || badWordMap[s] {
-
+		// look for exact match
+		if badWordFragmentMap[s] {
 			log.WithFields(log.Fields{
-				"reason":                "fragment or map",
-				"sentence":              sentence,
-				"s":                     s,
-				"badWordFragmentMap[s]": badWordFragmentMap[s],
-				"badWordMap[s]":         badWordMap[s],
+				"reason":   "badWordFragmentMap exact match",
+				"sentence": sentence,
+				"s":        s,
 			}).Info("isBad")
-
-			return true
-		}
-	}
-
-	cleanSentence := strings.ReplaceAll(sentence, " ", "")
-
-	for word := range badWordFragmentMap {
-		wordNoSpace := strings.ReplaceAll(word, " ", "")
-
-		// check if starts with
-		if strings.HasPrefix(cleanSentence, wordNoSpace) {
-			log.WithFields(log.Fields{
-				"reason":   "starts with",
-				"sentence": cleanSentence,
-				"word":     wordNoSpace,
-			}).Info("isBad")
-
 			return true
 		}
 
-		// check if ends with
-		if strings.HasSuffix(cleanSentence, wordNoSpace) {
+		if badWordMap[s] {
 			log.WithFields(log.Fields{
-				"reason":   "ends with",
-				"sentence": cleanSentence,
-				"word":     wordNoSpace,
+				"reason":   "map exact match",
+				"sentence": sentence,
+				"s":        s,
 			}).Info("isBad")
-
 			return true
 		}
+
+		// starts or ends with fragment
+		for word := range badWordFragmentMap {
+			wordNoSpace := strings.ReplaceAll(word, " ", "")
+
+			// check if starts with
+			if strings.HasPrefix(s, wordNoSpace) {
+				log.WithFields(log.Fields{
+					"reason":   "starts with fragment",
+					"sentence": s,
+					"word":     wordNoSpace,
+				}).Info("isBad")
+				return true
+			}
+
+			// check if ends with
+			if strings.HasSuffix(s, wordNoSpace) {
+				log.WithFields(log.Fields{
+					"reason":   "ends with fragment",
+					"sentence": s,
+					"word":     wordNoSpace,
+				}).Info("isBad")
+				return true
+			}
+		}
+
+		// starts or ends with map
+		for word := range badWordMap {
+			wordNoSpace := strings.ReplaceAll(word, " ", "")
+
+			// check if starts with
+			if strings.HasPrefix(s, wordNoSpace) {
+				log.WithFields(log.Fields{
+					"reason":   "starts with map",
+					"sentence": s,
+					"word":     wordNoSpace,
+				}).Info("isBad")
+				return true
+			}
+
+			// check if ends with
+			if strings.HasSuffix(s, wordNoSpace) {
+				log.WithFields(log.Fields{
+					"reason":   "ends with map",
+					"sentence": s,
+					"word":     wordNoSpace,
+				}).Info("isBad")
+				return true
+			}
+		}
+
 	}
 
 	return false
