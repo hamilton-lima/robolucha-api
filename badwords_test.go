@@ -1,8 +1,10 @@
 package main
 
 import (
-	"gitlab.com/robolucha/robolucha-api/utility"
 	"testing"
+
+	log "github.com/sirupsen/logrus"
+	"gitlab.com/robolucha/robolucha-api/utility"
 )
 
 func init() {
@@ -45,5 +47,19 @@ func TestWhenContains_ShouldBeTrue(t *testing.T) {
 func TestWhenContainsDuplication_ShouldBeTrue(t *testing.T) {
 	if !utility.ContainsBadWord("Asss$$") {
 		t.Fail()
+	}
+}
+
+func TestValidNamesFromPublicTest(t *testing.T) {
+	log.SetLevel(log.InfoLevel)
+
+	names := []string{"kaduzin", "caduzin", "caduzinho", "melhordetodos", "melhor de todos", "thebest"}
+	for _, name := range names {
+		if utility.ContainsBadWord(name) {
+			log.WithFields(log.Fields{
+				"failed name": name,
+			}).Info("TestValidNamesFromPublicTest")
+			t.Fail()
+		}
 	}
 }
