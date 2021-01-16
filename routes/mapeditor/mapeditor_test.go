@@ -188,3 +188,63 @@ func TestGetDefault(t *testing.T) {
 	assert.True(t, gd.ArenaWidth > 0)
 	assert.True(t, gd.ArenaHeight > 0)
 }
+
+func TestUpdateGameComponentCode(t *testing.T) {
+	Setup(t)
+	defer ds.DB.Close()
+
+	// creates a game definition
+	gd := model.BuildDefaultGameDefinition()
+	gd.Name = "AGAIN"
+
+	gd.GameComponents = make([]model.GameComponent, 1)
+	gd.SceneComponents = make([]model.SceneComponent, 0)
+	gd.Codes = make([]model.Code, 0)
+	gd.LuchadorSuggestedCodes = make([]model.Code, 0)
+
+	gd.GameComponents[0].Name = "otto"
+	gd.GameComponents[0].Configs = make([]model.Config, 0)
+	gd.GameComponents[0].Codes = make([]model.Code, 1)
+	gd.GameComponents[0].Codes[0] = model.Code{Event: "onStart", Script: "turnGun(90)"}
+
+	err := handler.Add(1, &gd)
+	assert.True(t, err == nil)
+
+	// check if ID different
+	gameDefinitions := handler.Find(1)
+	result := *gameDefinitions
+	assert.Equal(t, len(result), 1)
+	assert.Equal(t, result[0].Name, "AGAIN")
+	assert.True(t, result[0].ID != gd.ID)
+	assert.True(t, result[0].ID != 0)
+
+	id := result[0].ID
+
+	log.WithFields(log.Fields{
+		"ID":                                   id,
+		"result[0].GameComponents[0].Codes[0]": result[0].GameComponents[0].Codes[0],
+	}).Info("BEFORE UPDATE")
+
+	// update the code
+	result[0].GameComponents[0].Codes[0] = model.Code{Event: "all", Script: "--updated"}
+
+	log.WithFields(log.Fields{
+		"ID":                                   id,
+		"result[0].GameComponents[0].Codes[0]": result[0].GameComponents[0].Codes[0],
+	}).Info("AFTER UPDATE")
+
+	err = handler.Update(1, &result[0], false)
+	assert.True(t, err == nil)
+
+	gameDefinitions2 := handler.Find(1)
+	result2 := *gameDefinitions2
+
+	assert.Equal(t, 1, len(result2))
+	assert.Equal(t, id, result2[0].ID)
+
+	// both elements from the list will be present
+	assert.Equal(t, 2, len(result2[0].GameComponents[0].Codes))
+	code := result2[0].GameComponents[0].Codes[1]
+	assert.Equal(t, "all", code.Event)
+	assert.Equal(t, "--updated", code.Script)
+}

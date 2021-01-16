@@ -4,8 +4,9 @@ package model
 func BuildDefaultGameDefinition() GameDefinition {
 
 	gd := GameDefinition{}
+	gd.Type = GAMEDEFINITION_TYPE_TUTORIAL
 	gd.Duration = 1200000
-	gd.MinParticipants = 2
+	gd.MinParticipants = 1
 	gd.MaxParticipants = 20
 	gd.ArenaWidth = 2400
 	gd.ArenaHeight = 1200

@@ -870,19 +870,6 @@ func (ds *DataSource) UpdateGameDefinition(input *model.GameDefinition) *model.G
 			return nil
 		}
 
-		for n, gc := range input.GameComponents {
-			component := ds.FindLuchadorByNamePreload(gc.Name)
-
-			log.WithFields(log.Fields{
-				"gc.Name": gc.Name,
-				"gc.ID":   gc.ID,
-			}).Debug("searching gamedefinition")
-
-			if component != nil {
-				input.GameComponents[n] = *(ds.UpdateLuchador(component))
-			}
-		}
-
 		ds.DB.Model(gameDefinition).Association("NarrativeDefinitions").Replace(input.NarrativeDefinitions)
 		dbc = ds.DB.Save(gameDefinition)
 		if dbc.Error != nil {
