@@ -248,7 +248,9 @@ func (handler *RequestHandler) Update(userID uint, gameDefinition *model.GameDef
 		return errors.New("gamedefinition already EXISTS with this name")
 
 	} else {
-		gameDefinition.OwnerUserID = userID
+		log.WithFields(log.Fields{
+			"gameDefinition": gameDefinition,
+		}).Info("gamedefinition TOBE UPDATED")
 
 		updateResult := handler.ds.UpdateGameDefinition(gameDefinition)
 		log.WithFields(log.Fields{
