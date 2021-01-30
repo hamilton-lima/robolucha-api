@@ -35,19 +35,17 @@
   "increaseSpeedPercentage": 20,
   "fireEnergyCost": 2,
   "minLevel": 0,
-	"maxLevel": 49,
+  "maxLevel": 49,
   "gameComponents": [
     {
       "id": 0,
       "name": "Gecko",
       "isNPC": true,
       "codes": [
-        { "event": "onStart", "script": "turnGun(90)", "exception": "" },
-        { "event": "onRepeat", "script": "move(20)\nfire(3)", "exception": "" },
         {
-          "event": "onHitWall",
-          "script": "turn(90)\nturnGun(90)",
-          "exception": ""
+          "event": "all",
+          "blockly": "<xml xmlns=\"https://developers.google.com/blockly/xml\"><block type=\"turnGun\" id=\"m7q2WdgSOnF,D9hjuDgz\" x=\"49\" y=\"29\"><value name=\"TURNGUN_VALUE\"><block type=\"math_number\" id=\"Px]UBs;nUn]5P7kja54|\"><field name=\"NUM\">90</field></block></value></block><block type=\"onrepeat\" id=\"b+Nq-]FJTceI@?xQPP^a\" x=\"40\" y=\"94\"><statement name=\"ONREPEAT_CODE\"><block type=\"move\" id=\"B1wE7zlT;5r=hAoSD}E=\"><value name=\"MOVE_VALUE\"><block type=\"math_number\" id=\"zDIl6U.3L@/7k?+?vFCF\"><field name=\"NUM\">20</field></block></value><next><block type=\"fire\" id=\"Kd__zb1#0`^F2H!gohUk\"><value name=\"FIRE_VALUE\"><block type=\"math_number\" id=\"8]NrMvdV~CS#v~ClVTk?\"><field name=\"NUM\">3</field></block></value></block></next></block></statement></block><block type=\"onhitwall\" id=\"G5KAY}b=`|z%kPiKY:W5\" x=\"40\" y=\"190\"><statement name=\"ONHITWALL_CODE\"><block type=\"turn\" id=\"c/VOOItd8IJC4[VLG0Fe\"><value name=\"TURN_VALUE\"><block type=\"math_number\" id=\"ap**WNaSiQzn?+%ydOK|\"><field name=\"NUM\">90</field></block></value><next><block type=\"turnGun\" id=\"t)}-sv7Pl4eJy?8kZP3e\"><value name=\"TURNGUN_VALUE\"><block type=\"math_number\" id=\"0r$YZdzSMm0^YUqeK[O2\"><field name=\"NUM\">90</field></block></value></block></next></block></statement></block></xml>",
+          "script": "turnGun(90)\n\nonRepeat = function()\n  move(20)\n  fire(3)\nend\n\nonHitWall = function()\n  turn(90)\n  turnGun(90)\nend\n"
         }
       ],
       "configs": []
@@ -58,9 +56,9 @@
       "isNPC": true,
       "codes": [
         {
-          "event": "onRepeat",
-          "script": "turn(10)\nturnGun(-10)\nfire(1)",
-          "exception": ""
+          "event": "all",
+          "blockly": "<xml xmlns=\"https://developers.google.com/blockly/xml\"><block type=\"onrepeat\" id=\"4FmFEP+vv,9m:}Qgw83g\" x=\"31\" y=\"34\"><statement name=\"ONREPEAT_CODE\"><block type=\"turn\" id=\"GAC9t{ckE__$A^Fv1]$3\"><value name=\"TURN_VALUE\"><block type=\"math_number\" id=\"?^Y~Zv6l2AaAA_:`o*|k\"><field name=\"NUM\">10</field></block></value><next><block type=\"turnGun\" id=\"A0x:De]!#H{NGjE6AD|c\"><value name=\"TURNGUN_VALUE\"><block type=\"math_number\" id=\"z:NB~J8o1+uUPut#./l+\"><field name=\"NUM\">-10</field></block></value><next><block type=\"fire\" id=\"%)DZFCnd-zhm;oP}VHa]\"><value name=\"FIRE_VALUE\"><block type=\"math_number\" id=\"-WgSxP|JVccxXKeY_=+M\"><field name=\"NUM\">1</field></block></value></block></next></block></next></block></statement></block></xml>",
+          "script": "onRepeat = function()\n  turn(10)\n  turnGun((-10))\n  fire(1)\nend\n"
         }
       ],
       "configs": []
@@ -69,7 +67,13 @@
   "sceneComponents": [],
   "codes": [],
   "suggestedCodes": [
-    { "event": "onRepeat", "script": "move(20)\nfire(1)" },
-    { "event": "onHitWall", "script": "turn(45)" }
+    {
+      "event": "onRepeat",
+      "script": "move(20)\nfire(1)"
+    },
+    {
+      "event": "onHitWall",
+      "script": "turn(45)"
+    }
   ]
 }
